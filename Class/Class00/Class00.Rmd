@@ -494,8 +494,53 @@ El ejemplo mas sencillo es:
 ```{r bv, out.width = "120%", echo = FALSE}
 knitr::include_graphics("images/P1.png")
 ```
+
 ---
-# Uno en `r fa("r-project", fill = "steelblue")` 
+class: inverse, middle, center
+background-image: url(https://upload.wikimedia.org/wikipedia/commons/3/39/Naruto_Shiki_Fujin.svg)
+background-size: contain
+
+# Quiero conocer que es `r fa("r-project", fill = "steelblue")` 
+
+---
+# `r fa("r-project", fill = "steelblue")` 
+
+--
+
+> R es una "calculadora" especial... contiene paquetes que han sido creados a partir de funciones para desarrollar un calculo. No es un lenguaje de programación como tal.
+
+--
+
+```r
+# Quiero hacer una columna
+carlos<-c(1,2,3,4)
+```
+
+--
+
+Con el podemos crear objetos y trabajar con ellos. Inclusive crear funciones y automatizar algo.
+
+--
+
+```r
+IMC <- function(edad, genero, pliegue, peso, altura) {
+  # Fórmula de Faulkner para adultos
+  if (genero == "masculino") {
+    densidad_corporal = 1.097 - 0.00041563 * pliegue + 0.0000005804 * pliegue_cutaneo^2 - 0.0000036 * edad
+  } else if (genero == "femenino") {
+    densidad_corporal = 1.097 - 0.00042268 * pliegue + 0.00000077344 * pliegue^2 - 0.0000036 * edad
+  } else {
+    stop("El género debe ser 'masculino' o 'femenino'")
+  }
+# Calcular porcentaje de grasa corporal
+  porcentaje_grasa_corporal = ((4.95 / densidad_corporal) - 4.5) * 100
+  
+  return(porcentaje_grasa_corporal)
+}
+```
+
+---
+# Un gráfico en `r fa("r-project", fill = "steelblue")` 
 
 ```{r cars, fig.height=4, echo=FALSE}
 fit = lm(dist ~ 1 + speed, data = cars)
@@ -504,7 +549,7 @@ plot(cars, pch = 19, col = 'darkgray', las = 1)
 abline(fit, lwd = 2)
 ```
 ---
-# Uno en `r fa("r-project", fill = "steelblue")` 
+# Un gráfico en `r fa("r-project", fill = "steelblue")` 
 
 --
 
@@ -524,7 +569,7 @@ abline(fit, lwd = 2)
 Donde `fit` es el nombre u objeto que se le da la orden que ejecute un modelo lineal `lm` cuya variable es *distancia* y es afectada por la variable de *velocidad* usando una base de datos que se denomina .black[cars]
 
 ---
-# Uno en `r fa("r-project", fill = "steelblue")` 
+# Un gráfico en `r fa("r-project", fill = "steelblue")` 
 
 --
 
@@ -536,7 +581,7 @@ Donde `fit` es el nombre u objeto que se le da la orden que ejecute un modelo li
 knitr::include_graphics("images/chatgp.png")
 ```
 ---
-# Uno en `r fa("r-project", fill = "steelblue")`
+# Un gráfico en `r fa("r-project", fill = "steelblue")`
 
 --
 
@@ -556,7 +601,7 @@ l <- leaflet(df,width = 1100, height=400) %>%
 l
 ```
 ---
-# Uno en `r fa("r-project", fill = "steelblue")`
+# Un gráfico en `r fa("r-project", fill = "steelblue")`
 
 --
 
