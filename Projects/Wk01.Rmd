@@ -1,0 +1,117 @@
+---
+title: Econometría I
+subtitle: "Workclass 01"
+author:
+  name: Carlos A. Yanes Guerra
+  affiliation: Universidad del Norte | Departamento de Economía
+# date: "`r format(Sys.time(), '%d %B %Y')`" ## Or "Lecture no."
+output: 
+  html_document:
+    keep_md: false
+    theme: journal
+    highlight: haddock
+    # code_folding: show
+    toc: yes
+    toc_depth: 4
+    toc_float: yes
+    css: css/preamble.css ## For multi-col environments
+  pdf_document:
+    latex_engine: xelatex
+    keep_tex: false ## Change to true if want keep intermediate .tex file
+    toc: true
+    toc_depth: 3
+    dev: cairo_pdf
+    # fig_width: 7 ## Optional: Set default PDF figure width
+    # fig_height: 6 ## Optional: Set default PDF figure height
+    extra_dependencies: ['booktabs', 'threeparttable', 'float'] # "longtable"
+    includes:
+      in_header: tex/preamble.tex ## For multi-col environments
+    pandoc_args:
+        --template=tex/mytemplate.tex ## For affiliation field. See: https://bit.ly/2T191uZ
+always_allow_html: true
+urlcolor: blue
+mainfont: cochineal
+sansfont: Fira Sans
+monofont: Fira Code ## Although, see: https://tex.stackexchange.com/q/294362
+## Automatically knit to both formats:
+knit: (function(inputFile, encoding) {
+ rmarkdown::render(inputFile, encoding = encoding, 
+ output_format = 'all') 
+ })
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE, dpi=300, fig.align = "center")
+```
+
+## Antes de empezar
+
+Los prácticos son para desarrollarlos en clases en el tiempo sugerido por el profesor **1H:20 Min**. Trate con su grupo de trabajo (máximo 2 personas) este -*tenga un toque único*-. Para esta parte, queremos solo enfocarnos en leer código. Tratar de corregir algunos elementos de los que coloca el profesor y también hacer ciertas ejecuciones de estos chunks. La entrega debe hacerla en la carpeta del Brightspace para ello. La nota de *trabajos de clase* empieza desde acá.
+
+## Objetivo
+
+Miraremos la parte inicial de R y algunos comandos básicos de operaciones generales de aritmética. Ademas se solicita la interacción con `function` correspondiente a la parte de generación de formulas y cálculos básicos.
+
+### Ejemplo de salidas del trabajo
+
+Requerimos que el código sea limpio dentro de las respuestas
+
+:::::: {.columns}
+::: {.column width="48%" data-latex="{0.48\textwidth}"}
+Aqui un ejemplo de como debe ir su código.
+
+```{r math, message=FALSE, echo=FALSE}
+matrix(1:9,nrow = 3,ncol = 3)   
+```
+:::
+
+::: {.column width="4%" data-latex="{0.04\textwidth}"}
+\ <!-- an empty Div (with a white space), serving as a column separator -->
+:::
+
+::: {.column width="48%" data-latex="{0.48\textwidth}"}
+Matriz con nombres **R** con código.
+
+```{r dt, message=FALSE}
+V<-matrix(1:9,ncol=3)
+colnames(V)<-c("Edad", "Estado","Código")
+rownames(V)<-c("Alber","Marco","Maria")
+V
+```
+:::
+::::::
+\ <!-- an empty Div again to give some extra space before the next block -->
+
+Recuerde que algunas ocasiones dentro del código si solo se le pide la respuesta debe colocar lo siguiente:
+
+`echo=FALSE`
+
+\newpage
+
+## Preguntas
+
+1. Establezca dos matrices cuadradas o $n\times k\rightarrow n=k$ de tamaño $8 \times 8$. Créelas en dos objetos distintos, una matriz (objeto) que se llame $A$ y otra matriz que se llame $B$. Cuando las tenga, debe tener un resultado de una *multiplicación entre ellas* y debe llamarse $C$. Luego, solo con la matriz A, genere la matriz transpuesta $A'$ y con ella también obtenga la multiplicación, es decir $G=A'\times A$. Qué objetivo tiene hacer esta última operación? *Los datos deben surgir de su imaginación* 
+
+2. Halle el determinante de la Matriz B. ¿Para qué cree que se debe usar o entender el determinante de una matriz en la vida real?
+
+3.  Piense por un momento que una empresa le sugiere que construya una data que contenga la información del teléfono de la persona, la edad y el gasto en compras semanales que hace de cualquier outfit en moneda legal y corriente. Arme una matriz (entonces) que contenga como índice los nombres de las personas y en las columnas los nombres de las variables con los datos que usted establezca. La matriz debe tener en total 10 datos. *Recuerde que los datos los debe imaginar usted propiamente y no se debe parecer al de otro grupo de trabajo*. Qué diferencia hay entre una matriz y un data frame?
+
+4. Si quiero tener el logarítmo el gasto en la anterior matriz, como lo podría hacer. Explique con comentarios `#` el paso a paso del código para hallarlo. Diganos que tan importante es o por qué se hace uso de los logarítmos en economía.
+
+5. Sea el siguiente código:
+
+```r
+f <- function(num = 1) {
+         Lema <- "Viva el carnaval!\n"
+         for(i in seq_len(num)) {
+                 cat(Lema)
+         }
+         chars <- nchar(Lema) * num
+         chars
+ }
+```
++ Qué resultado arroja si usted le dice por ejemplo `f()`?, qué significa el número que da como resultado?. 
++ Intente Ahora hacerlo con `f(4)`. Qué dice ahora o que esta haciendo la función que acaba de crear?
+
++ Trate de explicar el código anterior y diganos que intenta hacer paso a paso.
+
