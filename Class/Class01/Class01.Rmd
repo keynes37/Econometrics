@@ -1,0 +1,908 @@
+---
+title: "Econometria I"
+subtitle: "EDA 1"
+author: "Carlos Yanes Guerra"
+date: "Universidad del Norte </br> `r Sys.Date()`"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    css: ["rutgers", "rutgers-fonts"]
+    nature:
+      beforeInit: "http://www.jvcasillas.com/ru_xaringan/js/ru_xaringan.js"
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+      ratio: "16:9"
+    seal: false
+---
+name: xaringan-title
+class: left, middle
+
+
+# Econometría I
+<br>
+## Estructura de Datos
+
+<br>
+<br>
+<img src="img/lognig.png" width="280" />
+
+### Carlos A. Yanes | Departamento de Economía | `r Sys.Date()`
+
+---
+
+```{r Setup, include = F}
+options(htmltools.dir.version = FALSE)
+library(pacman)
+p_load(broom, latex2exp, ggplot2, ggthemes, ggforce, viridis, dplyr, magrittr, knitr, parallel)
+
+library(tidyverse)
+library(babynames)
+library(fontawesome) # from github: https://github.com/rstudio/fontawesome
+library(DiagrammeR)
+library(fpp2)
+
+# Knitr options
+opts_chunk$set(
+  comment = "#>",
+  fig.align = "center",
+  fig.height = 7,
+  fig.width = 10.5,
+  warning = F,
+  message = F
+)
+# A blank theme for ggplot
+theme_empty <- theme_bw() + theme(
+  line = element_blank(),
+  rect = element_blank(),
+  strip.text = element_blank(),
+  axis.text = element_blank(),
+  plot.title = element_blank(),
+  axis.title = element_blank(),
+  plot.margin = structure(c(0, 0, -0.5, -1), unit = "lines", valid.unit = 3L, class = "unit"),
+  legend.position = "none"
+)
+theme_simple <- theme_bw() + theme(
+  line = element_blank(),
+  panel.grid = element_blank(),
+  rect = element_blank(),
+  strip.text = element_blank(),
+  axis.text.x = element_text(size = 14),
+  axis.text.y = element_blank(),
+  axis.ticks = element_blank(),
+  plot.title = element_blank(),
+  axis.title = element_blank(),
+  # plot.margin = structure(c(0, 0, -1, -1), unit = "lines", valid.unit = 3L, class = "unit"),
+  legend.position = "none"
+)
+theme_axes <- theme_empty + theme(
+  axis.title = element_text(size = 18),
+  plot.margin = structure(c(0, 0, 0.1, 0), unit = "lines", valid.unit = 3L, class = "unit"),
+)
+
+theme_axes_math <- theme_void() + theme(
+  text = element_text(family = "MathJax_Math"),
+  axis.title = element_text(size = 22),
+  axis.title.x = element_text(hjust = .95, margin = margin(0.15, 0, 0, 0, unit = "lines")),
+  axis.title.y = element_text(vjust = .95, margin = margin(0, 0.15, 0, 0, unit = "lines")),
+  axis.line = element_line(
+    color = "grey70",
+    size = 0.25,
+    arrow = arrow(angle = 30, length = unit(0.15, "inches")
+  )),
+  plot.margin = structure(c(1, 0, 1, 0), unit = "lines", valid.unit = 3L, class = "unit"),
+  legend.position = "none"
+)
+theme_axes_serif <- theme_void() + theme(
+  text = element_text(family = "MathJax_Main"),
+  axis.title = element_text(size = 22),
+  axis.title.x = element_text(hjust = .95, margin = margin(0.15, 0, 0, 0, unit = "lines")),
+  axis.title.y = element_text(vjust = .95, margin = margin(0, 0.15, 0, 0, unit = "lines")),
+  axis.line = element_line(
+    color = "grey70",
+    size = 0.25,
+    arrow = arrow(angle = 30, length = unit(0.15, "inches")
+  )),
+  plot.margin = structure(c(1, 0, 1, 0), unit = "lines", valid.unit = 3L, class = "unit"),
+  legend.position = "none"
+)
+
+```
+
+```{R, colors, include = F}
+# Define pink color
+red_pink <- "#e64173"
+turquoise <- "#20B2AA"
+orange <- "#FFA500"
+red <- "#fb6107"
+blue <- "#2b59c3"
+green <- "#8bb174"
+grey_light <- "grey70"
+grey_mid <- "grey50"
+grey_dark <- "grey20"
+purple <- "#6A5ACD"
+```
+
+background-size: 100%
+background-image: url(https://media.giphy.com/media/xUySTQZfdpSkIIg88M/giphy.gif)
+
+???
+
+Image test. Taken from gyfty.
+
+---
+class: middle, inverse
+.left-column[
+
+# `r emo::ji("smile")`
+
+]
+
+.right-column[
+# Preguntas de la sesión anterior?
+]
+
+
+
+---
+name: ninja
+class: middle, inverse
+
+# Yo asumo que:
+
+--
+
+### <img src="https://upload.wikimedia.org/wikipedia/commons/e/e5/YouTube-like_logo.png" width="5%" style="float:left"/>&nbsp; Sabe consultar acádemicamente en youtube
+
+
+
+--
+
+### <img src="https://raw.githubusercontent.com/rstudio/hex-stickers/master/PNG/rmarkdown.png" width="5%" style="float:left"/>&nbsp; tiene interes en R Markdown 
+
+--
+
+### <img src="https://upload.wikimedia.org/wikipedia/commons/7/7c/DANE_logo.svg" width="5%" style="float:left"/>&nbsp; .saltinline[.fancy[Sabe algo de estadística]] 
+
+---
+name: novice
+class: middle, inverse
+
+
+# Lo que aún no conoce:
+
+--
+
+### `r fa("r-project", fill = "steelblue")`  Interfaz del software o herramienta a usar   
+
+
+--
+
+### <img src="https://upload.wikimedia.org/wikipedia/commons/4/43/Social_Statistics_01-10.svg" width="5%" style="float:left"/>&nbsp; Modelos de regresión
+
+--
+
+### <img src="https://upload.wikimedia.org/wikipedia/commons/7/7e/Confocal_measurement_of_1-euro-star_3d.png" width="5%" style="float:left"/>&nbsp; Corregir problemas de estimación
+
+---
+class: title-slide-section-grey, middle
+
+# Bases de datos
+
+<br>
+<img src="img/lognig.png" width="380" />
+
+---
+name: datos
+
+# Bases de datos
+
+--
+
+Varias consideraciones pueden ser:
+
+--
+
+- Colección *especifica* de datos.
+
+- Formato "popular" de una tabla (matrices)
+
+- Forma `rectangular` cuya organización aborda filas y columnas.
+
+- Una **fila** tiene datos de una o varias variables para un mismo *individuo*.
+
+- Una **columna** contiene valores de una *variable* para muchos individuos.
+
+---
+# Bases de datos
+
+--
+
+### Tipos de datos (Recordeis)
+
+--
+
+`r fa('calculator')` **Índices**: Es la parte de nombres, números de identificación o cuestionario en una base de datos.
+
+--
+
+`r fa('calculator')` **Binarios**: Variables que tienen sólo dos posibles respuestas. Ej: Si, no; Femenino, masculino, etc. Se codifican con *valores* de (0 y 1), y se les conoce como variable `dummy`.
+
+--
+
+`r fa('calculator')` **De conteo**: Números enteros de no negación.
+
+--
+
+`r fa('calculator')` **Continuos**: Aquellos que admiten decimales.
+
+--
+
+`r fa('calculator')` **Nominales**: Respuestas no ordenadas y que amplían el espectro de las variables binarias, suelen ser datos categóricos.
+
+--
+
+`r fa('calculator')` **Ordinales**: Admiten respuestas nominales pero en esencia *ordenadas* y son codificadas con números.
+
+---
+class: middle, inverse
+
+# Estructuras de bases de datos
+
+--
+### `r fa("cube", fill = "red")` Corte transversal
+
+--
+
+### `r fa("fighter-jet", fill = "white")` Series de tiempo
+
+--
+
+### `r fa("empire", fill = "white")` Panel longitudinal
+
+---
+
+class: title-slide-section-red, middle
+
+# Corte transversal
+
+<br>
+<img src="img/lognig.png" width="380" />
+
+---
+# Datos de corte transversal
+
+--
+
+| Individuos| Consumo                  | Ingreso                   | Carrera                   |
+|----------|---------------------------|---------------------------|---------------------------|
+| Carlos   | 150                       | $ 2'000.000               | Economía                  |
+| Fernando | 160                       | $ 3'500.000               | Matemáticas               |
+| Luis     | 130                       | $ 2'789.000               | Economía                  |
+| Mary     | 168                       | $ 1'500.000               | Economía                  |
+| Paula    | 189                       | $ 7'450.000               | Psicología                |
+| ...      | ...                       | ...                       | ...                       |
+| ...      | ...                       | ...                       | ...                       |
+
+--
+
+<ru-blockquote> Son *bases* donde la información obtenida varia por individuos $(i)$ en un momento **determinado** de tiempo. Puede tratarse de un año o mes particular. Los datos se organizan por columnas asociando a cada uno de los individuos sus condiciones y/o características. </ru-blockquote>
+
+--
+
+*Por ejemplo*: Recopilamos datos de varios .black[individuos] como $i \in I : \{Carlos, Fernando, \dots , Paula \}$ en un .black[periodo de tiempo] de un año, es decir, $T = 2023$. Regularmente se denotan las .black[variables] de forma $(y_{i}, x_{i})$. La notación hace referencia a $x_i$ como el valor de la variable $x$ para la observación $i$, en un `dataset` con n observaciones, $i=1,2,3,\dots,n$.
+
+---
+# Datos de corte transversal 
+
+--
+
+En `r fa("r-project", fill = "steelblue")` es posible hacerlo como:
+
+--
+
+```{r, example}
+# Si no importamos podemos entonces hacerlo a mano
+individuos<- c("Carlos", "Fernando", "Luis", "Mary", "Paula")
+Consumo<-c(150,160,130,168,189); Ingreso<-c(2000000,3500000,2789000,1500000,7450000); Carrera<-c("Economía","Matemáticas","Economía","Economía", "Psicología")
+datos_pr <- cbind(Consumo,Ingreso,Carrera) 
+rownames(datos_pr) <- individuos 
+datos_pr
+```
+
+---
+# Datos de corte transversal 
+
+--
+
+### Bases de datos con `r fa("r-project", fill = "steelblue")`
+
+--
+
+Si le damos estructura
+
+```{r}
+# Creamos un data frame y este se muestra:
+bd <- as.data.frame(datos_pr)
+bd$Consumo=as.numeric(bd$Consumo)
+bd$Ingreso=as.numeric(bd$Ingreso)
+bd  
+```
+
+---
+# Datos de corte transversal 
+
+--
+
+### Bases de datos con `r fa("r-project", fill = "steelblue")`
+
+--
+.pull-left[
++ Podemos crear rápidamente nuevas variables
+
+```{r put-on, eval=FALSE}
+bd$loging<-log(bd$Ingreso)
+```
+
+]
+
+--
+
+.pull-right[
+```{r put-onr, echo=FALSE}
+bd$loging<-log(bd$Ingreso)
+bd
+```
+
+]
+
+---
+# Datos de corte transversal 
+
+### Bases de datos con `r fa("r-project", fill = "steelblue")`
+
+.pull-left[
++ Podemos crear rápidamente nuevas variables
+
+```{r put-on2, eval=FALSE}
+bd$loging<-log(bd$Ingreso)
+# Si no nos gusta el nombre
+names(bd)[4]="Logaritmo_Ingreso"
+```
+
+]
+
+--
+
+.pull-right[
+```{r put-onr2, echo=FALSE}
+names(bd)[4]="Logaritmo_Ingreso"
+bd
+```
+
+]
+
+---
+
+class: title-slide-section-red, middle
+
+# Series de Tiempo
+
+<br>
+<img src="img/lognig.png" width="380" />
+
+---
+# Series de Tiempo
+
+--
+
+| Fecha | PIB      | I.P.C |
+|-------|----------|-------|
+| 2010  | 150 mill | 101.2 |
+| 2011  | 230 mill | 104.6 |
+| 2012  | 345 mill | 110.4 |
+| 2013  | 421 mill | 115.3 |
+| 2014  | 434 mill | 118.2 |
+| ...   | ...      | ...   |
+| ...   | ...      | ...   |
+
+--
+
+<ru-blockquote>Son *bases* donde la información viene por periodos de .RUred[tiempo] $(t)$. Se usan mucho en economía, para análisis de tendencias y variaciones en el crecimiento</ru-blockquote>
+
+--
+
+*P.e*: La notación hace uso del subíndice $t$ en donde este hace referencia a la periodicidad ya sea en un día, mes, año, semestre, trimestre, especifico. Las variables entonces se escriben de forma $(y_{t}, x_{t})$. La parte de $x_t$ es el valor de la variable $x$ en el periodo $t$, en un `dataset` con T periodos, $t=2018,2019,2020,\dots, T$.
+
+---
+# Series de Tiempo
+
+--
+
+
+```{r, example2}
+# Una serie de tiempo
+Fecha<-c(2010,2011,2012,2013,2014); PIB<-c(150,230,345,421,434); I.P.C<-c(101.2,104.6,110.4,115.3,118.2)
+datos_ts <- cbind(Fecha,PIB,I.P.C) 
+datos_ts
+```
+---
+# Series de Tiempo
+
+--
+
+.pull-left[
++ Si nos solicitan calcular inflación
+
+```{r put-on21, eval=FALSE}
+datos_ts<- as.data.frame(datos_ts)
+library(tidyverse)
+datos_ts %>%
+  mutate(inflacion=100*((I.P.C-lag(I.P.C))/lag(I.P.C)))
+```
+
+]
+
+--
+
+.pull-right[
+```{r put-onr21, echo=FALSE}
+datos_ts<- as.data.frame(datos_ts)
+library(tidyverse)
+datos_ts %>%
+  mutate(inflacion=100*((I.P.C-lag(I.P.C))/lag(I.P.C)))
+```
+
+]
+
+
+
+---
+class: title-slide-section-red, middle
+
+# Panel de datos (longitudinal)
+
+<br>
+<img src="img/lognig.png" width="380" />
+
+---
+# Panel de datos (longitudinal)
+
+--
+
+| Individuo | Fecha | PIB      | IPC   |
+|-----------|-------|----------|-------|
+| Colombia  | 2000  | 150 mill | 101.2 |
+| Colombia  | 2001  | 230 mill | 104.6 |
+| Ecuador   | 2001  | 347 mill | 111.8 |
+| Ecuador   | 2001  | 347 mill | 111.8 |
+| Ecuador   | 2002  | 358 mill | 115.3 |
+| Perú      | 2000  | 434 mill | 118.2 |
+| Perú      | 2001  | 452 mill | 119.3 |
+| ...       | ...   | ...      | ...   |
+| ...       | ...   | ...      | ...   |
+
+--
+
+<ru-blockquote>Son *bases* donde la información esta tanto por .blue[individuos] $(i)$ y por periodo de .blue[tiempo] $(t)$. Son bases de datos mucho mas completas, eso si, un poco mas costosas, porque implica hacer seguimiento riguroso.</ru-blockquote>
+
+--
+
+*P.e*: La notación hace uso tanto del subíndice $t$ que sigue haciendo referencia a la periodicidad y se adiciona el subíndice $i$. Las variables entonces se escriben de forma $(y_{it}, x_{it})$.
+
+---
+class: title-slide-section-grey, middle
+
+# Modelos económicos y econométricos
+
+<br>
+<img src="img/lognig.png" width="380" />
+
+---
+# Modelo Económico
+
+--
+
+Estos parten de una **función** como la siguiente:
+    
+$$Salario = f(HorasT, Experiencia, CI, Edad)$$
+
+--
+
+Que significa que el salario *depende* (supuestamente) de variables como **horas de trabajo**, **Experiencia**, Coeficiente intelectual<sup>1</sup> (**CI**) y en efecto de la **Edad** de la persona.
+
+--
+
+.footnote[
+[1] La psicología pone muchas veces esto en duda sin restarle -eso sí- importancia, aduce que hay otras variables mas allá de una prueba de inteligencia.
+]
+---
+class: title-slide-section-grey, middle
+
+# Modelos econométricos
+
+<br>
+<img src="img/lognig.png" width="380" />
+---
+layout: true
+# Modelo Econométrico
+
+Resuelven especificaciones y medidas de un modelo económico:
+
+  $$Salario_{i} = \beta_{0}+\beta_{1} HorasT_{i} + \beta_{2} Experiencia_{i}+ \beta_{3} CI_{i} + \beta_{4} Edad_{i}+ \mu_{i}$$
+---
+
+Queremos estimar la relación entre las variables _explicativas_ y la __dependiente__ 
+$$Salario = f(\text{HorasT}, \text{Experiencia}, \text{CI}, \text{Edad})$$
+
+---
+
+### Preguntas
+
+--
+
+- __P:__ Como se interpreta $\beta_1$?
+--
+
+- __R:__ Una hora adicional de trabajo correlacionado con el $\beta_1$ incrementa en una unidad monetaria el salario del individuo (controlando por Experiencia, coeficiente intelectual y Edad).
+
+
+--
+
+- __P:__ Son los términos $\beta_k$ parámetros poblacionales o estadísticos muestrales?
+--
+
+- __R:__ Letras griegas significan  __parámetros poblacionales__. Los estimados tienen gorro (_sombrerito_), _p.e._, $\hat{\beta}_k$
+
+---
+
+### Preguntas
+
+- __P:__ Podemos interpretar el parámetro $\beta_2$ como causal?
+--
+
+- __R:__ No, sobre todo si no hacemos hipótesis y/o supuestos sobre el proceso generador de datos.
+--
+
+- __P:__ Qué es $\mu_i$?
+--
+
+- __R:__ La desviación/perturbación aleatoria de un individuo con respecto a los parámetros de la población.
+
+---
+
+### Preguntas
+
+- __P:__ ¿Qué supuestos imponemos al estimar con MCO?
+--
+
+- __R:__
+--
+
+  - La relación entre el salario y las variables explicativas es lineal en parámetros, y $\mu$ lo hace de forma aditiva.
+  - Las variables explicativas son __exógenas__, _p.e._, $E[\mu|X] = 0$.
+  - Tambien hay que asumir que :<br> $E[\mu_i] = 0$, $E[\mu_i^2] = \sigma^2$, $E[\mu_i \mu_j] = 0$ para $i \neq j$.
+  - Y (tal vez) $\mu_i$ se distribuye de forma normal.
+---
+layout: false
+# Otro ejemplo
+
+--
+
+**Curva de oferta de salario** (Wooldridge, 2010). Suponga que la oferta del salario $wage^{0}$ esta expresado y dado por:
+        
+$$log(wage^{0})=\beta_{0} + \beta_{1} educ + \beta_{2} exper + \beta_{3} married+ \epsilon$$
+--
+
+Donde:
+
+- Educ: Años de educación.
+
+- Exper: Años de experiencia en el mercado laboral.
+
+- Married: Variable de estado civil (marital)
+
+- $\epsilon$: Es el error aleatorio.
+
+- $\beta's$:  Son los *Parámetros* del modelo.
+
+--
+
+### Pregunta
+
+<span style="color:red"> La habilidad del trabajador sería un buen control en este modelo, pero ¿la observamos? ¿cómo se puede medir? </span>
+
+---
+# Hipótesis
+
+--
+
+## Qué tan importante son?
+
+Debe aprender lo **potente y flexible** que puede ser la regresión por mínimos cuadrados ordinarios (**MCO**).
+
+Sin embargo, sus resultados requieren de **supuestos** y/o hipótesis
+
+**La vida real todo el tiempo viola estos supuestos.**
+
+--
+
+Econometría I pregunta "**Qué ocurre cuando se violan los supuestos?**"
+
+- Podemos arreglarlo? (Especialmente: cuando $\beta$ es *causal*?)
+- Qué ocurre si no los arreglamos o dejamos todo así?
+
+El MCO sigue haciendo cosas increíbles, pero hay que saber cuándo hay que ser **prudente, confiado(a) o dudoso(a)**.
+
+---
+# No todo es causal
+
+--
+
+```{R, spurious, echo = F, fig.height=4}
+tmp <- data.frame(
+  year = 1999:2009,
+  count = c(
+    9, 8, 11, 12, 11, 13, 12, 9, 9, 7, 9,
+    6, 5, 5, 10, 8, 14, 10, 4, 8, 5, 6
+  ),
+  type = rep(c("Cartas", "Muertes"), each = 11)
+)
+ggplot(data = tmp, aes(x = year, y = count, color = type)) +
+  geom_path() +
+  geom_point(size = 4) +
+  xlab("Años") +
+  ylab("Número") +
+  scale_color_manual(
+    "",
+    labels = c("Muertes por picaduras de arañas", "Ganadores concurso ortografía"),
+    values = c(red_pink, "darkslategray")
+  ) +
+  theme_pander(base_size = 17) +
+  theme(legend.position = "bottom")
+```
+
+---
+# Películas de Nicolas Cage
+
+--
+
+```{R, spurious2, echo = F, fig.height=4}
+tmp1 <- data.frame(year = 1999:2009,
+nick = c(
+    2, 2, 2, 3, 1, 1, 2, 3, 4, 1, 4,
+    1.09, 1.02, 1.02, 0.98, 0.85, 0.95,0.96, 0.98, 1.23, 0.94, 1.02),
+  pis = rep(c("Peliculas", "Ahogados"), each = 11)
+)
+ggplot(data = tmp1, aes(x = year, y = nick, color = pis)) +
+  geom_path() +
+  geom_point(size = 4) +
+  xlab("Años") +
+  ylab("Número") +
+  scale_color_manual(
+    "",
+    labels = c("Número de peliculas de N. Cage", "Ahogados x 100"),
+    values = c(red_pink, "darkslategray")
+  ) +
+  theme_pander(base_size = 17) +
+  theme(legend.position = "bottom")
+
+```
+
+
+---
+# Econometría
+
+--
+
+Un econometrista aplicado <sup>†</sup> 
+necesita un dominio sólido de (al menos) tres áreas:
+
+--
+
+1. La __teoría__ subyacente a la econometría (supuestos, resultados, puntos fuertes, puntos débiles).
+
+2. Cómo __aplicar los métodos teóricos__ a los datos reales.
+
+3. Métodos eficientes para __trabajar con datos__-limpiar, agregar, unir, visualizar.
+
+--
+
+.footnote[
+[†]: _Econometrista aplicado_ .black[=] Profesional de la econometría, _e._, analista, consultor, científico de datos.
+]
+
+--
+
+Este curso tiene como objetivo profundizar en cada una de estas tres áreas.
+
+--
+
+- 1: Como antes.
+- 2–3: __.black[R]__
+        
+---
+class: middle, inverse
+
+.left-column[
+
+# `r emo::ji("worried")`
+
+]
+
+.right-column[
+# Y que mas hay por aprender?
+]
+
+
+---
+# Básicos de `r fa("r-project", fill = "steelblue")`
+
+.pull-left[
+
+1. Todo es un __objeto__.
+
+1. Todo objeto tiene __nombre__ y __valor__.
+
+1. Puede usar __funciones__ en esos objetos.
+
+1. Estas estan en __library__ (packages)
+
+1. `r fa("r-project", fill = "steelblue")` posee __ayudas__
+
+1. `r fa("r-project", fill = "steelblue")` tiene __avisos__.
+
+]
+
+.pull-right[
+
+`balon`
+
+`balon <- 15`
+
+`mean(balon)`
+
+`library(dplyr)`
+
+`?dplyr`
+
+`NA; error; warning`
+
+]
+---
+class: title-slide-section-grey, middle
+
+# Enfoque
+
+<br>
+<img src="img/lognig.png" width="380" />
+
+---
+
+# Enfoque
+
+--
+
+- Encontrar la mejor predicción de un valor real desconocido regularmente por un investigador a partir de datos recolectados (muestra) de una población.
+--
+
+
+- Medidas de tendencia central: __Media__, __varianza__ y demás momentos de la _distribución_.
+--
+
+
+- Construcción de __intervalos de confianza__ y proposición y/o planteamiento de __hipótesis__.
+
+---
+# Enfoque `r fa("r-project", fill = "steelblue")`
+
+--
+
+.pull-left[
+
+1. Media $\bar{x}=\sum x_i / n$
+
+1. Varianza $\sigma^2= \sum (x_i- \bar{x})^2$
+
+1. Paquete momentos
+
+1. Curtosis $K=3$.
+
+1. Asimetría $(+)\; o\  (-)$
+]
+
+.pull-right[
+
+`mean(x)`
+
+`var(x)`
+
+`library(moments)`
+
+`kurtosis(x)`
+
+`skewness(x)`]
+---
+# Enfoque `r fa("r-project", fill = "steelblue")`
+
+--
+
++ Una función de distribución **normal**
+
+--
+
+```{r, echo=FALSE}
+# data
+set.seed(123)
+x<- rnorm(300)
+
+# X-axis Grilla
+x37 <- seq(min(x), max(x), length = 50)
+
+# Curva de la Normal Standar
+fun <- dnorm(x37, mean = mean(x), sd = sd(x))
+
+# Histograma
+hist(x, prob = TRUE, col = "blue",
+     ylim = c(0, max(fun)),
+     main = "Histograma y su respectiva curva")
+lines(x37, fun, col = 3, lwd = 2) 
+```
+
+
+---
+# Enfoque `r fa("r-project", fill = "steelblue")`
+
+--
+
+.pull-left[
+```{r, examplo3, eval=FALSE}
+# Instalar paquete
+install.packages("moments")
+library(moments)
+Notas<-c(2.11,2.30,2.42,2.19,2.23,3.67,3.82)
+mean(Notas)
+sd(Notas)
+kurtosis(Notas)
+hist(Notas)
+```
+]
+
+--
+
+.pull-right[
+```{r, examplo3a, echo=FALSE}
+# Instalar paquete
+#install.packages("moments")
+library(moments)
+Notas<-c(2.11,2.30,2.42,2.19,2.23,3.67,3.82)
+mean(Notas)
+sd(Notas)
+kurtosis(Notas) # Curtosis
+skewness(Notas) # Asímetría
+hist(Notas, main="Notas de clase")
+lines(density(Notas), col=4, lwd=2)
+```
+]
+---
+class: title-slide-section-grey
+# Bibliografía
+
+`r fa('book')` Gujarati, D. N., & Porter, D. C. (2011). *Econometria Básica*. Ed. Porto Alegre: AMGH..
+
+`r fa('book')` Stock, J. H., Watson, M. W., & Larrión, R. S. (2012). *Introducción a la Econometría*.
+
+`r fa('book')` Wooldridge, J. M. (2015). *Introductory econometrics: A modern approach*. Cengage learning.
+
+---
+class: title-slide-final, middle
+
+# Gracias por su atención!
+
+## Alguna pregunta adicional?
+
+### Carlos Andres Yanes Guerra
+`r fa("envelope", fill="red")` cayanes@uninorte.edu.co
+`r fa("twitter", fill="cyan")` keynes37
+
+
