@@ -1,0 +1,91 @@
+---
+title: Econometría I
+subtitle: "Workclass 02"
+author:
+  name: Carlos A. Yanes Guerra
+  affiliation: Universidad del Norte | Departamento de Economía
+# date: "`r format(Sys.time(), '%d %B %Y')`" ## Or "Lecture no."
+output: 
+  html_document:
+    keep_md: false
+    theme: journal
+    highlight: haddock
+    # code_folding: show
+    toc: yes
+    toc_depth: 4
+    toc_float: yes
+    css: css/preamble.css ## For multi-col environments
+  pdf_document:
+    latex_engine: xelatex
+    keep_tex: false ## Change to true if want keep intermediate .tex file
+    toc: true
+    toc_depth: 3
+    dev: cairo_pdf
+    # fig_width: 7 ## Optional: Set default PDF figure width
+    # fig_height: 6 ## Optional: Set default PDF figure height
+    extra_dependencies: ['booktabs', 'threeparttable', 'float'] # "longtable"
+    includes:
+      in_header: tex/preamble.tex ## For multi-col environments
+    pandoc_args:
+        --template=tex/mytemplate.tex ## For affiliation field. See: https://bit.ly/2T191uZ
+always_allow_html: true
+urlcolor: blue
+mainfont: cochineal
+sansfont: Fira Sans
+monofont: Fira Code ## Although, see: https://tex.stackexchange.com/q/294362
+## Automatically knit to both formats:
+knit: (function(inputFile, encoding) {
+ rmarkdown::render(inputFile, encoding = encoding, 
+ output_format = 'all') 
+ })
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE, dpi=300, fig.align = "center")
+```
+
+## Antes de empezar
+
+Los prácticos son para desarrollarlos en clases en el tiempo sugerido por el profesor **1H:20 Min**. Trate con su grupo de trabajo (máximo 2 personas) este -*tenga un toque único y logre diferenciarse de los demas grupos*-. En esta ocasión va a *importar* datos y hacer un análisis muy breve de estadisticas **descriptivas**. 
+
+## Objetivo
+
+Realizar a partir de la información disponible un análisis estadistico incluyendo los momentos de la distribución. Es indispensable consultar la ***guía 2*** del curso para la elaboración de lo requerido.
+
+### Consideración
+Recuerde que algunas ocasiones dentro del código si solo se le pide la respuesta debe colocar lo siguiente en su chunk:
+
+`echo=FALSE`
+
+\newpage
+
+## Preguntas
+
+1. Haga uso de los paquetes de `foreign`, `readxl`, `tidyverse` y `moments` para su chunk de tipo `setup`. Luego importe el archivo *datawk2.xlsx* y muestre el proceso. Debe quedarle algo como:
+
+```r
+datos <- read_excel("datawk2.xlsx")
+```
+
+2. Recree la elaboración de un `tible` de `tidyverse` de la tabla de datos. Muestre la salida completa.
+
+3.  Digamos ahora que requerimos una variable como lo es el **Ingreso real**. Note que en la base de datos el ingreso es *nominal*. La idea es medir la capacidad de pago o poder de compra de los individuos y por ende, se debe crear una nueva variable que logre capturar ese evento. Debe hacer uso de la función `mutate` y usar la formula de:
+
+$$\text{Ingreso real}=\frac{Ingreso \times \text{IPC base}}{\text{IPC}}$$
+*Tome como base IPC de 119*.  Muestre nuevamente en formato tibble la data con la nueva variable.
+
+4. Halle la media y coeficiente de asimetría de cada una de las variables que posee en sus datos en una tabla resumida. Interprete cada uno de los valores que le salen.
+
+5. Construya un histograma de la serie de **ingreso real**. Luego, halle cada uno de los momentos de esa distribución e interpretelos, -*debe tener un sentido económico mas allá del estadístico simple*-. Construya un párrafo interpretativo de toda la distribución de la variable.
+
++ Tenga en consideración la linea de la distribución y no olvide explicarla tambien, tome como referencia lo siguiente:
+
+```r
+hist(x, main="Distribución de la variable x") # Histograma y título
+lines(density(x), col=4, lwd=2) # Línea de distribución
+```
+
+
+
+
+

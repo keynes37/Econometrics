@@ -1,0 +1,1364 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Econometria I</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Carlos Yanes" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <link href="libs/remark-css/rutgers.css" rel="stylesheet" />
+    <link href="libs/remark-css/rutgers-fonts.css" rel="stylesheet" />
+  </head>
+  <body>
+    <textarea id="source">
+
+name: xaringan-title
+class: left, middle
+
+
+# Econometría I
+&lt;br&gt;
+## Propiedades inferenciales
+
+&lt;br&gt;
+&lt;br&gt;
+&lt;img src="images/lognig.png" width="280" /&gt;
+
+### Carlos A. Yanes | Departamento de Economía | 2024-02-14
+
+---
+
+
+
+
+
+background-size: 100%
+background-image: url(https://media.giphy.com/media/AXorq76Tg3Vte/giphy.gif)
+
+???
+
+Image test. Taken from gyfty.
+
+---
+class: middle, inverse
+.left-column[
+
+# 😄
+
+]
+
+.right-column[
+# Preguntas de la sesión anterior?
+]
+---
+# Variables: Clasificación básica
+
+&lt;ru-blockquote&gt; _Variable aleatoria_:  Aquella que toma un **valor** numérico y su resultado esta determinado por un &lt;span style="color:red"&gt; **Experimento** &lt;/span&gt;. Suelen escribirse con letras `\((X, Y, Z)\)` y sus resultados se hacen con minúsculas `\((x, y, z)\)`.&lt;/ru-blockquote&gt;
+
+--
+
+Un .black[_ejemplo_]: cuando se lanza un dado, `\(X\)` viene a ser el número de veces que lo lanzamos, entonces:
+
+--
+
+`\(X= \left \{ 1, 2, 3, \cdots, 6 \right \}\)` y `\((x)\)` puede ser 4.
+
+--
+
+&lt;div align="center"&gt;
+![](images/dado2.gif)
+
+---
+# Variables: Clasificación básica
+
+--
+
+
+```r
+set.seed(123) # La opción de 1 es para una solo lanzamiento (resultado) 
+sample(1:6, 1) 
+```
+
+```
+#&gt; [1] 3
+```
+
+--
+
+Ya si quisieramos lanzar dos dados, tendriamos:
+
+--
+
+
+```r
+set.seed(123) # Ahora queremos ver dos resultados 
+sample(1:12, 2) 
+```
+
+```
+#&gt; [1]  3 12
+```
+
+---
+# Variables: Clasificación básica 
+
+--
+
+Para el caso del lanzamiento de una moneda:
+
+--
+
+`$$X = \begin{cases}  1\, =&amp; \text{Si es cara} \\  0\, =&amp; \text{Si es sello} \end{cases}$$`
+--
+
+- La moneda tiene dos posibles **resultados**, _posiblemente encontramos la probabilidad de que la variable tome el valor de 1 si es cara con probabilidad 0.5_. Al igual que si sale sello. Ej:
+
+--
+
+$$P \left( X=1 \right)=0.5 \; \text{y por otro lado} \; P \left( X=0 \right)=0.5 $$
+
+--
+
+
+```r
+set.seed(123) # Garantizar el sorteo
+sample(c("Cara", "Sello"), 1) 
+```
+
+```
+#&gt; [1] "Cara"
+```
+
+---
+# Variables: Clasificación básica 
+
+--
+
+- **Variables discretas**: Son aquellas que provienen de una naturaleza aleatoria o _resultado_ aleatorio. Toman valores discreto de forma tal que `\(X:\left \{ 0,1,2,3,\cdots,245  \right \}\)`
+
+--
+
+
+```r
+# Definir la función para simular un sorteo de números discretos
+simulacion &lt;- function(n, min_valor, max_valor) {
+  resultado &lt;- sample(min_valor:max_valor, n, replace = TRUE)
+  return(resultado)
+}
+# Vamos a simular un sorteo de 10 números discretos entre 1 y 100
+resultado &lt;- simulacion(10, 1, 100)
+print(resultado)
+```
+
+```
+#&gt;  [1] 79 51 14 67 42 50 43 14 25 90
+```
+
+--
+
+- **Variables continuas**: Aquellas que toman valores en un conjunto continuo de posibles valores. P.e.: `\(12.32; 114,6\)`
+
+
+```r
+set.seed(123)
+runif(n = 10, min = 15, max = 242)
+```
+
+```
+#&gt;  [1]  80.28010 193.94527 107.83776 215.44495 228.48607  25.34133 134.87995
+#&gt;  [8] 217.57912 140.17575 118.65154
+```
+
+---
+# Variables: Clasificación básica 
+
+---
+class: title-slide-section-red, middle
+
+# Distribución 
+
+&lt;br&gt;
+&lt;img src="images/lognig.png" width="380" /&gt;
+---
+
+# Distribución de probabilidad
+
+--
+
+### Conceptos
+
+--
+
+- La .blue[distribución de probabilidad] es una **relación** de todos los posibles valores que son posibles resultados de una variable.
+
+--
+
+- La .blue[probabilidad] de los sucesos suele calcularse a partir de una distribución de probabilidad.
+
+--
+
+- La .blue[distribución acumulada de probabilidad] resulta ser la probabilidad de que la .black[V.A] sea menor o igual a un valor concreto. 
+
+--
+
+| **Probabilidad de ocurrencia** |      | **Resultados** |      |      |
+|:------------------------------:|:----:|:--------------:|:----:|:----:|
+|                                | 0    | 1              | 2    | 3    |
+| Distribución de probabilidad   | 0.6  | 0.2            | 0.16 | 0.04 |
+| Distribución Acumulada         | 0.6  | 0.8            | 0.96 | 1    |
+
+
+---
+class: inverse
+# Recuerde 😮
+
+--
+
+- De la ecuación y frontera de probabilidad
+
+--
+
+ `$$p_{i}=P(X=x_{i}), \; i= 1,2,3,...,k$$`
+--
+
+Donde,
+
+--
+
+`$$0 \leq p_{i} \leq 1$$`
+--
+
+&lt;br/&gt;
+- La función de **densidad** reúne toda la información acerca de los valores de X y sus probabilidades correspondientes:
+
+--
+
+     `$$f(x_{i})= p_{i}, \; i=1,2,3,...,k$$`
+---
+# Distribución de una variable aleatoria discreta
+
+--
+
+- Una **función de densidad discreta**, es `\(f(x)\)` una _lista_ de las probabilidades asociadas a diferentes realizaciones, `\(x\)`, que pueda tomar una variable discreta `\(X\)`:
+
+--
+
+`$$P(W=w): \begin{cases} \frac{1}{6}&amp; si  &amp;w=1 \\ \frac{1}{6}&amp; si  &amp;w=2 \\ \frac{1}{6}&amp; si  &amp;w=3 \\ \frac{1}{6}&amp; si &amp; w=4 \\ \frac{1}{6}&amp; si  &amp;w=5 \\ \frac{1}{6}&amp; si  &amp;w=6 \\ 0&amp; si  &amp; ocurre\; otro\; evento \end{cases}$$` 
+--
+
+- El valor esperado del dado es: 
+
+--
+
+`$$E(W)= 1 \times \frac{1}{6}+2 \times \frac{1}{6}+3 \times \frac{1}{6}+4 \times \frac{1}{6}+5 \times \frac{1}{6}+6 \times \frac{1}{6}=3.5$$`
+---
+# Ejemplo de distribución discreta
+
+--
+
+&lt;img src="Class02_files/figure-html/graph1-1.svg" style="display: block; margin: auto;" /&gt;
+
+
+---
+# Distribución de una variable aleatoria continua
+
+--
+
+- Una **función de densidad continua** es, `\(f(x)\)`, una función asociada a una variable continua X, de tal forma que:
+
+--
+    
+`$$\int_{a}^{b} f (x) dx= P( a \leq x\leq b )$$`
+
+--
+
+Donde `\(f(x)\)` debe cumplir:
+
+--
+
+  - `\(f(x) \geq 0\)`.
+
+--
+
+  - `\(\int_{-\infty}^{\infty} f(x) dx=1\)`
+
+--
+  
+**Esto permite conocer la probabilidad de que una V.A.C se encuentre en un intervalo**.
+
+---
+# Ejemplo: Distribución Continua
+
+<svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:currentColor;overflow:visible;position:relative;"><path d="M24 32C10.7 32 0 42.7 0 56V456c0 13.3 10.7 24 24 24H40c13.3 0 24-10.7 24-24V56c0-13.3-10.7-24-24-24H24zm88 0c-8.8 0-16 7.2-16 16V464c0 8.8 7.2 16 16 16s16-7.2 16-16V48c0-8.8-7.2-16-16-16zm72 0c-13.3 0-24 10.7-24 24V456c0 13.3 10.7 24 24 24h16c13.3 0 24-10.7 24-24V56c0-13.3-10.7-24-24-24H184zm96 0c-13.3 0-24 10.7-24 24V456c0 13.3 10.7 24 24 24h16c13.3 0 24-10.7 24-24V56c0-13.3-10.7-24-24-24H280zM448 56V456c0 13.3 10.7 24 24 24h16c13.3 0 24-10.7 24-24V56c0-13.3-10.7-24-24-24H472c-13.3 0-24 10.7-24 24zm-64-8V464c0 8.8 7.2 16 16 16s16-7.2 16-16V48c0-8.8-7.2-16-16-16s-16 7.2-16 16z"/></svg> Una &lt;span style="color:red"&gt;**empresa**&lt;/span&gt; después de haber realizado un estudio de la distribución del consumo de gasolina, encontró que:
+
+--
+
+`$$f(x)=\begin{cases} \frac{1}{40000}&amp; si  &amp; 10000 \leq x \leq 50000 \\ 0&amp; si  &amp; ocurre\; lo\; contrario\end{cases}$$` 
+--
+
+(x) viene a ser la **cantidad** de gasolina que consumen sus empleados en un mes.
+
+--
+
+&lt;img src="images/d1.png" width="60%" style="display: block; margin: auto;" /&gt;
+
+
+---
+class: title-slide-section-grey
+# Preguntas al público 🏆
+
+--
+
+## Qué pasaría si quiero conocer:
+
+--
+
+### 1. La probabilidad que los empleados consuman en este mes exactamente 30000 litros de gasolina
+
+--
+
+### 2. Por lo menos 30000 litros
+
+
+--
+
+### 3. Entre 20000 y 30000 litros de gasolina
+
+---
+# Para esto:
+--
+
+Resuelvo la integral de la **función**:
+--
+
+`$$\int f(x) dx= \int \frac{1}{40000} dx=\frac{x}{40000}+C$$`
+--
+
+Para la _pregunta 1_ `\(\Rightarrow\)`
+
+--
+
+`$$P(X=30000)=P(30000 \leq x \leq 30000)$$`
+--
+Teniendo:
+`$$\int_{30000}^{30000} f(x) dx= 0$$`
+
+--
+_Es decir, la probabilidad que consuman 30 mil litros de gasolina es exactamente cero_.
+
+---
+# En <svg aria-hidden="true" role="img" viewBox="0 0 581 512" style="height:1em;width:1.13em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:steelblue;overflow:visible;position:relative;"><path d="M581 226.6C581 119.1 450.9 32 290.5 32S0 119.1 0 226.6C0 322.4 103.3 402 239.4 418.1V480h99.1v-61.5c24.3-2.7 47.6-7.4 69.4-13.9L448 480h112l-67.4-113.7c54.5-35.4 88.4-84.9 88.4-139.7zm-466.8 14.5c0-73.5 98.9-133 220.8-133s211.9 40.7 211.9 133c0 50.1-26.5 85-70.3 106.4-2.4-1.6-4.7-2.9-6.4-3.7-10.2-5.2-27.8-10.5-27.8-10.5s86.6-6.4 86.6-92.7-90.6-87.9-90.6-87.9h-199V361c-74.1-21.5-125.2-67.1-125.2-119.9zm225.1 38.3v-55.6c57.8 0 87.8-6.8 87.8 27.3 0 36.5-38.2 28.3-87.8 28.3zm-.9 72.5H365c10.8 0 18.9 11.7 24 19.2-16.1 1.9-33 2.8-50.6 2.9v-22.1z"/></svg> 
+
+--
+
+
+```r
+fp &lt;- function(x){1/40000}
+Vfp &lt;- Vectorize(fp) # Se debe aplicar
+e1 &lt;- integrate(Vfp, lower = 30000, upper = 30000)$value
+e1
+```
+
+```
+#&gt; [1] 0
+```
+
+
+
+---
+# Continuando:
+--
+
+Para la _pregunta 2_ `\(\Rightarrow\)`
+--
+
+`$$P ( X \geq 30000)=1-P (10000 \leq x \leq 30000)$$`
+--
+Teniendo:
+`$$1-\int_{10000}^{30000} f(x) dx = 1- 0.5 = 0.5$$`
+--
+
+_La probabilidad es del 50% en este caso de que al menos consuman 30 mil litros_.
+
+--
+
+De donde salió el **0.5**? 😱
+
+--
+
+&lt;span style="color:red"&gt; `$$\Biggr|_{10000}^{30000}\quad\frac{30000}{40000}-\frac{10000}{40000}=\frac{2}{4}=0.5$$` 😬&lt;/span&gt;
+
+--
+
+
+```r
+e2 &lt;- 1 - integrate(Vfp, lower = 10000, upper = 30000)$value
+e2
+```
+
+```
+#&gt; [1] 0.5
+```
+
+
+---
+# Para lo último
+
+Para la _pregunta 3_ `\(\Rightarrow\)`
+
+--
+
+`$$P( 20000 \leq X \leq 30000 )=P (20000 \leq x \leq 30000)$$`
+--
+
+Teniendo:
+`$$\int_{20000}^{30000} f(x) dx= 0.25$$`
+--
+
+_La probabilidad es del 25% en este caso de que al consuman entre 20 mil y 30 mil litros de gasolina_.
+
+--
+
+De donde:
+`$$\Biggr|_{20000}^{30000}\quad\frac{30000}{40000}-\frac{20000}{40000}= \frac{1}{4}=0.25$$`
+
+--
+
+
+```r
+e3 &lt;- integrate(Vfp, lower = 20000, upper = 30000)$value
+e3
+```
+
+```
+#&gt; [1] 0.25
+```
+
+---
+class: title-slide-section-red, middle
+
+# Operadores 
+
+&lt;br&gt;
+&lt;img src="images/lognig.png" width="380" /&gt;
+
+---
+# Operador: Sumatoria
+--
+
+&gt;Simplifica de forma significativa el uso de términos en una expresión.
+
+--
+
+`$$M_{1}+M_{2}+M_{3}+M_{4}+M_{5}+M_{6}+M_{7}$$`
+--
+
+Entonces podemos escribir lo anterior como:
+`$$\sum_{i=1}^{7}M_{i}$$`
+--
+
+Calcule el _resultado_ de la siguiente expresión:
+
+`$$\sum_{j=0}^{2}\frac{1}{(j+1)(j+3)}$$`
+
+--
+
+El desarrollo es sencillo:
+
+--
+
+$$\sum_{j=0}^{2}\frac{1}{(j+1)(j+3)}=\frac{1}{1\cdot3}+\frac{1}{2\cdot4}+\frac{1}{3\cdot5}=\quad \frac{40+15+8}{120} = \frac{63}{120} $$
+
+---
+class: title-slide-section-grey, middle
+#Propiedades Operador Sumatoria
+
+Algunas de las principales:
+
+--
+
+1. `$$\sum_{i=1}^{n}(a_{i}+b_{i})=\sum_{i=1}^{n}a_{i}+\sum_{i=1}^{n} b_{i} \quad \text{Prop. aditiva}$$`
+
+--
+
+2. `$$\sum_{i=1}^{n}ca_{i}=c\sum_{i=1}^{n}a_{i}\quad\text{Prop. de homogeneidad}$$`
+
+--
+
+3. &lt;span style="color:red"&gt;Una propiedad que es importante&lt;/span&gt;:
+`$$\sum \limits_{i=1}^{n} c= n\;c \; ; \; \text{Prop. Constante}$$`
+--
+Por ejemplo: `\(\sum_{i=1}^{4} 7=7+7+7+7=28\)` 
+
+---
+# Operador Productoria
+
+--
+
+&gt; Es **análogo** al operador **sumatoria**. Se plantea como lo siguiente:
+
+--
+
+`$$\prod \limits_{i=1}^{n} a_{i}= a_{1} \times a_{2} \cdots a_{n}$$`
+--
+
+Por ejemplo:
+
+`$$\prod \limits_{i=2}^{4} (3i-2)= 4\times7\times10=280$$`
+---
+# Pequeño ejemplo en <svg aria-hidden="true" role="img" viewBox="0 0 581 512" style="height:1em;width:1.13em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:steelblue;overflow:visible;position:relative;"><path d="M581 226.6C581 119.1 450.9 32 290.5 32S0 119.1 0 226.6C0 322.4 103.3 402 239.4 418.1V480h99.1v-61.5c24.3-2.7 47.6-7.4 69.4-13.9L448 480h112l-67.4-113.7c54.5-35.4 88.4-84.9 88.4-139.7zm-466.8 14.5c0-73.5 98.9-133 220.8-133s211.9 40.7 211.9 133c0 50.1-26.5 85-70.3 106.4-2.4-1.6-4.7-2.9-6.4-3.7-10.2-5.2-27.8-10.5-27.8-10.5s86.6-6.4 86.6-92.7-90.6-87.9-90.6-87.9h-199V361c-74.1-21.5-125.2-67.1-125.2-119.9zm225.1 38.3v-55.6c57.8 0 87.8-6.8 87.8 27.3 0 36.5-38.2 28.3-87.8 28.3zm-.9 72.5H365c10.8 0 18.9 11.7 24 19.2-16.1 1.9-33 2.8-50.6 2.9v-22.1z"/></svg>
+
+--
+
+Con el software, es fácil de implementar las operaciones anteriores ya sea con los comandos `sum` o `prod`.
+
+--
+
+- Halle la sumatoria y el producto de `\(a=35\)` donde `\(i:\{1,2,3,4,5\}\)`
+  `$$\sum \limits_{i=1}^{5} a_{i}, \; \text{ademas de la} \; \prod \limits_{i=1}^{5} a_{i}$$`
+
+--
+
+
+```r
+a&lt;-rep(35,5)
+a
+```
+
+```
+#&gt; [1] 35 35 35 35 35
+```
+
+```r
+sum(a)
+```
+
+```
+#&gt; [1] 175
+```
+
+```r
+prod(a)
+```
+
+```
+#&gt; [1] 52521875
+```
+
+---
+# Otro ejemplo en <svg aria-hidden="true" role="img" viewBox="0 0 581 512" style="height:1em;width:1.13em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:steelblue;overflow:visible;position:relative;"><path d="M581 226.6C581 119.1 450.9 32 290.5 32S0 119.1 0 226.6C0 322.4 103.3 402 239.4 418.1V480h99.1v-61.5c24.3-2.7 47.6-7.4 69.4-13.9L448 480h112l-67.4-113.7c54.5-35.4 88.4-84.9 88.4-139.7zm-466.8 14.5c0-73.5 98.9-133 220.8-133s211.9 40.7 211.9 133c0 50.1-26.5 85-70.3 106.4-2.4-1.6-4.7-2.9-6.4-3.7-10.2-5.2-27.8-10.5-27.8-10.5s86.6-6.4 86.6-92.7-90.6-87.9-90.6-87.9h-199V361c-74.1-21.5-125.2-67.1-125.2-119.9zm225.1 38.3v-55.6c57.8 0 87.8-6.8 87.8 27.3 0 36.5-38.2 28.3-87.8 28.3zm-.9 72.5H365c10.8 0 18.9 11.7 24 19.2-16.1 1.9-33 2.8-50.6 2.9v-22.1z"/></svg> 
+
+- Para la función 
+`$$\prod \limits_{i=2}^{4} (3i-2)$$`
+--
+
+- Halle el respectivo **resultado**
+
+--
+
+De forma manual es:
+`$$(3)(2)-2\times(3)(3)-2\times(3)(4)-2=280$$`
+--
+
+- En <svg aria-hidden="true" role="img" viewBox="0 0 581 512" style="height:1em;width:1.13em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:steelblue;overflow:visible;position:relative;"><path d="M581 226.6C581 119.1 450.9 32 290.5 32S0 119.1 0 226.6C0 322.4 103.3 402 239.4 418.1V480h99.1v-61.5c24.3-2.7 47.6-7.4 69.4-13.9L448 480h112l-67.4-113.7c54.5-35.4 88.4-84.9 88.4-139.7zm-466.8 14.5c0-73.5 98.9-133 220.8-133s211.9 40.7 211.9 133c0 50.1-26.5 85-70.3 106.4-2.4-1.6-4.7-2.9-6.4-3.7-10.2-5.2-27.8-10.5-27.8-10.5s86.6-6.4 86.6-92.7-90.6-87.9-90.6-87.9h-199V361c-74.1-21.5-125.2-67.1-125.2-119.9zm225.1 38.3v-55.6c57.8 0 87.8-6.8 87.8 27.3 0 36.5-38.2 28.3-87.8 28.3zm-.9 72.5H365c10.8 0 18.9 11.7 24 19.2-16.1 1.9-33 2.8-50.6 2.9v-22.1z"/></svg>  construiremos la formula haciendo uso de las **funciones**, para eso podemos decirle al programa que usaremos el _comando_ `function`.
+
+---
+# Funciones <svg aria-hidden="true" role="img" viewBox="0 0 581 512" style="height:1em;width:1.13em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:steelblue;overflow:visible;position:relative;"><path d="M581 226.6C581 119.1 450.9 32 290.5 32S0 119.1 0 226.6C0 322.4 103.3 402 239.4 418.1V480h99.1v-61.5c24.3-2.7 47.6-7.4 69.4-13.9L448 480h112l-67.4-113.7c54.5-35.4 88.4-84.9 88.4-139.7zm-466.8 14.5c0-73.5 98.9-133 220.8-133s211.9 40.7 211.9 133c0 50.1-26.5 85-70.3 106.4-2.4-1.6-4.7-2.9-6.4-3.7-10.2-5.2-27.8-10.5-27.8-10.5s86.6-6.4 86.6-92.7-90.6-87.9-90.6-87.9h-199V361c-74.1-21.5-125.2-67.1-125.2-119.9zm225.1 38.3v-55.6c57.8 0 87.8-6.8 87.8 27.3 0 36.5-38.2 28.3-87.8 28.3zm-.9 72.5H365c10.8 0 18.9 11.7 24 19.2-16.1 1.9-33 2.8-50.6 2.9v-22.1z"/></svg>
+
+--
+
+&gt; Una función **R**, permite obtener un resultado a partir de una formula anteriormente establecida y  tiene varias partes:
+
+--
+
+*Primero hagamos un ejemplo simple de establecer la formula de raíz cuadrada de un valor o número*
+
+--
+
+
+```r
+raiz = 
+  function(x) { 
+    raiz_x = x^(1/2)  # formula que se va establecer
+    return(raiz_x) ## Resultado 
+  }
+```
+
+--
+
+*A continuación la usamos con el valor de 144*
+
+--
+
+
+```r
+raiz(144)
+```
+
+```
+#&gt; [1] 12
+```
+
+---
+# Funciones <svg aria-hidden="true" role="img" viewBox="0 0 581 512" style="height:1em;width:1.13em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:steelblue;overflow:visible;position:relative;"><path d="M581 226.6C581 119.1 450.9 32 290.5 32S0 119.1 0 226.6C0 322.4 103.3 402 239.4 418.1V480h99.1v-61.5c24.3-2.7 47.6-7.4 69.4-13.9L448 480h112l-67.4-113.7c54.5-35.4 88.4-84.9 88.4-139.7zm-466.8 14.5c0-73.5 98.9-133 220.8-133s211.9 40.7 211.9 133c0 50.1-26.5 85-70.3 106.4-2.4-1.6-4.7-2.9-6.4-3.7-10.2-5.2-27.8-10.5-27.8-10.5s86.6-6.4 86.6-92.7-90.6-87.9-90.6-87.9h-199V361c-74.1-21.5-125.2-67.1-125.2-119.9zm225.1 38.3v-55.6c57.8 0 87.8-6.8 87.8 27.3 0 36.5-38.2 28.3-87.8 28.3zm-.9 72.5H365c10.8 0 18.9 11.7 24 19.2-16.1 1.9-33 2.8-50.6 2.9v-22.1z"/></svg>
+
+--
+
+Podemos ademas implementar otras opciones como las listas o la manera en como quiere que nos quede el resultado:
+
+--
+
+
+```r
+raiz = 
+  function(x) { 
+    raiz_x = x^(1/2)  # formula que se va establecer
+    return(list(valor=x, raiz_cuadrada=raiz_x))
+  }
+```
+
+--
+
+Testeamos
+
+--
+
+
+```r
+raiz(144)
+```
+
+```
+#&gt; $valor
+#&gt; [1] 144
+#&gt; 
+#&gt; $raiz_cuadrada
+#&gt; [1] 12
+```
+
+---
+# Funciones <svg aria-hidden="true" role="img" viewBox="0 0 581 512" style="height:1em;width:1.13em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:steelblue;overflow:visible;position:relative;"><path d="M581 226.6C581 119.1 450.9 32 290.5 32S0 119.1 0 226.6C0 322.4 103.3 402 239.4 418.1V480h99.1v-61.5c24.3-2.7 47.6-7.4 69.4-13.9L448 480h112l-67.4-113.7c54.5-35.4 88.4-84.9 88.4-139.7zm-466.8 14.5c0-73.5 98.9-133 220.8-133s211.9 40.7 211.9 133c0 50.1-26.5 85-70.3 106.4-2.4-1.6-4.7-2.9-6.4-3.7-10.2-5.2-27.8-10.5-27.8-10.5s86.6-6.4 86.6-92.7-90.6-87.9-90.6-87.9h-199V361c-74.1-21.5-125.2-67.1-125.2-119.9zm225.1 38.3v-55.6c57.8 0 87.8-6.8 87.8 27.3 0 36.5-38.2 28.3-87.8 28.3zm-.9 72.5H365c10.8 0 18.9 11.7 24 19.2-16.1 1.9-33 2.8-50.6 2.9v-22.1z"/></svg>
+
+--
+
+Tambien se puede con el formato `tibble` de `tidyverse` y colocar como si se tratara de una matriz.
+
+--
+
+
+```r
+raiz = 
+  function(x) { 
+    raiz_x = x^(1/2)  # formula que se va establecer
+    df = tibble(valor=x, raiz_cuadrada=raiz_x) # un dataframe
+    return(df)
+  }
+```
+
+--
+
+Testeamos
+
+
+```r
+raiz(144)
+```
+
+```
+#&gt; # A tibble: 1 × 2
+#&gt;   valor raiz_cuadrada
+#&gt;   &lt;dbl&gt;         &lt;dbl&gt;
+#&gt; 1   144            12
+```
+
+--
+
+*El resultado aparece como si fuera una tabla*
+
+---
+# Funciones <svg aria-hidden="true" role="img" viewBox="0 0 581 512" style="height:1em;width:1.13em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:steelblue;overflow:visible;position:relative;"><path d="M581 226.6C581 119.1 450.9 32 290.5 32S0 119.1 0 226.6C0 322.4 103.3 402 239.4 418.1V480h99.1v-61.5c24.3-2.7 47.6-7.4 69.4-13.9L448 480h112l-67.4-113.7c54.5-35.4 88.4-84.9 88.4-139.7zm-466.8 14.5c0-73.5 98.9-133 220.8-133s211.9 40.7 211.9 133c0 50.1-26.5 85-70.3 106.4-2.4-1.6-4.7-2.9-6.4-3.7-10.2-5.2-27.8-10.5-27.8-10.5s86.6-6.4 86.6-92.7-90.6-87.9-90.6-87.9h-199V361c-74.1-21.5-125.2-67.1-125.2-119.9zm225.1 38.3v-55.6c57.8 0 87.8-6.8 87.8 27.3 0 36.5-38.2 28.3-87.8 28.3zm-.9 72.5H365c10.8 0 18.9 11.7 24 19.2-16.1 1.9-33 2.8-50.6 2.9v-22.1z"/></svg>
+
+--
+
+Para el caso de 
+
+--
+
+`$$\prod \limits_{i=2}^{4} (3i-2)$$`
+
+--
+
+
+```r
+caps&lt;-function(x,y){a=3*(x:y)-2;m=prod(a);m}
+# Los argumentos son X y Y, y es donde empieza y termina la productoria.
+caps(2,4) # con la función
+```
+
+```
+#&gt; [1] 280
+```
+
+--
+
+*Note que para este caso usamos (;) para separar por operación*
+---
+class: title-slide-section-red, middle
+
+# Media y varianza de una distribución
+
+&lt;br&gt;
+&lt;img src="images/lognig.png" width="380" /&gt;
+
+---
+# Media y varianza de una distribución
+
+--
+
+Para el caso general -esto es- para `\(X_i\)`, i.i.d para cualquier distribución:
+
+--
+
+`$$\text{Media:}\; E(X)= \bar{X}=E \left(\frac{1}{n}\sum\limits_{i=1}^{n}X_i\right)=\frac{1}{n}\sum\limits_{i=1}^{n}E(X_i)=\frac{1}{n}\sum\limits_{i=1}^{n}\mu_x=\mu_x$$`
+--
+
+Para la **Varianza** `\(\Rightarrow\)`
+
+--
+
+`$$\begin{aligned}
+\text{Varianza:} &amp;= var(\bar{X})\\
+                 &amp;= E \left[\bar{X} - E(\bar{X})\right]^2\\
+                 &amp;= E \left[\left(\frac{1}{n}\sum\limits_{i=1}^{n}X_i \right) - \mu_x)\right]^2\\
+                 &amp;= \color{#e31612}{E \left[\frac{1}{n}\sum\limits_{i=1}^{n}(X_i  - \mu_x)\right]^2}🥲
+\end{aligned}$$`
+
+
+---
+class: title-slide-section-red, middle
+
+# Covarianza
+
+&lt;br&gt;
+&lt;img src="images/lognig.png" width="380" /&gt;
+
+---
+# Covarianza
+
+--
+
+&gt; Una de las medidas que muestra como evolucionan dos variables.
+
+--
+
+`$$cov(X,Y)=\sigma_{xy}= E[( X-\mu_{x}) (Y-\mu_{y})]$$`
+
+--
+
+<svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:currentColor;overflow:visible;position:relative;"><path d="M256 32c14.2 0 27.3 7.5 34.5 19.8l216 368c7.3 12.4 7.3 27.7 .2 40.1S486.3 480 472 480H40c-14.3 0-27.6-7.7-34.7-20.1s-7-27.8 .2-40.1l216-368C228.7 39.5 241.8 32 256 32zm0 128c-13.3 0-24 10.7-24 24V296c0 13.3 10.7 24 24 24s24-10.7 24-24V184c0-13.3-10.7-24-24-24zm32 224a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"/></svg> Lo que vendría a ser:
+
+`$$\sum_{i=1}^{k} \sum_{j=1}^{l}(x_{j} - \mu_{x})(y_{i} - \mu_{y}) Pr( X=x_{j}, Y=y_{i})$$`
+
+--
+
+**El signo** de la **covarianza** es fundamental!!
+
+--
+
+<svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:currentColor;overflow:visible;position:relative;"><path d="M256 32c14.2 0 27.3 7.5 34.5 19.8l216 368c7.3 12.4 7.3 27.7 .2 40.1S486.3 480 472 480H40c-14.3 0-27.6-7.7-34.7-20.1s-7-27.8 .2-40.1l216-368C228.7 39.5 241.8 32 256 32zm0 128c-13.3 0-24 10.7-24 24V296c0 13.3 10.7 24 24 24s24-10.7 24-24V184c0-13.3-10.7-24-24-24zm32 224a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"/></svg> Esto significa:
+
+--
+
+- &lt;span style="color:blue"&gt; **La dirección de la influencia de una variable sobre la otra.** &lt;/span&gt;
+
+--
+
+
+```r
+x &lt;- c(4.2, 4.6, 3.8, 4.1, 4.3)  # Datos de una asignatura
+y &lt;- c(2.1, 2.4, 2.8, 2.1, 3.2)  # Datos segunda asignatura
+covarianza_xy &lt;- cov(x, y) # Formula base
+print(covarianza_xy)
+```
+
+```
+#&gt; [1] -0.0125
+```
+
+
+---
+# Correlación
+
+--
+
+&gt; Debido a que la covarianza presenta dificultades en la interpretación dado el producto de las dispersiones de variables de Y y X. Surge el concepto o medida de dependencia entre Y y X y resuelve el problema de interpretación.
+
+--
+
+`$$Corr(X,Y)= \frac{cov( X,Y)}{\sqrt{var(x)var(y)}}=\frac{\sigma_{xy}}{\sigma_{x}\sigma_{y}}$$` 
+
+--
+
+<svg aria-hidden="true" role="img" viewBox="0 0 448 512" style="height:1em;width:0.88em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:currentColor;overflow:visible;position:relative;"><path d="M288 0H160 128C110.3 0 96 14.3 96 32s14.3 32 32 32V196.8c0 11.8-3.3 23.5-9.5 33.5L10.3 406.2C3.6 417.2 0 429.7 0 442.6C0 480.9 31.1 512 69.4 512H378.6c38.3 0 69.4-31.1 69.4-69.4c0-12.8-3.6-25.4-10.3-36.4L329.5 230.4c-6.2-10.1-9.5-21.7-9.5-33.5V64c17.7 0 32-14.3 32-32s-14.3-32-32-32H288zM192 196.8V64h64V196.8c0 23.7 6.6 46.9 19 67.1L309.5 320h-171L173 263.9c12.4-20.2 19-43.4 19-67.1z"/></svg> **La medida esta en un intervalo cerrado**
+
+--
+
+`$$-1 \leqslant corr(X,Y) \leqslant 1$$`
+
+--
+
+
+```r
+correlacion_xy &lt;- cor(x, y) # Formula correlación
+print(correlacion_xy)
+```
+
+```
+#&gt; [1] -0.08998863
+```
+
+---
+# Coeficiente de Correlación
+
+--
+
+.pull-left[ 
+&gt;Dado que la &lt;span style="color:red"&gt; **Covarianza** &lt;/span&gt; depende de las unidades en que se miden las desviaciones, aparece un concepto mas estandarizado a la hora de medir relación y asociación entre un par de variables **aleatorias** y tener un concepto o interpretación mas "detallada".]
+
+--
+
+.pull-right[
+&gt; Es un &lt;span style="color:red"&gt; **estadístico** &lt;/span&gt; que mide la relación (**signo**) y la fuerza (&lt;span style="color:red"&gt; _magnitud_ &lt;/span&gt;) de asociación lineal entre dos variables.]
+
+--
+
+<svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:currentColor;overflow:visible;position:relative;"><path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM216 336h24V272H216c-13.3 0-24-10.7-24-24s10.7-24 24-24h48c13.3 0 24 10.7 24 24v88h8c13.3 0 24 10.7 24 24s-10.7 24-24 24H216c-13.3 0-24-10.7-24-24s10.7-24 24-24zm40-208a32 32 0 1 1 0 64 32 32 0 1 1 0-64z"/></svg> La formula puede ser _re-expresada_ como:
+
+--
+
+`$$\frac{\sum\limits_{i=1}^{n}(x_{i} - \bar{x})(y_{i}- \bar{y})}{\sqrt{ \sum\limits_{i=1}^{n} (x_{i} - \bar{x} )^{2} \sum\limits_{i=1}^{n} ( y_{i} - \bar{y})^{2}}}$$`
+
+---
+# Intepretación
+
+--
+
+<svg aria-hidden="true" role="img" viewBox="0 0 640 512" style="height:1em;width:1.25em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:currentColor;overflow:visible;position:relative;"><path d="M0 128C0 92.7 28.7 64 64 64H256h48 16H576c35.3 0 64 28.7 64 64V384c0 35.3-28.7 64-64 64H320 304 256 64c-35.3 0-64-28.7-64-64V128zm320 0V384H576V128H320zM178.3 175.9c-3.2-7.2-10.4-11.9-18.3-11.9s-15.1 4.7-18.3 11.9l-64 144c-4.5 10.1 .1 21.9 10.2 26.4s21.9-.1 26.4-10.2l8.9-20.1h73.6l8.9 20.1c4.5 10.1 16.3 14.6 26.4 10.2s14.6-16.3 10.2-26.4l-64-144zM160 233.2L179 276H141l19-42.8zM448 164c11 0 20 9 20 20v4h44 16c11 0 20 9 20 20s-9 20-20 20h-2l-1.6 4.5c-8.9 24.4-22.4 46.6-39.6 65.4c.9 .6 1.8 1.1 2.7 1.6l18.9 11.3c9.5 5.7 12.5 18 6.9 27.4s-18 12.5-27.4 6.9l-18.9-11.3c-4.5-2.7-8.8-5.5-13.1-8.5c-10.6 7.5-21.9 14-34 19.4l-3.6 1.6c-10.1 4.5-21.9-.1-26.4-10.2s.1-21.9 10.2-26.4l3.6-1.6c6.4-2.9 12.6-6.1 18.5-9.8l-12.2-12.2c-7.8-7.8-7.8-20.5 0-28.3s20.5-7.8 28.3 0l14.6 14.6 .5 .5c12.4-13.1 22.5-28.3 29.8-45H448 376c-11 0-20-9-20-20s9-20 20-20h52v-4c0-11 9-20 20-20z"/></svg> El coeficiente (**r**) no tiene unidades y solo puede tomar valores entre -1 y 1, lo que es `\(-1 \leq r_{x,y} \leq 1\)`. **Su interpretación depende del signo y magnitud que nos arroja el estadístico**.
+
+--
+
+- Cuando `\(Corr(X,Y)=1\)`, se dice que hay una asociación lineal perfecta y directa.
+
+--
+
+- Cuando `\(Corr(X,Y)=0\)`, se dice que NO hay asociación.
+
+--
+
+- Cuando `\(Corr(X,Y)=-1\)`, se dice que hay una asociación lineal perfecta e indirecta.
+
+--
+
+&lt;img src="images/gra1.svg" width="60%" style="display: block; margin: auto;" /&gt;
+
+---
+# Recuerde 😮 
+
+--
+
+## Propiedades en Varianza
+
+--
+
+La suma de varianzas X e Y toma la expresión:
+
+--
+
+`$$var(X+Y)=var(X)+var(Y)+2cov(X,Y)=\sigma^{2}_{x}+\sigma^{2}_{y}+2\sigma ^{2}_{xy}$$`
+
+--
+
+Y dado el caso que las variables sean &lt;span style="color:red"&gt; **independientes**&lt;/span&gt; la formula se reduce a:
+
+--
+
+`$$var(X+Y)=var(X)+var(Y)+2cov(X,Y) =\sigma^{2}_{x} +\sigma^{2}_{y}$$`
+
+--
+
+### Independencia lineal
+
+--
+
+<svg aria-hidden="true" role="img" viewBox="0 0 448 512" style="height:1em;width:0.88em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:currentColor;overflow:visible;position:relative;"><path d="M288 0H160 128C110.3 0 96 14.3 96 32s14.3 32 32 32V196.8c0 11.8-3.3 23.5-9.5 33.5L10.3 406.2C3.6 417.2 0 429.7 0 442.6C0 480.9 31.1 512 69.4 512H378.6c38.3 0 69.4-31.1 69.4-69.4c0-12.8-3.6-25.4-10.3-36.4L329.5 230.4c-6.2-10.1-9.5-21.7-9.5-33.5V64c17.7 0 32-14.3 32-32s-14.3-32-32-32H288zM192 196.8V64h64V196.8c0 23.7 6.6 46.9 19 67.1L309.5 320h-171L173 263.9c12.4-20.2 19-43.4 19-67.1z"/></svg> Dos variables _aleatorias_, X y Y, se consideran independientes si y solamente si:
+
+--
+
+`$$E[XY]= E[X]E[Y]$$`
+
+--
+
+- Esto no implica que no existe relación entre ellas 
+
+---
+class: title-slide-section-red, middle
+
+# Nuevamente lo de distribución
+
+&lt;br&gt;
+&lt;img src="images/lognig.png" width="380" /&gt;
+
+
+---
+# Recordeis
+
+--
+
+<svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:red;overflow:visible;position:relative;"><path d="M481.2 64h-106c-14.5 0-26.6 11.8-26.6 26.3v39.6H163.3V90.3c0-14.5-12-26.3-26.6-26.3h-106C16.1 64 4.3 75.8 4.3 90.3v331.4c0 14.5 11.8 26.3 26.6 26.3h450.4c14.8 0 26.6-11.8 26.6-26.3V90.3c-.2-14.5-12-26.3-26.7-26.3zM149.8 355.8c-36.6 0-66.4-29.7-66.4-66.4 0-36.9 29.7-66.6 66.4-66.6 36.9 0 66.6 29.7 66.6 66.6 0 36.7-29.7 66.4-66.6 66.4zm212.4 0c-36.9 0-66.6-29.7-66.6-66.6 0-36.6 29.7-66.4 66.6-66.4 36.6 0 66.4 29.7 66.4 66.4 0 36.9-29.8 66.6-66.4 66.6z"/></svg> Recordemos que utilizamos **funciones de densidad de probabilidad** (FDP) para describir la probabilidad de que una **variable aleatoria continua** tome un rango de valores, p.e: (El área total = 1). Estas _FDP_ caracterizan las distribuciones de probabilidad, y las distribuciones más comunes/famosas/populares reciben nombres (_p.e_, normal, *t*, Weibull, Gamma, Poisson).
+
+--
+
+- La probabilidad de que una variable aleatoria normal estándar tome un valor entre -2 y 0: `$$\mathop{\text{P}}\left(-2\leq X \leq 0\right) = 0.48$$`
+
+--
+
+&lt;img src="Class02_files/figure-html/Ejemplokd123-1.svg" style="display: block; margin: auto;" /&gt;
+---
+# Recordeis
+--
+
++ Para el caso de hallar la probabilidad de que una variable aleatoria normal estándar tome un valor mayor a 2: `$$\mathop{\text{P}}\left(X &gt; 2\right) = 0.023$$`
+--
+&lt;img src="Class02_files/figure-html/Ejemplokd1234-1.svg" style="display: block; margin: auto;" /&gt;
+
+--
+
+En <svg aria-hidden="true" role="img" viewBox="0 0 581 512" style="height:1em;width:1.13em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:steelblue;overflow:visible;position:relative;"><path d="M581 226.6C581 119.1 450.9 32 290.5 32S0 119.1 0 226.6C0 322.4 103.3 402 239.4 418.1V480h99.1v-61.5c24.3-2.7 47.6-7.4 69.4-13.9L448 480h112l-67.4-113.7c54.5-35.4 88.4-84.9 88.4-139.7zm-466.8 14.5c0-73.5 98.9-133 220.8-133s211.9 40.7 211.9 133c0 50.1-26.5 85-70.3 106.4-2.4-1.6-4.7-2.9-6.4-3.7-10.2-5.2-27.8-10.5-27.8-10.5s86.6-6.4 86.6-92.7-90.6-87.9-90.6-87.9h-199V361c-74.1-21.5-125.2-67.1-125.2-119.9zm225.1 38.3v-55.6c57.8 0 87.8-6.8 87.8 27.3 0 36.5-38.2 28.3-87.8 28.3zm-.9 72.5H365c10.8 0 18.9 11.7 24 19.2-16.1 1.9-33 2.8-50.6 2.9v-22.1z"/></svg> 
+
+--
+
+
+```r
+prob &lt;- 1- pnorm(2)
+prob
+```
+
+```
+#&gt; [1] 0.02275013
+```
+
+
+---
+# Distribución Normal
+
+--
+
+&gt;  **Normal estándar**:
+Su forma concisa de expresión es `\(N(\mu, \sigma^{2})\)`. Lo que significa que su media, `\(\mu=0\)` y su varianza `\(\sigma^2=1\)`.  Para buscar probabilidades de una variable normal se debe **estandarizar** la variable en cuestión restando su &lt;span style="color:red"&gt; **media**&lt;/span&gt; y luego dividir el resultado por la &lt;span style="color:red"&gt;**desviación típica**&lt;/span&gt;.
+
+--
+
+<svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:currentColor;overflow:visible;position:relative;"><path d="M16.1 260.2c-22.6 12.9-20.5 47.3 3.6 57.3L160 376V479.3c0 18.1 14.6 32.7 32.7 32.7c9.7 0 18.9-4.3 25.1-11.8l62-74.3 123.9 51.6c18.9 7.9 40.8-4.5 43.9-24.7l64-416c1.9-12.1-3.4-24.3-13.5-31.2s-23.3-7.5-34-1.4l-448 256zm52.1 25.5L409.7 90.6 190.1 336l1.2 1L68.2 285.7zM403.3 425.4L236.7 355.9 450.8 116.6 403.3 425.4z"/></svg> **Ejemplo**: Suponga que desea calcular la probabilidad de que `\(Y\leq2\)`? cuando `\(N\sim(1,4)\)`.
+
+--
+
+- Para eso simplemente aplica:
+
+--
+
+`$$Pr(Y\leq 2) =\frac{Y-1}{2}\Rightarrow\frac{2-1}{2} =\Phi ( 0.5)=0.691$$`
+
+--
+
+<svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:currentColor;overflow:visible;position:relative;"><path d="M256 32c14.2 0 27.3 7.5 34.5 19.8l216 368c7.3 12.4 7.3 27.7 .2 40.1S486.3 480 472 480H40c-14.3 0-27.6-7.7-34.7-20.1s-7-27.8 .2-40.1l216-368C228.7 39.5 241.8 32 256 32zm0 128c-13.3 0-24 10.7-24 24V296c0 13.3 10.7 24 24 24s24-10.7 24-24V184c0-13.3-10.7-24-24-24zm32 224a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"/></svg> _La formula de la normal es_:
+
+--
+
+`$$\text{Normal} =\frac{X-\mu}{\sigma}$$`
+--
+
+- Donde `\(X\)` es el valor a _testear_; `\(\mu\)` es la media de la **distribución** y `\(\sigma\)` la _desviación estandar_.  
+
+--
+
+<svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:currentColor;overflow:visible;position:relative;"><path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM216 336h24V272H216c-13.3 0-24-10.7-24-24s10.7-24 24-24h48c13.3 0 24 10.7 24 24v88h8c13.3 0 24 10.7 24 24s-10.7 24-24 24H216c-13.3 0-24-10.7-24-24s10.7-24 24-24zm40-208a32 32 0 1 1 0 64 32 32 0 1 1 0-64z"/></svg> &lt;span style="color:red"&gt;Mucho cuidado!!&lt;/span&gt;: El signo u operador de `\(\Phi\)` significa que hay que ir a buscar el valor en la &lt;mark&gt;tabla de la Normal&lt;/mark&gt;.
+
+---
+# Ejemplo de valor en tabla normal
+
+--
+
+&lt;img src="images/bnormal.png" width="60%" style="display: block; margin: auto;" /&gt;
+
+--
+
+En <svg aria-hidden="true" role="img" viewBox="0 0 581 512" style="height:1em;width:1.13em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:steelblue;overflow:visible;position:relative;"><path d="M581 226.6C581 119.1 450.9 32 290.5 32S0 119.1 0 226.6C0 322.4 103.3 402 239.4 418.1V480h99.1v-61.5c24.3-2.7 47.6-7.4 69.4-13.9L448 480h112l-67.4-113.7c54.5-35.4 88.4-84.9 88.4-139.7zm-466.8 14.5c0-73.5 98.9-133 220.8-133s211.9 40.7 211.9 133c0 50.1-26.5 85-70.3 106.4-2.4-1.6-4.7-2.9-6.4-3.7-10.2-5.2-27.8-10.5-27.8-10.5s86.6-6.4 86.6-92.7-90.6-87.9-90.6-87.9h-199V361c-74.1-21.5-125.2-67.1-125.2-119.9zm225.1 38.3v-55.6c57.8 0 87.8-6.8 87.8 27.3 0 36.5-38.2 28.3-87.8 28.3zm-.9 72.5H365c10.8 0 18.9 11.7 24 19.2-16.1 1.9-33 2.8-50.6 2.9v-22.1z"/></svg> es hacer uso del comando `pnorm()`, observe:
+
+
+```r
+pnorm(0.5)
+```
+
+```
+#&gt; [1] 0.6914625
+```
+
+---
+# Grafico de nuestro ejemplo (normalizada)
+
+--
+
+&lt;img src="Class02_files/figure-html/ejemplojpg34-1.svg" style="display: block; margin: auto;" /&gt;
+
+--
+
+La probabilidad de `\(P(x\leq 2)= P(Z \leq 0.5)\)` con una media de 1 y varianza de 4 es del 69%.
+---
+class: inverse
+# Clave 📣
+
+--
+
+Sean `\(X_{1}\)` y `\(X_{2}\)` dos números tal que `\(X_{1} &lt; X_{2}\)`
+
+--
+
+- Es bueno saber que hay que usar lo siguiente normalmente:
+
+--
+
+`$$Pr( Y\leq X_{2}) =Pr( Z\leq d_{2}) =\Phi ( d_{2})$$`
+
+--
+
+- &lt;span style="color:red"&gt;**Es posible que ocurra o le pregunten de esto**&lt;/span&gt;
+
+--
+
+`$$Pr( Y\geq X_{1}) =Pr( Z\geq d_{1}) =1-\Phi ( d_{1})$$`
+
+--
+
+- O también pase 🦸️
+
+`$$Pr( X_{1} \leq Y\leq X_{2}) =Pr( d_{1} \leq Z\leq d_{2}) =\Phi ( d_{2}) -\Phi ( d_{1})$$`
+--
+
+- No olvide que:
+
+--
+
+`$$d=\frac{X_{1}-\mu}{\sigma}$$`
+---
+# Mas ejemplos
+
+--
+
+<svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:currentColor;overflow:visible;position:relative;"><path d="M16.1 260.2c-22.6 12.9-20.5 47.3 3.6 57.3L160 376V479.3c0 18.1 14.6 32.7 32.7 32.7c9.7 0 18.9-4.3 25.1-11.8l62-74.3 123.9 51.6c18.9 7.9 40.8-4.5 43.9-24.7l64-416c1.9-12.1-3.4-24.3-13.5-31.2s-23.3-7.5-34-1.4l-448 256zm52.1 25.5L409.7 90.6 190.1 336l1.2 1L68.2 285.7zM403.3 425.4L236.7 355.9 450.8 116.6 403.3 425.4z"/></svg> **Ejemplo**: Suponga que desea calcular la probabilidad de una variable aleatoria cuando `\(P(-1.96 \leq Y\leq 1.96)=0.95\)`.
+
+--
+
+&lt;img src="Class02_files/figure-html/ejemplo2-1.svg" style="display: block; margin: auto;" /&gt;
+
+--
+
+
+```r
+probabilidad &lt;- pnorm(1.96) - pnorm(-1.96)
+probabilidad
+```
+
+```
+#&gt; [1] 0.9500042
+```
+
+---
+# Otras distribuciones
+
+--
+
+&lt;img src="Class02_files/figure-html/ejemplovg23-1.svg" style="display: block; margin: auto;" /&gt;
+
+--
+
+Las distintas distribuciones son importantes a la hora de hacer inferencia y pruebas de hipotesis y de **parámetros de los modelos**.
+
+---
+class: inverse, middle, center
+background-image: url(https://upload.wikimedia.org/wikipedia/commons/a/a6/Logo_NIKE.svg)
+background-size: contain
+
+# Y todo esto para qué? 😼
+
+---
+# Estimador
+
+Se considera como una variable aleatoria que posee las características de ser _Insesgado_, _Mínima Varianza_ y _Eficiente_.
+
+--
+
+- Sea L una variable aleatoria en función de unas características tales como:
+    `$$L=f(X_{1},X_{2},X_{3},\cdots, X_{n})$$`
+--
+
+`$$E(L)= \beta$$`
+
+--
+
+Sesgo del estimador:
+    
+`$$E(L) - \beta=0$$`
+--
+
+<svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:currentColor;overflow:visible;position:relative;"><path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM216 336h24V272H216c-13.3 0-24-10.7-24-24s10.7-24 24-24h48c13.3 0 24 10.7 24 24v88h8c13.3 0 24 10.7 24 24s-10.7 24-24 24H216c-13.3 0-24-10.7-24-24s10.7-24 24-24zm40-208a32 32 0 1 1 0 64 32 32 0 1 1 0-64z"/></svg> Nuestros estimadores muestrales, deben ser similares a nuestros estimadores poblacionales.
+---
+# Estimación econométrica
+
+--
+
+Tenemos presente una ecuación econométrica:
+
+--
+
+`$$Y_{i} =\beta _{0} +\beta _{1} X_{i} +\mu _{i}$$`
+
+--
+
+- La ecuación tiene como objeto "modelar" la interacción de variables.
+
+--
+
+- La estadística es lo que permite validar estas estimaciones parámetricas.
+
+--
+
+## Parámetro
+En nuestras ecuaciones lo tendremos como: `\(P= \left \{ \beta, \alpha, \gamma, \theta , \cdots, \omega   \right \}\)` y lo tendremos como aquel valor de medida de cambio del efecto de una variable explicativa sobre la dependiente. _Función de datos que permite obtener estimaciones de los parámetros desconocidos_.
+---
+# El estimador deseable
+
+--
+
+&lt;img src="Class02_files/figure-html/competingpdfs98-1.svg" style="display: block; margin: auto;" /&gt;
+---
+# Sesgos del estimador
+
+--
+
+.pull-left[
+
+**Estimator insesgado:** `\(\mathop{\boldsymbol{E}}\left[ \hat{\beta} \right] = \beta\)`
+
+&lt;img src="Class02_files/figure-html/unbiased pdf-1.svg" style="display: block; margin: auto;" /&gt;
+
+]
+
+--
+
+.pull-right[
+
+**Estimator sesgado:** `\(\mathop{\boldsymbol{E}}\left[ \hat{\beta} \right] \neq \beta\)`
+
+&lt;img src="Class02_files/figure-html/biased pdf-1.svg" style="display: block; margin: auto;" /&gt;
+
+]
+---
+class: inverse, middle, center
+background-image: url(https://upload.wikimedia.org/wikipedia/commons/a/a6/Logo_NIKE.svg)
+background-size: contain
+
+# Y el asunto de la varianza en estimadores 👻
+
+---
+# Mínima Varianza
+
+--
+
+Las tendencias centrales (medias) de las distribuciones en competencia no son lo único que importa. También nos importa la **varianza** de un estimador.
+
+--
+
+`$$\text{Var}= (\hat{\beta}) = E [(\hat{\beta} - E[\hat{\beta}])^2]$$`
+
+--
+
+Los estimadores de menor varianza significan que obtenemos estimaciones más cercanas a la media en cada muestra.
+
+---
+# Mínima Varianza
+
+--
+
+&lt;img src="Class02_files/figure-html/variance pdf-1.svg" style="display: block; margin: auto;" /&gt;
+---
+# Mínima Varianza
+
+--
+
++ Siempre hay una especie de **trade-off** entre sesgo y varianza.
+
+--
+
++ Para el caso de .RUred[Econometría] la preferencia ahonda la parte de insesgadez (consistencia).
+
+--
+
++ En otras partes... Ya va por el lado de lo que les sirve.. sin embargo hacen hincapie en la varianza.
+
+
+---
+# Bibliografía
+
+<svg aria-hidden="true" role="img" viewBox="0 0 448 512" style="height:1em;width:0.88em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:currentColor;overflow:visible;position:relative;"><path d="M96 0C43 0 0 43 0 96V416c0 53 43 96 96 96H384h32c17.7 0 32-14.3 32-32s-14.3-32-32-32V384c17.7 0 32-14.3 32-32V32c0-17.7-14.3-32-32-32H384 96zm0 384H352v64H96c-17.7 0-32-14.3-32-32s14.3-32 32-32zm32-240c0-8.8 7.2-16 16-16H336c8.8 0 16 7.2 16 16s-7.2 16-16 16H144c-8.8 0-16-7.2-16-16zm16 48H336c8.8 0 16 7.2 16 16s-7.2 16-16 16H144c-8.8 0-16-7.2-16-16s7.2-16 16-16z"/></svg> Álvarez, R. A. R., Calvo, J. A. P., Torrado, C. A. M., &amp; Mondragón, J. A. U. (2013). *Fundamentos de econometría intermedia: teoría y aplicaciones*. Universidad de los Andes.
+
+<svg aria-hidden="true" role="img" viewBox="0 0 448 512" style="height:1em;width:0.88em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:currentColor;overflow:visible;position:relative;"><path d="M96 0C43 0 0 43 0 96V416c0 53 43 96 96 96H384h32c17.7 0 32-14.3 32-32s-14.3-32-32-32V384c17.7 0 32-14.3 32-32V32c0-17.7-14.3-32-32-32H384 96zm0 384H352v64H96c-17.7 0-32-14.3-32-32s14.3-32 32-32zm32-240c0-8.8 7.2-16 16-16H336c8.8 0 16 7.2 16 16s-7.2 16-16 16H144c-8.8 0-16-7.2-16-16zm16 48H336c8.8 0 16 7.2 16 16s-7.2 16-16 16H144c-8.8 0-16-7.2-16-16s7.2-16 16-16z"/></svg> Stock, J. H., Watson, M. W., &amp; Larrión, R. S. (2012). *Introducción a la Econometría*.
+
+<svg aria-hidden="true" role="img" viewBox="0 0 448 512" style="height:1em;width:0.88em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:currentColor;overflow:visible;position:relative;"><path d="M96 0C43 0 0 43 0 96V416c0 53 43 96 96 96H384h32c17.7 0 32-14.3 32-32s-14.3-32-32-32V384c17.7 0 32-14.3 32-32V32c0-17.7-14.3-32-32-32H384 96zm0 384H352v64H96c-17.7 0-32-14.3-32-32s14.3-32 32-32zm32-240c0-8.8 7.2-16 16-16H336c8.8 0 16 7.2 16 16s-7.2 16-16 16H144c-8.8 0-16-7.2-16-16zm16 48H336c8.8 0 16 7.2 16 16s-7.2 16-16 16H144c-8.8 0-16-7.2-16-16s7.2-16 16-16z"/></svg> Wooldridge, J. M. (2015). *Introductory econometrics: A modern approach*. Cengage learning.
+
+---
+class: title-slide-final, middle
+
+# Gracias por su atención!
+
+## Alguna pregunta adicional?
+
+### Carlos Andres Yanes Guerra
+<svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:red;overflow:visible;position:relative;"><path d="M64 112c-8.8 0-16 7.2-16 16v22.1L220.5 291.7c20.7 17 50.4 17 71.1 0L464 150.1V128c0-8.8-7.2-16-16-16H64zM48 212.2V384c0 8.8 7.2 16 16 16H448c8.8 0 16-7.2 16-16V212.2L322 328.8c-38.4 31.5-93.7 31.5-132 0L48 212.2zM0 128C0 92.7 28.7 64 64 64H448c35.3 0 64 28.7 64 64V384c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V128z"/></svg> cayanes@uninorte.edu.co
+<svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:cyan;overflow:visible;position:relative;"><path d="M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253z"/></svg> keynes37
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script src="http://www.jvcasillas.com/ru_xaringan/js/ru_xaringan.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9"
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
