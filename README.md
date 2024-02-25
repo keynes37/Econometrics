@@ -9,4 +9,4 @@ Análisis [EDA 1](https://keynes37.github.io/Econometrics/Class/Class01/Class01.
 
 Análisis Inferencial [EDA 2](https://keynes37.github.io/Econometrics/Class/Class02/Class02.html#1)
 
-Modelo MCO [EDA 2](https://keynes37.github.io/Econometrics/Class/Class03/Class03.html#1)
+Modelo Mínimos Cuadrados [MCO](https://keynes37.github.io/Econometrics/Class/Class03/Class03.html#1)
