@@ -1,0 +1,1229 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Econometria I</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Carlos Yanes" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <link href="libs/remark-css/rutgers.css" rel="stylesheet" />
+    <link href="libs/remark-css/rutgers-fonts.css" rel="stylesheet" />
+  </head>
+  <body>
+    <textarea id="source">
+
+name: xaringan-title
+class: left, middle
+
+
+# Econometría I
+&lt;br&gt;
+## Mínimos Cuadrados Ordinarios
+
+&lt;br&gt;
+&lt;br&gt;
+&lt;img src="images/lognig.png" width="280" /&gt;
+
+### Carlos A. Yanes | Departamento de Economía | 2024-02-24
+
+---
+
+
+
+
+
+background-size: 100%
+background-image: url(https://media.giphy.com/media/VP2F9tqaCmUarK7GrU/giphy.gif)
+
+???
+
+Image test. Taken from gyfty.
+
+---
+class: middle, inverse
+.left-column[
+
+# 😕
+
+]
+
+.right-column[
+# Preguntas de la sesión anterior?
+]
+---
+# Preliminar
+
+--
+
+La última vez:
+
+--
+
+1. Hasta el momento hemos hablado de estadisticas.
+
+1. Hoy hablaremos mejor de las condiciones **MELI** de un estimador
+
+1. Vamos a mirar algunas lineas de código en **.blue[R]** 
+
+1. Para eso pensaremos en eventos con .RUred[muestras de datos].
+
+---
+class: title-slide-section-red, middle
+
+# Modelo Poblacional vs Muestral 
+
+&lt;br&gt;
+&lt;img src="images/lognig.png" width="380" /&gt;
+
+---
+# Modelo Poblacional vs Muestral 
+
+--
+
+Podemos tener un modelo &lt;span style="font-size:larger;"&gt;**Poblacional**&lt;/span&gt;
+
+--
+
+$$ y_i = \beta_0 + \beta_1 x_i + u_i $$
+
+--
+
+Y uno &lt;span style="font-size:larger;"&gt;.black[Muestral]&lt;/span&gt;  de la siguiente forma
+
+--
+
+$$ y_i = \hat{\beta}_0 + \hat{\beta}_1 x_i + e_i $$
+
+--
+
+Un **modelo de regresión** produce un estimador por cada observación
+
+--
+
+$$ \hat{y}_i = \hat{\beta}_0 + \hat{\beta}_1 x_i $$
+
+--
+
+El cual nos dará el _mejor-ajuste_ lineal a partir de nuestros datos.
+
+---
+class: title-slide-section-grey, middle
+
+# Población *vs.* Muestra
+
+&lt;br&gt;
+&lt;img src="images/lognig.png" width="380" /&gt;
+
+
+---
+layout: true
+
+# Población *vs.* Muestra
+
+**Pregunta:** Por qué nos preocupa eso de la *población vs. muestra*?
+
+---
+
+--
+
+
+
+.pull-left[
+
+&lt;img src="Class03_files/figure-html/pop1-1.svg" style="display: block; margin: auto;" /&gt;
+
+.center[**Población**]
+
+]
+
+--
+
+.pull-right[
+
+&lt;img src="Class03_files/figure-html/scatter1-1.svg" style="display: block; margin: auto;" /&gt;
+
+.center[**Relación Poblacional**]
+
+$$ y_i = 2.53 + 0.57 x_i + u_i $$
+
+$$ y_i = \beta_0 + \beta_1 x_i + u_i $$
+
+
+]
+
+---
+
+.pull-left[
+
+&lt;img src="Class03_files/figure-html/sample1-1.svg" style="display: block; margin: auto;" /&gt;
+
+.center[**Muestra 1:** 30 individuos de forma aleatoria]
+
+]
+
+--
+
+.pull-right[
+
+&lt;img src="Class03_files/figure-html/sample1 scatter-1.svg" style="display: block; margin: auto;" /&gt;
+
+.center[
+
+**Relación Poblacional**
+&lt;br&gt;
+`\(y_i = 2.53 + 0.57 x_i + u_i\)`
+
+**Relación Muestral**
+&lt;br&gt;
+`\(\hat{y}_i = 2.36 + 0.61 x_i\)`
+
+]
+
+]
+
+---
+count: false
+
+.pull-left[
+
+&lt;img src="Class03_files/figure-html/sample2-1.svg" style="display: block; margin: auto;" /&gt;
+
+.center[**Muestra 2:** 30 individuos aleatorios]
+
+]
+
+.pull-right[
+
+&lt;img src="Class03_files/figure-html/sample2 scatter-1.svg" style="display: block; margin: auto;" /&gt;
+
+.center[
+
+**Relación Poblacional**
+&lt;br&gt;
+`\(y_i = 2.53 + 0.57 x_i + u_i\)`
+
+**Relación Muestral**
+&lt;br&gt;
+`\(\hat{y}_i = 2.79 + 0.56 x_i\)`
+
+]
+
+]
+---
+count: false
+
+.pull-left[
+
+&lt;img src="Class03_files/figure-html/sample3-1.svg" style="display: block; margin: auto;" /&gt;
+
+.center[**Muestra 3:** 30 individuos aleatorios]
+
+]
+
+.pull-right[
+
+&lt;img src="Class03_files/figure-html/sample3 scatter-1.svg" style="display: block; margin: auto;" /&gt;
+
+.center[
+
+**Relación Poblacional**
+&lt;br&gt;
+`\(y_i = 2.53 + 0.57 x_i + u_i\)`
+
+**Relación Muestral**
+&lt;br&gt;
+`\(\hat{y}_i = 3.21 + 0.45 x_i\)`
+
+]
+
+]
+
+---
+layout: false
+class: clear, middle
+
+Podemos repetir esto **10,000 veces**.
+
+(Este ejercicio se llama simulación de (Monte Carlo) )
+
+---
+layout: false
+# Población *vs.* Muestra
+
+&lt;img src="Class03_files/figure-html/simulation scatter-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+layout: true
+# Población *vs.* Muestra
+
+**Pregunta:** Por qué nos preocupa eso de la *población vs. muestra*?
+
+---
+
+.pull-left[
+&lt;img src="Class03_files/figure-html/simulation scatter2-1.png" style="display: block; margin: auto;" /&gt;
+]
+
+.pull-right[
+
+- En **promedio**, nuestras líneas de regresión coinciden con la línea de la población de forma correcta.
+
+- Sin embargo, **Lineas individuales** (muestras) pueden fallar.
+
+- Las diferencias entre las muestras individuales y de la población generan **incertidumbre** para el econometrista.
+
+]
+
+---
+
+--
+
+**Respuesta:** La incertidumbre es importante.
+
+--
+
+- Se esta `interesado` en **describir** y **evaluar** la relación entre una variable determinada (denominada _explicada_ o _dependiente_) y una o más otras variables (comúnmente llamadas variables 
+_explicativas_ o independientes).
+
+--
+
+- Estableceremos como la variable _dependiente_ por `\((y)\)`, mientras que las `independientes` por `\(x_{1}, x_{2}, x_{k}\)`. 
+
+--
+
+<svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:currentColor;overflow:visible;position:relative;"><path d="M14.1 463.3c-18.7-18.7-18.7-49.1 0-67.9L395.4 14.1c18.7-18.7 49.1-18.7 67.9 0l34.6 34.6c18.7 18.7 18.7 49.1 0 67.9L116.5 497.9c-18.7 18.7-49.1 18.7-67.9 0L14.1 463.3zM347.6 187.6l105-105L429.4 59.3l-105 105 23.3 23.3z"/></svg> Si `\(k=1\)`, solo hay una de las `\(k\)`-variables, por ende se estima una regresión `simple`.
+
+--
+
+<svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:currentColor;overflow:visible;position:relative;"><path d="M14.1 463.3c-18.7-18.7-18.7-49.1 0-67.9L395.4 14.1c18.7-18.7 49.1-18.7 67.9 0l34.6 34.6c18.7 18.7 18.7 49.1 0 67.9L116.5 497.9c-18.7 18.7-49.1 18.7-67.9 0L14.1 463.3zM347.6 187.6l105-105L429.4 59.3l-105 105 23.3 23.3z"/></svg> Si `\(k&gt;1\)`, hay más de las `\(k\)`-variables, tenemos entonces un modelo de regresión `múltiple`.
+
+---
+layout: false
+class: title-slide-section-grey, middle
+
+# Modelos
+
+&lt;br&gt;
+&lt;img src="images/lognig.png" width="380" /&gt;
+
+
+---
+# Modelos 🎯
+
+--
+
+<svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:currentColor;overflow:visible;position:relative;"><path d="M24 32C10.7 32 0 42.7 0 56V456c0 13.3 10.7 24 24 24H40c13.3 0 24-10.7 24-24V56c0-13.3-10.7-24-24-24H24zm88 0c-8.8 0-16 7.2-16 16V464c0 8.8 7.2 16 16 16s16-7.2 16-16V48c0-8.8-7.2-16-16-16zm72 0c-13.3 0-24 10.7-24 24V456c0 13.3 10.7 24 24 24h16c13.3 0 24-10.7 24-24V56c0-13.3-10.7-24-24-24H184zm96 0c-13.3 0-24 10.7-24 24V456c0 13.3 10.7 24 24 24h16c13.3 0 24-10.7 24-24V56c0-13.3-10.7-24-24-24H280zM448 56V456c0 13.3 10.7 24 24 24h16c13.3 0 24-10.7 24-24V56c0-13.3-10.7-24-24-24H472c-13.3 0-24 10.7-24 24zm-64-8V464c0 8.8 7.2 16 16 16s16-7.2 16-16V48c0-8.8-7.2-16-16-16s-16 7.2-16 16z"/></svg> Un ejemplo de modelos de regresión
+`$$\begin{equation}
+y= \text{Salario por horas} \\ 
+x = \text{Años de educación}
+\end{equation}$$`
+
+--
+
+- `Objetivo`: **Determinar la relación entre `\((y)\)` (Salario) y `\((x)\)` (años de educación)**.
+
+--
+
+- Un modelo mas general y con múltiples variables, como es el caso de los **Salario en función de la educación y otras carácteristicas**:
+
+--
+
+`$$\begin{aligned}
+y &amp;= \text{Salario por horas} \\ 
+x_{1} &amp;= \text{Años de educación} \\ 
+x_{2} &amp;= \text{Edad}\\ 
+x_{3} &amp;= \text{Experiencia}
+\end{aligned}$$`
+
+--
+
+- `Objetivo`: **Determinar la relación entre `\((y)\)` (salario ) y `\((x's)\)` (años de educación, edad y la experiencia)**.
+
+---
+# Modelos 🎯
+
+--
+
+**Hay varios** `objetivos` en estudiar este tipo de _relaciones_
+
+--
+
+-  Analizar los **efectos** de políticas que envuelven cambiar los `\(x's\)` individuales.
+
+--
+
+- Pronosticar **el valor** de `\(y\)` para un determinado conjunto de `\(x's\)`.
+
+--
+
+- Examinar si alguno de los `\(x's\)` tiene un **efecto** significativo en `\(y\)`.
+
+--
+
+<svg aria-hidden="true" role="img" viewBox="0 0 448 512" style="height:1em;width:0.88em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:currentColor;overflow:visible;position:relative;"><path d="M288 0H160 128C110.3 0 96 14.3 96 32s14.3 32 32 32V196.8c0 11.8-3.3 23.5-9.5 33.5L10.3 406.2C3.6 417.2 0 429.7 0 442.6C0 480.9 31.1 512 69.4 512H378.6c38.3 0 69.4-31.1 69.4-69.4c0-12.8-3.6-25.4-10.3-36.4L329.5 230.4c-6.2-10.1-9.5-21.7-9.5-33.5V64c17.7 0 32-14.3 32-32s-14.3-32-32-32H288zM192 196.8V64h64V196.8c0 23.7 6.6 46.9 19 67.1L309.5 320h-171L173 263.9c12.4-20.2 19-43.4 19-67.1z"/></svg> &lt;span style="color:blue"&gt; **Comparaciones estadísticas y deterministicas** &lt;/span&gt;
+
+--
+
+- En las relaciones **estadísticas** entre variables tratamos esencialmente con variables aleatorias (variables que tienen distribuciones de probabilidad).
+
+--
+
+- En la dependencia funcional o **determinística** también manejamos variables, pero no son aleatorias (ejemplo: leyes física).
+
+---
+class: title-slide-section-red, middle
+
+# Regresión vs. Causalidad 
+
+&lt;br&gt;
+&lt;img src="images/lognig.png" width="380" /&gt;
+
+
+---
+# Regresión vs. Causalidad ⛰
+
+--
+
+<svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:currentColor;overflow:visible;position:relative;"><path d="M464 256A208 208 0 1 0 48 256a208 208 0 1 0 416 0zM0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256zM188.3 147.1c7.6-4.2 16.8-4.1 24.3 .5l144 88c7.1 4.4 11.5 12.1 11.5 20.5s-4.4 16.1-11.5 20.5l-144 88c-7.4 4.5-16.7 4.7-24.3 .5s-12.3-12.2-12.3-20.9V168c0-8.7 4.7-16.7 12.3-20.9z"/></svg> A pesar de que el **análisis de regresión** tiene que ver con la _dependencia_ de una `variable` respecto a otras `variables`, esto no implica causalidad necesariamente.
+
+--
+
+<svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:currentColor;overflow:visible;position:relative;"><path d="M464 256A208 208 0 1 0 48 256a208 208 0 1 0 416 0zM0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256zM188.3 147.1c7.6-4.2 16.8-4.1 24.3 .5l144 88c7.1 4.4 11.5 12.1 11.5 20.5s-4.4 16.1-11.5 20.5l-144 88c-7.4 4.5-16.7 4.7-24.3 .5s-12.3-12.2-12.3-20.9V168c0-8.7 4.7-16.7 12.3-20.9z"/></svg> Para aducir **causalidad** se debe acudir a consideraciones a priori o teóricas.
+
+--
+
+<svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:currentColor;overflow:visible;position:relative;"><path d="M464 256A208 208 0 1 0 48 256a208 208 0 1 0 416 0zM0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256zM188.3 147.1c7.6-4.2 16.8-4.1 24.3 .5l144 88c7.1 4.4 11.5 12.1 11.5 20.5s-4.4 16.1-11.5 20.5l-144 88c-7.4 4.5-16.7 4.7-24.3 .5s-12.3-12.2-12.3-20.9V168c0-8.7 4.7-16.7 12.3-20.9z"/></svg> **Ejemplo**: Un estudio de la  dependencia existente entre el producto de una cosecha y la temperatura, lluvia, cantidad de sol y fertilizantes.
+
+--
+
+&gt; No hay una relación estadística para suponer que la lluvia no depende del producto de la cosecha. El hecho que el producto de la cosecha se considere como dependiente de la lluvia (entre otros) es debido a otras consideraciones, como por ejemplo el _sentido común_.
+
+---
+# Regresión vs. Causalidad ⛰
+
+--
+#### Estructura de un modelo 🏇
+
+--
+
+(X,Y) son dos variables _aleatorias_, que representan a alguna población, y estamos interesados en `explicar Y en términos de X` o en "estudiar como _varia_ Y con cambios en X".
+
+--
+
+`$$\begin{aligned}
+     \underbrace{Y}_{\text{Variable dependiente}} = \underbrace{\beta_{0}}_{\text{Parámetro intercepto}}+
+\underbrace{\beta_{1}}_{\text{Parámetro pendiente}} \underbrace{X}_{\text{Variable independiente}} +
+\underbrace{\mu}_{\text{Término de error}} 
+  \end{aligned}$$`
+
+--
+
+- El parámetro `\(\mu\)` es una variable aleatoria _no observable_ que toma valores positivos o negativos, en términos generales representa _otros_ factores de X que afectan a Y.
+
+--
+
+- La(s) variable(s) `\(X\)` tiene un efecto lineal en `\(Y\;\Rightarrow \quad \triangle Y = \beta_{1} \triangle X\)` si y solo si `\(\; \triangle \mu = 0\)`.
+
+---
+class: title-slide-section-red, middle
+
+# Otro ejemplo
+
+&lt;br&gt;
+&lt;img src="images/lognig.png" width="380" /&gt;
+---
+# Piense en lo siguiente 🛑
+
+--
+
+<svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:currentColor;overflow:visible;position:relative;"><path d="M24 32C10.7 32 0 42.7 0 56V456c0 13.3 10.7 24 24 24H40c13.3 0 24-10.7 24-24V56c0-13.3-10.7-24-24-24H24zm88 0c-8.8 0-16 7.2-16 16V464c0 8.8 7.2 16 16 16s16-7.2 16-16V48c0-8.8-7.2-16-16-16zm72 0c-13.3 0-24 10.7-24 24V456c0 13.3 10.7 24 24 24h16c13.3 0 24-10.7 24-24V56c0-13.3-10.7-24-24-24H184zm96 0c-13.3 0-24 10.7-24 24V456c0 13.3 10.7 24 24 24h16c13.3 0 24-10.7 24-24V56c0-13.3-10.7-24-24-24H280zM448 56V456c0 13.3 10.7 24 24 24h16c13.3 0 24-10.7 24-24V56c0-13.3-10.7-24-24-24H472c-13.3 0-24 10.7-24 24zm-64-8V464c0 8.8 7.2 16 16 16s16-7.2 16-16V48c0-8.8-7.2-16-16-16s-16 7.2-16 16z"/></svg> La directora de escuelas primarias de una localidad de Barranquilla quiere responder la siguiente pregunta: 
+
+--
+
+- Si se reduce el **tamaño promedio** de las clases en dos (2) estudiantes, `¿cuál es el efecto en las calificaciones obtenidas por el resto del curso en un examen de cierta asignatura?`
+
+--
+
+&gt; Una respuesta precisa a la _pregunta_ exige una cuantificación de las _variaciones_: si la directora varía el número de alumnos por clase en cierta cantidad, `¿qué variación esperaría que sucediese sobre las puntuaciones de los exámenes?` 
+
+--
+
+- Una posible respuesta es:
+
+--
+
+`$$\beta_{i}\equiv\beta_{\text{Tamaño clase}}= \frac{\text{Variación Calif Examen}}{\text{Variación Tamaño Clase}} = \frac{\triangle \text{Calificación Examen}}{\triangle \text{Tamaño Clase}}$$` 
+---
+# Piense en lo siguiente 🛑
+
+--
+
+- Se podría `responder` a la pregunta real de la directora reorganizando la ecuación:
+`$$\triangle \text{Calificación Examen} = \beta_{\text{Tamaño Clase}} \times \triangle \text{Tamaño Clase}$$`
+--
+
+
+- Si por alguna manera `\(\beta_{\text{Tamaño Clase}}=-0.6\)`, una reducción en dos alumnos da como `variación` de las calificaciones esperadas de `\((-0.6) \times (-2) =1.2\)`.
+
+--
+
+La **línea** recta que relaciona las _calificaciones_ y el _Tamaño de la clase_ puede escribirse como:
+
+`$$\text{Calificación examen}= \beta_{0} + \beta_{i} \times \text{Tamaño Clase}$$`
+
+--
+
+Recuerde que `\(\beta_{i}\)` es el .blue[parámetro] del tamaño de la clase
+
+--
+
+&gt;Esta **ecuación** no se cumple con exactitud para todas las **localidades**. Una versión de esta _relación lineal_ que se cumpliera en cada distrito debería incorporar otros factores que pueden influir en las calificaciones, incluyendo las características únicas de cada uno de los distritos (ejemplos: calidad maestros, características alumnos, fortuna estudiantes el día del examen, etc.)
+
+---
+# Piense en lo siguiente 🛑
+
+--
+
+<svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:red;overflow:visible;position:relative;"><path d="M352 320c88.4 0 160-71.6 160-160c0-15.3-2.2-30.1-6.2-44.2c-3.1-10.8-16.4-13.2-24.3-5.3l-76.8 76.8c-3 3-7.1 4.7-11.3 4.7H336c-8.8 0-16-7.2-16-16V118.6c0-4.2 1.7-8.3 4.7-11.3l76.8-76.8c7.9-7.9 5.4-21.2-5.3-24.3C382.1 2.2 367.3 0 352 0C263.6 0 192 71.6 192 160c0 19.1 3.4 37.5 9.5 54.5L19.9 396.1C7.2 408.8 0 426.1 0 444.1C0 481.6 30.4 512 67.9 512c18 0 35.3-7.2 48-19.9L297.5 310.5c17 6.2 35.4 9.5 54.5 9.5zM80 408a24 24 0 1 1 0 48 24 24 0 1 1 0-48z"/></svg> Suponga que quisiéramos `predecir` la nota del examen de matemáticas dado *cierto tamaño de la clase*, entonces tendremos:
+
+--
+
+`$$\text{Calificación examen}= 27 -0.6 \times \text{Tamaño Clase} + \mu_i$$`
+--
+
+Si colocamos como tamaño de clase el número de 40 estudiantes, entonces vamos a tener en promedio como resultado de nota 3.0. Observe que si el tamaño de la clase fuera ahora de 38. La **calificación** entonces estaría rondando una nota de 4.2.  
+
+---
+# Piense en lo siguiente 🛑
+
+--
+
+#### Un modelo completo 🍄
+
+--
+
+Es de pensar, que entonces un modelo más `completo` es:
+
+--
+
+`$$\text{Calificación examen}= \beta_{0} + \beta_{\text{Tamaño Clase}} \times \text{Tamaño Clase} + \text{Otros factores}$$` 
+
+--
+
+<svg aria-hidden="true" role="img" viewBox="0 0 448 512" style="height:1em;width:0.88em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:currentColor;overflow:visible;position:relative;"><path d="M64 80c-8.8 0-16 7.2-16 16V416c0 8.8 7.2 16 16 16H384c8.8 0 16-7.2 16-16V96c0-8.8-7.2-16-16-16H64zM0 96C0 60.7 28.7 32 64 32H384c35.3 0 64 28.7 64 64V416c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V96zM152 232H296c13.3 0 24 10.7 24 24s-10.7 24-24 24H152c-13.3 0-24-10.7-24-24s10.7-24 24-24z"/></svg> Siempre es bueno tener en cuenta los supuestos del **Modelo de regresión**
+
+--
+
+Estos son:
+
+--
+
+<svg aria-hidden="true" role="img" viewBox="0 0 496 512" style="height:1em;width:0.97em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:#fb6107;overflow:visible;position:relative;"><path d="M248 167.5l64.9 98.8H183.1l64.9-98.8zM496 256c0 136.9-111.1 248-248 248S0 392.9 0 256 111.1 8 248 8s248 111.1 248 248zm-99.8 82.7L248 115.5 99.8 338.7h30.4l33.6-51.7h168.6l33.6 51.7h30.2z"/></svg> Sea `\(\left \{ (X_{i},Y_{i}: \; i= 1,2,3,\dots,n  ) \right\}\)` una muestra _aleatoria_ de tamaño `\(n\)` de la población:
+
+--
+
+`$$Y_{i}= \beta_{0}+\beta_{1} X_{i}+ \mu_{i} \; i=1,2,3,\dots,n$$`
+
+--
+
+Nuestro objetivo es tener estimado los **parámetros** desconocidos `\(\beta_{0}\)` y `\(\beta_{1}\)` dadas las `\(n\)` observaciones de `\((X,Y)\)`. _Para esto, tenemos algunos supuestos sobre `\(\mu\)`_.
+
+---
+# Piense en lo siguiente 🛑
+
+--
+
+.pull-left[
+----
+
+
+```c1
+library(wooldridge)
+library(tidyverse)
+data("ceosal1")
+
+mi_modelo&lt;-lm(salary~roe, ceosal1)
+summary(mi_modelo)
+```
+----
+
+.center[Qué interpretación tiene lo anterior?
+.hi-red[$$\hat{salary}=963.19+18501 \;roe$$]]
+- Lo que si el rendimiento del **capital** es cero `\(roe=0\)`, el sueldo (intercepto), la parte de 963.191 es el salario promedio que recibe el gerente. Ya que el salario se mide en miles esto se interpreta así en términos de las unidades de `\(\hat{y}\)`.
+]
+
+.pull-right[
+
+```
+#&gt; 
+#&gt; Call:
+#&gt; lm(formula = salary ~ roe, data = ceosal1)
+#&gt; 
+#&gt; Residuals:
+#&gt;     Min      1Q  Median      3Q     Max 
+#&gt; -1160.2  -526.0  -254.0   138.8 13499.9 
+#&gt; 
+#&gt; Coefficients:
+#&gt;             Estimate Std. Error t value Pr(&gt;|t|)    
+#&gt; (Intercept)   963.19     213.24   4.517 1.05e-05 ***
+#&gt; roe            18.50      11.12   1.663   0.0978 .  
+#&gt; ---
+#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#&gt; 
+#&gt; Residual standard error: 1367 on 207 degrees of freedom
+#&gt; Multiple R-squared:  0.01319,	Adjusted R-squared:  0.008421 
+#&gt; F-statistic: 2.767 on 1 and 207 DF,  p-value: 0.09777
+```
+
+
+- Lo que tenemos, el **cambio** que se predice para el sueldo en función del cambio en el `roe` se expresa tal que:
+
+`$$\vartriangle \hat{salary}= 18,501 (\vartriangle roe)$$`
+
+- Esto indica que cuando el rendimiento del capital de la empresa aumenta en un punto porcentual, `\(roe=1\)`, podemos predecir que el sueldo del gerente varie en aproximadamente $18.500 para un gerente, manteniendo todo lo demas constante
+
+]
+
+
+---
+class: title-slide-section-red, middle
+
+# Los supuestos de residuo y la estimación
+
+&lt;br&gt;
+&lt;img src="images/lognig.png" width="380" /&gt;
+---
+# Supuestos de los residuos `\(\mu\)` o `\(\epsilon\)`
+
+--
+
+1. **Media cero**: `\(E(\mu_{i})=0 \; \forall i\)`.
+
+--
+
+2. **Varianza común**: `\(var(\mu_{i})=\sigma^{2} \; \forall i\)`.
+
+--
+
+3. **Independencia (no correlación serial)**: `\(\mu_{i}\)` y `\(\mu_{j}\)` son independientes para todo `\(i\neq j\)`. Dado `\((X_{i})\)`, las desviaciones de dos valores cualquiera de Y de su media no muestran valores _sistemáticos_.
+
+--
+
+4. **Independencia** de `\(X_{j}: \mu_{i} \; y \; X_{j}\)` son independientes para todo i y j.  Intuitivamente, `si no se cumple` entonces es difícil aislar la influencia de X y `\(\mu\)` sobre Y.
+
+--
+
+5. **Normalidad**: `\(\mu_{i}\)` está normalmente distribuida para todo i.
+
+---
+class: title-slide-section-red, middle
+
+# Regresión lineal
+
+&lt;br&gt;
+&lt;img src="images/lognig.png" width="380" /&gt;
+
+
+
+---
+# El estimador 🚩
+
+--
+
+Podemos estimar la regresión en .mono[R] (`lm(y ~ x, my_data)`). Pero esas estimaciones de donde provienen?
+
+--
+
+Repasemos
+
+&gt; `$$\hat{y}_i = \hat{\beta}_0 + \hat{\beta}_1 x_i$$`
+
+--
+
+El cual nos da *mejor-ajuste* lineal de nuestros datos.
+Pero que significa eso de "Linea de mejor ajuste"?
+
+--
+
+- En (econometría), *mejor-ajuste* significa que la _linea_ de los datos minimiza la suma del error al cuadrado (SSE):
+
+.center[
+`\(\text{SSE} = \sum_{i = 1}^{n} e_i^2\quad\)` donde `\(\quad e_i = y_i - \hat{y}_i\)`
+]
+
+--
+
+- Mínimos  **cuadrados ordinarios** (**MCO**) minimiza la suma de los errores al cuadrado.
+
+--
+
+- Basado en una serie de supuestos (en su mayoría aceptables), MCO:
+
+--
+
+  - Es insesgado (y consistente)
+  - Es el *mejor* (mínima varianza) estimador lineal insesgado (MELI)
+  
+---
+Tomemos como referencia la base de datos poblacional. `\(\color{#ffffff}{\bigg|}\)`
+
+--
+
+&lt;img src="Class03_files/figure-html/ols vs lines 1-1.svg" style="display: block; margin: auto;" /&gt;
+
+---
+count: false
+
+Para cualquier linea `\(\left(\hat{y} = \hat{\beta}_0 + \hat{\beta}_1 x\right)\)` `\(\color{#ffffff}{\bigg|}\)`
+
+&lt;img src="Class03_files/figure-html/vs lines 2-1.svg" style="display: block; margin: auto;" /&gt;
+
+---
+count: false
+
+Para cualquier linea `\(\left(\hat{y} = \hat{\beta}_0 + \hat{\beta}_1 x\right)\)`, podemos calcular sus errores: `\(e_i = y_i - \hat{y}_i\)` `\(\color{#ffffff}{\bigg|}\)`
+
+&lt;img src="Class03_files/figure-html/ols vs lines 3-1.svg" style="display: block; margin: auto;" /&gt;
+
+---
+count: false
+
+Para cualquier linea `\(\left(\hat{y} = \hat{\beta}_0 + \hat{\beta}_1 x\right)\)`, podemos calcular sus errores: `\(e_i = y_i - \hat{y}_i\)` `\(\color{#ffffff}{\bigg|}\)`
+
+&lt;img src="Class03_files/figure-html/ols vs lines 4-1.svg" style="display: block; margin: auto;" /&gt;
+
+---
+count: false
+
+Para cualquier linea `\(\left(\hat{y} = \hat{\beta}_0 + \hat{\beta}_1 x\right)\)`, podemos calcular sus errores: `\(e_i = y_i - \hat{y}_i\)` `\(\color{#ffffff}{\bigg|}\)`
+
+&lt;img src="Class03_files/figure-html/ols vs lines 5-1.svg" style="display: block; margin: auto;" /&gt;
+
+---
+count: false
+
+SSE errores al cuadrado `\(\left(\sum e_i^2\right)\)`: los errores mas grandes seran mayormente penalizados. `\(\color{#ffffff}{\bigg|}\)`
+
+&lt;img src="Class03_files/figure-html/ols vs lines 6-1.svg" style="display: block; margin: auto;" /&gt;
+
+---
+count: false
+
+La estimación MCO busca tener un `\(\hat{\beta}_0\)` y un `\(\hat{\beta}_1\)` que minimiza a SSE. `\(\color{#ffffff}{\bigg|}\)`
+
+&lt;img src="Class03_files/figure-html/ols vs lines 7-1.svg" style="display: block; margin: auto;" /&gt;
+
+
+---
+layout: true
+# El estimador 🚩
+
+---
+
+### Formalmente
+
+En el modelo de regresión simple, el estimador MCO vendrá a ser obtenido mediante `\(\hat{\beta}_0\)` y `\(\hat{\beta}_1\)` que minimiza la suma de los residuos al cuadrado (SSE), _p.e._,
+
+--
+
+`$$\min_{\hat{\beta}_0,\, \hat{\beta}_1} \text{SSE}$$`
+
+--
+
+Pero ya sabemos que `\(\text{SSE} = \sum_i e_i^2\)`. Ahora definimos a los residuos  `\(e_i\)` y el valor predicho de la .black[dependiente] `\(\hat{y}\)`.
+
+--
+
+$$
+`\begin{aligned}
+  e_i^2 &amp;= \left( y_i - \hat{y}_i \right)^2 = \left( y_i - \hat{\beta}_0 - \hat{\beta}_1 x_i \right)^2 \\
+  &amp;= y_i^2 - 2 y_i \hat{\beta}_0 - 2 y_i \hat{\beta}_1 x_i + \hat{\beta}_0^2 + 2 \hat{\beta}_0 \hat{\beta}_1 x_i + \hat{\beta}_1^2 x_i^2
+\end{aligned}`
+$$
+
+--
+
+**Recuerde:** Minimizar una función multivariada requiere (**1**) que la primera derivada (La condición de *1.super[er]-orden*) y (**2**) condición de segundo-orden o (concavidad).
+
+---
+Nos estamos acercando. Tenemos que **minimizar la SSE**. Hemos mostrado cómo se relaciona el SSE con nuestra muestra (nuestros datos: `\(x\)` e `\(y\)`) y nuestras estimaciones (_p.e._, `\(\hat{\beta}_0\)` y `\(\hat{\beta}_1\)`).
+
+--
+
+`$$\text{SSE} = \sum_i e_i^2 = \sum_i \left( y_i^2 - 2 y_i \hat{\beta}_0 - 2 y_i \hat{\beta}_1 x_i + \hat{\beta}_0^2 + 2 \hat{\beta}_0 \hat{\beta}_1 x_i + \hat{\beta}_1^2 x_i^2 \right)$$`
+
+--
+
+Para las condiciones de primer orden de minimización, tomamos ahora las primeras derivadas de SSE con respecto a `\(\hat{\beta}_0\)` y `\(\hat{\beta}_1\)`.
+
+--
+
+$$
+`\begin{aligned}
+  \dfrac{\partial \text{SSE}}{\partial \hat{\beta}_0} &amp;= \sum_i \left( 2 \hat{\beta}_0 + 2 \hat{\beta}_1 x_i - 2 y_i \right) = 2n \hat{\beta}_0 + 2 \hat{\beta}_1 \sum_i x_i - 2 \sum_i y_i \\
+  &amp;= 2n \hat{\beta}_0 + 2n \hat{\beta}_1 \overline{x} - 2n \overline{y}
+\end{aligned}`
+$$
+
+--
+
+donde `\(\overline{x} = \frac{\sum x_i}{n}\)` y `\(\overline{y} = \frac{\sum y_i}{n}\)` son las medias muestrales de `\(x\)` e `\(y\)` (tamaño `\(n\)`).
+
+---
+Las condiciones de primer orden establecen que las derivadas son iguales a cero, por lo que:
+
+--
+
+`$$\dfrac{\partial \text{SSE}}{\partial \hat{\beta}_0} = 2n \hat{\beta}_0 + 2n \hat{\beta}_1 \overline{x} - 2n \overline{y} = 0$$`
+
+--
+
+Lo cual implica
+
+--
+
+`$$\hat{\beta}_0 = \overline{y} - \hat{\beta}_1 \overline{x}$$`
+--
+
+<svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:red;overflow:visible;position:relative;"><path d="M464 256A208 208 0 1 1 48 256a208 208 0 1 1 416 0zM0 256a256 256 0 1 0 512 0A256 256 0 1 0 0 256zM294.6 135.1c-4.2-4.5-10.1-7.1-16.3-7.1C266 128 256 138 256 150.3V208H160c-17.7 0-32 14.3-32 32v32c0 17.7 14.3 32 32 32h96v57.7c0 12.3 10 22.3 22.3 22.3c6.2 0 12.1-2.6 16.3-7.1l99.9-107.1c3.5-3.8 5.5-8.7 5.5-13.8s-2-10.1-5.5-13.8L294.6 135.1z"/></svg> Este .black[estimador] viene a ser la diferencia entre los promedios de nuestras variables dependientes e independientes teniendo presente el efecto de `\(\hat{\beta}_1\)`.
+
+--
+
+Ahora solo nos falta por hallar `\(\hat{\beta}_1\)`.
+
+---
+Hay que tomar la derivada de SSE con respecto a `\(\hat{\beta}_1\)`
+
+--
+
+$$
+`\begin{aligned}
+  \dfrac{\partial \text{SSE}}{\partial \hat{\beta}_1} &amp;= \sum_i \left( 2 \hat{\beta}_0 x_i + 2 \hat{\beta}_1 x_i^2 - 2 y_i x_i \right) = 2 \hat{\beta}_0 \sum_i x_i + 2 \hat{\beta}_1 \sum_i x_i^2 - 2 \sum_i y_i x_i \\
+  &amp;= 2n \hat{\beta}_0 \overline{x} + 2 \hat{\beta}_1 \sum_i x_i^2 - 2 \sum_i y_i x_i
+\end{aligned}`
+$$
+
+--
+
+todo igual a cero (condición de primer-orden, de nuevo)
+
+--
+
+`$$\dfrac{\partial \text{SSE}}{\partial \hat{\beta}_1} = 2n \hat{\beta}_0 \overline{x} + 2 \hat{\beta}_1 \sum_i x_i^2 - 2 \sum_i y_i x_i = 0$$`
+
+--
+
+y sustituimos `\(\hat{\beta}_0\)`, _p.e._, `\(\hat{\beta}_0 = \overline{y} - \hat{\beta}_1 \overline{x}\)`. Así,
+
+--
+
+$$
+ 2n \left(\overline{y} - \hat{\beta}_1 \overline{x}\right) \overline{x} + 2 \hat{\beta}_1 \sum_i x_i^2 - 2 \sum_i y_i x_i = 0
+$$
+
+---
+De lo anterior
+
+--
+
+$$ 2n \left(\overline{y} - \hat{\beta}_1 \overline{x}\right) \overline{x} + 2 \hat{\beta}_1 \sum_i x_i^2 - 2 \sum_i y_i x_i = 0 $$
+--
+
+a multiplicar
+
+--
+
+`$$2n \overline{y}\,\overline{x} - 2n \hat{\beta}_1 \overline{x}^2 + 2 \hat{\beta}_1 \sum_i x_i^2 - 2 \sum_i y_i x_i = 0$$`
+
+--
+
+`$$\implies 2 \hat{\beta}_1 \left( \sum_i x_i^2 - n \overline{x}^2 \right) = 2 \sum_i y_i x_i - 2n \overline{y}\,\overline{x}$$`
+
+--
+
+$$ \implies \hat{\beta}_1 = \dfrac{\sum_i y_i x_i - 2n \overline{y}\,\overline{x}}{\sum_i x_i^2 - n \overline{x}^2} = \dfrac{\sum_i (x_i - \overline{x})(y_i - \overline{y})}{\sum_i (x_i - \overline{x})^2} $$
+
+---
+Hecho!
+
+--
+
+Ahora tenemos estimadores OLS (encantadores) para la pendiente
+
+--
+
+`$$\hat{\beta}_1 = \dfrac{\sum_i (x_i - \overline{x})(y_i - \overline{y})}{\sum_i (x_i - \overline{x})^2}$$`
+--
+
+Para el intercepto o `\(\beta_{0}\)`
+
+`$$\hat{\beta}_0 = \overline{y} - \hat{\beta}_1 \overline{x}$$`
+
+--
+
+Y ahora **ya saben de dónde** viene la parte de *mínimos cuadrados* de MCO.
+
+---
+layout: false
+class: title-slide-section-red, middle
+
+# Otras condiciones 
+
+&lt;br&gt;
+&lt;img src="images/lognig.png" width="380" /&gt;
+
+
+---
+# Propiedades de los estimadores de MCO ⚠
+
+--
+
+1. Los estimadores deben ser **lineales** sumado a las perturbaciones.
+
+--
+
+1. Nuestras variables .black[X] son exogenas, p.e: `\(E[\mu|X]=0\)`
+
+--
+
+1. La relación entre las variables explicativas .black[X] es inexistente, de lo contrario padecera de *multicolinealidad*.
+
+--
+
+1. La perturbación tiene media cero `\(E[\mu]=0\)` y varianza constante `\((\sigma^2)\)`, su distribución debe ser independiente e idénticamente distribuida.
+
+---
+# Propiedades de los estimadores de MCO ⚠
+
+--
+
+`$$E[\mu|X]=0$$`
+
+--
+
+Es una de las propiedades mas restrictivas. El cumplimiento de los supuestos 1-3 nos garantiza .black[insesgadez] en los estimadores. Ya se hace necesario tener 4 para decir que entonces es .black[mínima varianza].
+
+--
+
+_Un ejemplo_ 
+
+--
+
+`$$E[\mu|X=10]=0 \quad \text{de igual manera}\quad E[\mu|X=100]=0$$`
+
+--
+
+Incluso con variables cualitativas, la condición debe mantenerse, esto es:
+
+--
+
+`$$E[\mu|X=mujer]=0 \quad \text{de igual manera}\quad E[\mu|X=hombre]=0$$`
+---
+class: title-slide-section-grey, middle
+
+# Exogeneidad estricta
+
+&lt;br&gt;
+&lt;img src="images/lognig.png" width="380" /&gt;
+
+---
+# Exogeneidad estricta
+
+
+---
+Esa validez es, _p.e._, `\(\mathop{E}\left[ u \mid X \right] = 0\)`
+
+&lt;img src="Class03_files/figure-html/ex_good_exog-1.svg" style="display: block; margin: auto;" /&gt;
+---
+Esa validez no se da cuando, _p.e._, `\(\mathop{E}\left[ u \mid X \right] \neq 0\)`
+
+&lt;img src="Class03_files/figure-html/ex_bad_exog-1.svg" style="display: block; margin: auto;" /&gt;
+
+---
+class: title-slide-section-red, middle
+
+# Estimación en <svg aria-hidden="true" role="img" viewBox="0 0 581 512" style="height:1em;width:1.13em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:steelblue;overflow:visible;position:relative;"><path d="M581 226.6C581 119.1 450.9 32 290.5 32S0 119.1 0 226.6C0 322.4 103.3 402 239.4 418.1V480h99.1v-61.5c24.3-2.7 47.6-7.4 69.4-13.9L448 480h112l-67.4-113.7c54.5-35.4 88.4-84.9 88.4-139.7zm-466.8 14.5c0-73.5 98.9-133 220.8-133s211.9 40.7 211.9 133c0 50.1-26.5 85-70.3 106.4-2.4-1.6-4.7-2.9-6.4-3.7-10.2-5.2-27.8-10.5-27.8-10.5s86.6-6.4 86.6-92.7-90.6-87.9-90.6-87.9h-199V361c-74.1-21.5-125.2-67.1-125.2-119.9zm225.1 38.3v-55.6c57.8 0 87.8-6.8 87.8 27.3 0 36.5-38.2 28.3-87.8 28.3zm-.9 72.5H365c10.8 0 18.9 11.7 24 19.2-16.1 1.9-33 2.8-50.6 2.9v-22.1z"/></svg> 
+
+&lt;br&gt;
+&lt;img src="images/lognig.png" width="380" /&gt;
+
+---
+# Estimación en <svg aria-hidden="true" role="img" viewBox="0 0 581 512" style="height:1em;width:1.13em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:steelblue;overflow:visible;position:relative;"><path d="M581 226.6C581 119.1 450.9 32 290.5 32S0 119.1 0 226.6C0 322.4 103.3 402 239.4 418.1V480h99.1v-61.5c24.3-2.7 47.6-7.4 69.4-13.9L448 480h112l-67.4-113.7c54.5-35.4 88.4-84.9 88.4-139.7zm-466.8 14.5c0-73.5 98.9-133 220.8-133s211.9 40.7 211.9 133c0 50.1-26.5 85-70.3 106.4-2.4-1.6-4.7-2.9-6.4-3.7-10.2-5.2-27.8-10.5-27.8-10.5s86.6-6.4 86.6-92.7-90.6-87.9-90.6-87.9h-199V361c-74.1-21.5-125.2-67.1-125.2-119.9zm225.1 38.3v-55.6c57.8 0 87.8-6.8 87.8 27.3 0 36.5-38.2 28.3-87.8 28.3zm-.9 72.5H365c10.8 0 18.9 11.7 24 19.2-16.1 1.9-33 2.8-50.6 2.9v-22.1z"/></svg> 
+
+--
+
+### La opción por default es: `lm()`
+
+--
+
+La forma de estimación en .black[R] para usar como `base`.super[†]  para estimar los modelos de Regresión .RUred[l]ineal es `lm()`.
+
+--
+
+.footnote[† `base` es el formato por default del algoritmo &lt;br&gt; .RUred[††] Puede remover el intercepto solo colocando `-1` dentro de la formula, _p.e._, `lm(y ~ -1 + x)`.]
+
+--
+
+Puede hacerlo directamente
+
+--
+
+`lm(y ~ x)`
+
+--
+
+- Esto estima `\(y_i = \beta_0 + \beta_1 x_i + u_i\)` (.black[R] lo hace automáticamente incluyendo el término del .blue[intercepto]).super[.RUred[††]]
+
+--
+
+- Los datos se vinculan como objetos columna `(y)` (dependiente) y ademas  `(x)` (independientes).
+
+--
+
+`lm(y ~ x, data = bd_Dane)`
+
+--
+
+- Estimamos `\(y_i = \beta_0 + \beta_1 x_i + u_i\)`
+
+--
+
+- Usando las columnas de `y` ademas de `x` del objeto `bd_Dane`.
+
+---
+# Estimación en <svg aria-hidden="true" role="img" viewBox="0 0 581 512" style="height:1em;width:1.13em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:steelblue;overflow:visible;position:relative;"><path d="M581 226.6C581 119.1 450.9 32 290.5 32S0 119.1 0 226.6C0 322.4 103.3 402 239.4 418.1V480h99.1v-61.5c24.3-2.7 47.6-7.4 69.4-13.9L448 480h112l-67.4-113.7c54.5-35.4 88.4-84.9 88.4-139.7zm-466.8 14.5c0-73.5 98.9-133 220.8-133s211.9 40.7 211.9 133c0 50.1-26.5 85-70.3 106.4-2.4-1.6-4.7-2.9-6.4-3.7-10.2-5.2-27.8-10.5-27.8-10.5s86.6-6.4 86.6-92.7-90.6-87.9-90.6-87.9h-199V361c-74.1-21.5-125.2-67.1-125.2-119.9zm225.1 38.3v-55.6c57.8 0 87.8-6.8 87.8 27.3 0 36.5-38.2 28.3-87.8 28.3zm-.9 72.5H365c10.8 0 18.9 11.7 24 19.2-16.1 1.9-33 2.8-50.6 2.9v-22.1z"/></svg> 
+
+--
+
+### Ademas de `lm()`
+
+--
+
+Si necesita incluir mas variables? Pues... fácil
+
+--
+
+`lm(y ~ x1 + x2 + x3, data = alguna_bd)`
+- Donde estima `\(y_i = \beta_0 + \beta_1 x_{1i} + \beta_2 x_{2i} + \beta_3 x_{3i} + u_i\)`
+- La referencia de `alguna_bd` es para estipular la base de datos a usar.
+
+---
+# Estimación en <svg aria-hidden="true" role="img" viewBox="0 0 581 512" style="height:1em;width:1.13em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:steelblue;overflow:visible;position:relative;"><path d="M581 226.6C581 119.1 450.9 32 290.5 32S0 119.1 0 226.6C0 322.4 103.3 402 239.4 418.1V480h99.1v-61.5c24.3-2.7 47.6-7.4 69.4-13.9L448 480h112l-67.4-113.7c54.5-35.4 88.4-84.9 88.4-139.7zm-466.8 14.5c0-73.5 98.9-133 220.8-133s211.9 40.7 211.9 133c0 50.1-26.5 85-70.3 106.4-2.4-1.6-4.7-2.9-6.4-3.7-10.2-5.2-27.8-10.5-27.8-10.5s86.6-6.4 86.6-92.7-90.6-87.9-90.6-87.9h-199V361c-74.1-21.5-125.2-67.1-125.2-119.9zm225.1 38.3v-55.6c57.8 0 87.8-6.8 87.8 27.3 0 36.5-38.2 28.3-87.8 28.3zm-.9 72.5H365c10.8 0 18.9 11.7 24 19.2-16.1 1.9-33 2.8-50.6 2.9v-22.1z"/></svg> 
+
+--
+
+### Algo mas de `lm()`
+
+--
+
+Si requiere transformar/interactuar con variables? También es fácil: debe usar para eso `I()`.
+
+--
+
+`lm(y ~ x1 + x2 + I(x1^2) + I(x2^2) + I(x1*x2), data = bd_Dane)`
+- Esto estima `\(y_i = \beta_0 + \beta_1 x_{1i} + \beta_2 x_{2i} + \beta_3 x_{1i}^2 + \beta_4 x_{2i}^2 + \beta_5 x_{1i} x_{2i} + u_i\)`
+- Utilizando las variables del objecto `bd_Dane` (donde están los datos)
+- o se crean/generan vía `I()`
+
+--
+
+.grey[Nota:] Los siguientes *ejemplos* son equivalentes:
+
+--
+
+- `lm(y ~ x1 + x2 + I(x1*x2))`
+- `lm(y ~ x1 + x2 + x1:x2)`
+- `lm(y ~ x1*x2)`
+
+
+---
+name: transformations
+# Estimación en <svg aria-hidden="true" role="img" viewBox="0 0 581 512" style="height:1em;width:1.13em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:steelblue;overflow:visible;position:relative;"><path d="M581 226.6C581 119.1 450.9 32 290.5 32S0 119.1 0 226.6C0 322.4 103.3 402 239.4 418.1V480h99.1v-61.5c24.3-2.7 47.6-7.4 69.4-13.9L448 480h112l-67.4-113.7c54.5-35.4 88.4-84.9 88.4-139.7zm-466.8 14.5c0-73.5 98.9-133 220.8-133s211.9 40.7 211.9 133c0 50.1-26.5 85-70.3 106.4-2.4-1.6-4.7-2.9-6.4-3.7-10.2-5.2-27.8-10.5-27.8-10.5s86.6-6.4 86.6-92.7-90.6-87.9-90.6-87.9h-199V361c-74.1-21.5-125.2-67.1-125.2-119.9zm225.1 38.3v-55.6c57.8 0 87.8-6.8 87.8 27.3 0 36.5-38.2 28.3-87.8 28.3zm-.9 72.5H365c10.8 0 18.9 11.7 24 19.2-16.1 1.9-33 2.8-50.6 2.9v-22.1z"/></svg> 
+
+--
+
+### Transformando variables con `lm()`
+
+--
+
+Observe lo siguiente:
+
+--
+
+`lm(y ~ x1 + x2 + I(x1^2) + I(x2^2) + I(x1*x2), data = bd_Dane)`
+
+--
+
+No necesitamos crear `\(x_1^2\)`, `\(x_2^2\)`, ademas de `\(x_1\times x_2\)` en el conjunto de datos.
+
+--
+
+El programa de .mono[R] hace el calculo por nosotros (siempre y cuando `x1` y `x2` existan en la base de datos).
+
+--
+
+Cualquier **transformación** que quiera hace es posible
+
+--
+
+- Transformación Matemática/estadística: `I(x^2)`, `I(x/3)`, `I((x - mean(x))/sd(x))`
+- Log/exponenenciales : `log(x)`, `exp(x)`
+- Indicadores: `I(x &lt; 100)`, `I(x == "Barranquilla")`
+
+
+---
+# Bibliografía
+
+<svg aria-hidden="true" role="img" viewBox="0 0 448 512" style="height:1em;width:0.88em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:currentColor;overflow:visible;position:relative;"><path d="M96 0C43 0 0 43 0 96V416c0 53 43 96 96 96H384h32c17.7 0 32-14.3 32-32s-14.3-32-32-32V384c17.7 0 32-14.3 32-32V32c0-17.7-14.3-32-32-32H384 96zm0 384H352v64H96c-17.7 0-32-14.3-32-32s14.3-32 32-32zm32-240c0-8.8 7.2-16 16-16H336c8.8 0 16 7.2 16 16s-7.2 16-16 16H144c-8.8 0-16-7.2-16-16zm16 48H336c8.8 0 16 7.2 16 16s-7.2 16-16 16H144c-8.8 0-16-7.2-16-16s7.2-16 16-16z"/></svg> Álvarez, R. A. R., Calvo, J. A. P., Torrado, C. A. M., &amp; Mondragón, J. A. U. (2013). *Fundamentos de econometría intermedia: teoría y aplicaciones*. Universidad de los Andes.
+
+<svg aria-hidden="true" role="img" viewBox="0 0 448 512" style="height:1em;width:0.88em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:currentColor;overflow:visible;position:relative;"><path d="M96 0C43 0 0 43 0 96V416c0 53 43 96 96 96H384h32c17.7 0 32-14.3 32-32s-14.3-32-32-32V384c17.7 0 32-14.3 32-32V32c0-17.7-14.3-32-32-32H384 96zm0 384H352v64H96c-17.7 0-32-14.3-32-32s14.3-32 32-32zm32-240c0-8.8 7.2-16 16-16H336c8.8 0 16 7.2 16 16s-7.2 16-16 16H144c-8.8 0-16-7.2-16-16zm16 48H336c8.8 0 16 7.2 16 16s-7.2 16-16 16H144c-8.8 0-16-7.2-16-16s7.2-16 16-16z"/></svg> Stock, J. H., Watson, M. W., &amp; Larrión, R. S. (2012). *Introducción a la Econometría*.
+
+<svg aria-hidden="true" role="img" viewBox="0 0 448 512" style="height:1em;width:0.88em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:currentColor;overflow:visible;position:relative;"><path d="M96 0C43 0 0 43 0 96V416c0 53 43 96 96 96H384h32c17.7 0 32-14.3 32-32s-14.3-32-32-32V384c17.7 0 32-14.3 32-32V32c0-17.7-14.3-32-32-32H384 96zm0 384H352v64H96c-17.7 0-32-14.3-32-32s14.3-32 32-32zm32-240c0-8.8 7.2-16 16-16H336c8.8 0 16 7.2 16 16s-7.2 16-16 16H144c-8.8 0-16-7.2-16-16zm16 48H336c8.8 0 16 7.2 16 16s-7.2 16-16 16H144c-8.8 0-16-7.2-16-16s7.2-16 16-16z"/></svg> Wooldridge, J. M. (2015). *Introductory econometrics: A modern approach*. Cengage learning.
+
+---
+class: title-slide-final, middle
+
+# Gracias por su atención!
+
+## Alguna pregunta adicional?
+
+### Carlos Andres Yanes Guerra
+<svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:red;overflow:visible;position:relative;"><path d="M64 112c-8.8 0-16 7.2-16 16v22.1L220.5 291.7c20.7 17 50.4 17 71.1 0L464 150.1V128c0-8.8-7.2-16-16-16H64zM48 212.2V384c0 8.8 7.2 16 16 16H448c8.8 0 16-7.2 16-16V212.2L322 328.8c-38.4 31.5-93.7 31.5-132 0L48 212.2zM0 128C0 92.7 28.7 64 64 64H448c35.3 0 64 28.7 64 64V384c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V128z"/></svg> cayanes@uninorte.edu.co
+<svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:cyan;overflow:visible;position:relative;"><path d="M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253z"/></svg> keynes37
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script src="http://www.jvcasillas.com/ru_xaringan/js/ru_xaringan.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9"
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

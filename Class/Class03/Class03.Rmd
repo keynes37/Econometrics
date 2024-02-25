@@ -1,0 +1,1452 @@
+---
+title: "Econometria I"
+subtitle: "MCO"
+author: "Carlos Yanes"
+date: "Universidad del Norte </br> `r Sys.Date()`"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    css: ["rutgers", "rutgers-fonts"]
+    nature:
+      beforeInit: "http://www.jvcasillas.com/ru_xaringan/js/ru_xaringan.js"
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+      ratio: "16:9"
+    seal: false
+---
+name: xaringan-title
+class: left, middle
+
+
+# Econometría I
+<br>
+## Mínimos Cuadrados Ordinarios
+
+<br>
+<br>
+<img src="images/lognig.png" width="280" />
+
+### Carlos A. Yanes | Departamento de Economía | `r Sys.Date()`
+
+---
+
+```{r Setup, include = F}
+options(htmltools.dir.version = FALSE)
+library(pacman)
+p_load(broom, latex2exp, ggplot2, ggthemes, ggforce, viridis, dplyr, magrittr, knitr, parallel)
+
+library(tidyverse)
+library(babynames)
+library(fontawesome) # from github: https://github.com/rstudio/fontawesome
+library(DiagrammeR)
+library(fpp2)
+
+# Knitr options
+opts_chunk$set(
+  comment = "#>",
+  fig.align = "center",
+  fig.height = 7,
+  fig.width = 10.5,
+  warning = F,
+  message = F
+)
+# A blank theme for ggplot
+theme_empty <- theme_bw() + theme(
+  line = element_blank(),
+  rect = element_blank(),
+  strip.text = element_blank(),
+  axis.text = element_blank(),
+  plot.title = element_blank(),
+  axis.title = element_blank(),
+  plot.margin = structure(c(0, 0, -0.5, -1), unit = "lines", valid.unit = 3L, class = "unit"),
+  legend.position = "none"
+)
+theme_simple <- theme_bw() + theme(
+  line = element_blank(),
+  panel.grid = element_blank(),
+  rect = element_blank(),
+  strip.text = element_blank(),
+  axis.text.x = element_text(size = 14),
+  axis.text.y = element_blank(),
+  axis.ticks = element_blank(),
+  plot.title = element_blank(),
+  axis.title = element_blank(),
+  # plot.margin = structure(c(0, 0, -1, -1), unit = "lines", valid.unit = 3L, class = "unit"),
+  legend.position = "none"
+)
+theme_axes <- theme_empty + theme(
+  axis.title = element_text(size = 18),
+  plot.margin = structure(c(0, 0, 0.1, 0), unit = "lines", valid.unit = 3L, class = "unit"),
+)
+
+theme_axes_math <- theme_void() + theme(
+  text = element_text(family = "MathJax_Math"),
+  axis.title = element_text(size = 22),
+  axis.title.x = element_text(hjust = .95, margin = margin(0.15, 0, 0, 0, unit = "lines")),
+  axis.title.y = element_text(vjust = .95, margin = margin(0, 0.15, 0, 0, unit = "lines")),
+  axis.line = element_line(
+    color = "grey70",
+    size = 0.25,
+    arrow = arrow(angle = 30, length = unit(0.15, "inches")
+  )),
+  plot.margin = structure(c(1, 0, 1, 0), unit = "lines", valid.unit = 3L, class = "unit"),
+  legend.position = "none"
+)
+theme_axes_serif <- theme_void() + theme(
+  text = element_text(family = "MathJax_Main"),
+  axis.title = element_text(size = 22),
+  axis.title.x = element_text(hjust = .95, margin = margin(0.15, 0, 0, 0, unit = "lines")),
+  axis.title.y = element_text(vjust = .95, margin = margin(0, 0.15, 0, 0, unit = "lines")),
+  axis.line = element_line(
+    color = "grey70",
+    size = 0.25,
+    arrow = arrow(angle = 30, length = unit(0.15, "inches")
+  )),
+  plot.margin = structure(c(1, 0, 1, 0), unit = "lines", valid.unit = 3L, class = "unit"),
+  legend.position = "none"
+)
+
+```
+
+```{R, colors, include = F}
+# Define pink color
+red_pink <- "#e64173"
+turquoise <- "#20B2AA"
+orange <- "#FFA500"
+red <- "#fb6107"
+blue <- "#2b59c3"
+green <- "#8bb174"
+grey_light <- "grey70"
+grey_mid <- "grey50"
+grey_dark <- "grey20"
+purple <- "#6A5ACD"
+blue_ty <- "#3b29e3"
+```
+
+background-size: 100%
+background-image: url(https://media.giphy.com/media/VP2F9tqaCmUarK7GrU/giphy.gif)
+
+???
+
+Image test. Taken from gyfty.
+
+---
+class: middle, inverse
+.left-column[
+
+# `r emo::ji("confused")`
+
+]
+
+.right-column[
+# Preguntas de la sesión anterior?
+]
+---
+# Preliminar
+
+--
+
+La última vez:
+
+--
+
+1. Hasta el momento hemos hablado de estadisticas.
+
+1. Hoy hablaremos mejor de las condiciones **MELI** de un estimador
+
+1. Vamos a mirar algunas lineas de código en **.blue[R]** 
+
+1. Para eso pensaremos en eventos con .RUred[muestras de datos].
+
+---
+class: title-slide-section-red, middle
+
+# Modelo Poblacional vs Muestral 
+
+<br>
+<img src="images/lognig.png" width="380" />
+
+---
+# Modelo Poblacional vs Muestral 
+
+--
+
+Podemos tener un modelo <span style="font-size:larger;">**Poblacional**</span>
+
+--
+
+$$ y_i = \beta_0 + \beta_1 x_i + u_i $$
+
+--
+
+Y uno <span style="font-size:larger;">.black[Muestral]</span>  de la siguiente forma
+
+--
+
+$$ y_i = \hat{\beta}_0 + \hat{\beta}_1 x_i + e_i $$
+
+--
+
+Un **modelo de regresión** produce un estimador por cada observación
+
+--
+
+$$ \hat{y}_i = \hat{\beta}_0 + \hat{\beta}_1 x_i $$
+
+--
+
+El cual nos dará el _mejor-ajuste_ lineal a partir de nuestros datos.
+
+---
+class: title-slide-section-grey, middle
+
+# Población *vs.* Muestra
+
+<br>
+<img src="images/lognig.png" width="380" />
+
+
+---
+layout: true
+
+# Población *vs.* Muestra
+
+**Pregunta:** Por qué nos preocupa eso de la *población vs. muestra*?
+
+---
+
+--
+
+```{R, gen dataset, include = F, cache = T}
+# Poblacion y muestra
+n_p <- 100
+n_s <- 30
+# Semilla
+set.seed(12468)
+# Generar datos
+pop_df <- tibble(
+  i = 3,
+  x = rnorm(n_p, mean = 5, sd = 1.5),
+  e = rnorm(n_p, mean = 0, sd = 1),
+  y = i + 0.5 * x + e,
+  row = rep(1:sqrt(n_p), times = sqrt(n_p)),
+  col = rep(1:sqrt(n_p), each = sqrt(n_p)),
+  s1 = sample(x = c(rep(T, n_s), rep(F, n_p - n_s))),
+  s2 = sample(x = c(rep(T, n_s), rep(F, n_p - n_s))),
+  s3 = sample(x = c(rep(T, n_s), rep(F, n_p - n_s)))
+)
+# Regresiones
+lm0 <- lm(y ~ x, data = pop_df)
+lm1 <- lm(y ~ x, data = filter(pop_df, s1 == T))
+lm2 <- lm(y ~ x, data = filter(pop_df, s2 == T))
+lm3 <- lm(y ~ x, data = filter(pop_df, s3 == T))
+# Simulación
+set.seed(12468)
+sim_df <- mclapply(mc.cores = 10, X = 1:1e4, FUN = function(x, size = n_s) {
+  lm(y ~ x, data = pop_df %>% sample_n(size = size)) %>% tidy()
+}) %>% do.call(rbind, .) %>% as_tibble()
+```
+
+.pull-left[
+
+```{R, pop1, echo = F, fig.fullwidth = T, dev = "svg"}
+ggplot(data = pop_df, aes(x = row, y = col)) +
+geom_point(color = "darkslategray", size = 10) +
+theme_empty
+```
+
+.center[**Población**]
+
+]
+
+--
+
+.pull-right[
+
+```{R, scatter1, echo = F, fig.fullwidth = T, dev = "svg"}
+ggplot(data = pop_df, aes(x = x, y = y)) +
+geom_abline(
+  intercept = lm0$coefficients[1], slope = lm0$coefficients[2],
+  color = red_pink, size = 3
+) +
+geom_point(color = "darkslategray", size = 6) +
+theme_empty
+```
+
+.center[**Relación Poblacional**]
+
+$$ y_i = `r round(lm0$coefficients[1], 2)` + `r round(lm0$coefficients[2], 2)` x_i + u_i $$
+
+$$ y_i = \beta_0 + \beta_1 x_i + u_i $$
+
+
+]
+
+---
+
+.pull-left[
+
+```{R, sample1, echo = F, fig.fullwidth = T, dev = "svg"}
+ggplot(data = pop_df, aes(x = row, y = col, shape = s1)) +
+geom_point(color = "darkslategray", size = 10) +
+scale_shape_manual(values = c(1, 19)) +
+theme_empty
+```
+
+.center[**Muestra 1:** 30 individuos de forma aleatoria]
+
+]
+
+--
+
+.pull-right[
+
+```{R, sample1 scatter, echo = F, fig.fullwidth = T, dev = "svg"}
+ggplot(data = pop_df, aes(x = x, y = y)) +
+geom_abline(
+  intercept = lm0$coefficients[1], slope = lm0$coefficients[2],
+  color = red_pink, size = 3, alpha = 0.3
+) +
+geom_point(aes(shape = s1), color = "darkslategray", size = 6) +
+geom_abline(
+  intercept = lm1$coefficients[1], slope = lm1$coefficients[2],
+  size = 2, linetype = 2, color = "black"
+) +
+scale_shape_manual(values = c(1, 19)) +
+theme_empty
+```
+
+.center[
+
+**Relación Poblacional**
+<br>
+$y_i = `r round(lm0$coefficients[1], 2)` + `r round(lm0$coefficients[2], 2)` x_i + u_i$
+
+**Relación Muestral**
+<br>
+$\hat{y}_i = `r round(lm1$coefficients[1], 2)` + `r round(lm1$coefficients[2], 2)` x_i$
+
+]
+
+]
+
+---
+count: false
+
+.pull-left[
+
+```{R, sample2, echo = F, fig.fullwidth = T, dev = "svg"}
+ggplot(data = pop_df, aes(x = row, y = col, shape = s2)) +
+geom_point(color = "darkslategray", size = 10) +
+scale_shape_manual(values = c(1, 19)) +
+theme_empty
+```
+
+.center[**Muestra 2:** 30 individuos aleatorios]
+
+]
+
+.pull-right[
+
+```{R, sample2 scatter, echo = F, fig.fullwidth = T, dev = "svg"}
+ggplot(data = pop_df, aes(x = x, y = y)) +
+geom_abline(
+  intercept = lm0$coefficients[1], slope = lm0$coefficients[2],
+  color = red_pink, size = 3, alpha = 0.3
+) +
+geom_point(aes(shape = s2), color = "darkslategray", size = 6) +
+geom_abline(
+  intercept = lm1$coefficients[1], slope = lm1$coefficients[2],
+  size = 2, linetype = 2, color = "black", alpha = 0.3
+) +
+geom_abline(
+  intercept = lm2$coefficients[1], slope = lm2$coefficients[2],
+  size = 2, linetype = 2, color = "black"
+) +
+scale_shape_manual(values = c(1, 19)) +
+theme_empty
+```
+
+.center[
+
+**Relación Poblacional**
+<br>
+$y_i = `r round(lm0$coefficients[1], 2)` + `r round(lm0$coefficients[2], 2)` x_i + u_i$
+
+**Relación Muestral**
+<br>
+$\hat{y}_i = `r round(lm2$coefficients[1], 2)` + `r round(lm2$coefficients[2], 2)` x_i$
+
+]
+
+]
+---
+count: false
+
+.pull-left[
+
+```{R, sample3, echo = F, fig.fullwidth = T, dev = "svg"}
+ggplot(data = pop_df, aes(x = row, y = col, shape = s3)) +
+geom_point(color = "darkslategray", size = 10) +
+scale_shape_manual(values = c(1, 19)) +
+theme_empty
+```
+
+.center[**Muestra 3:** 30 individuos aleatorios]
+
+]
+
+.pull-right[
+
+```{R, sample3 scatter, echo = F, fig.fullwidth = T, dev = "svg"}
+ggplot(data = pop_df, aes(x = x, y = y)) +
+geom_abline(
+  intercept = lm0$coefficients[1], slope = lm0$coefficients[2],
+  color = red_pink, size = 3, alpha = 0.3
+) +
+geom_point(aes(shape = s3), color = "darkslategray", size = 6) +
+geom_abline(
+  intercept = lm1$coefficients[1], slope = lm1$coefficients[2],
+  size = 2, linetype = 2, color = "black", alpha = 0.3
+) +
+geom_abline(
+  intercept = lm2$coefficients[1], slope = lm2$coefficients[2],
+  size = 2, linetype = 2, color = "black", alpha = 0.3
+) +
+geom_abline(
+  intercept = lm3$coefficients[1], slope = lm3$coefficients[2],
+  size = 2, linetype = 2, color = "black"
+) +
+scale_shape_manual(values = c(1, 19)) +
+theme_empty
+```
+
+.center[
+
+**Relación Poblacional**
+<br>
+$y_i = `r round(lm0$coefficients[1], 2)` + `r round(lm0$coefficients[2], 2)` x_i + u_i$
+
+**Relación Muestral**
+<br>
+$\hat{y}_i = `r round(lm3$coefficients[1], 2)` + `r round(lm3$coefficients[2], 2)` x_i$
+
+]
+
+]
+
+---
+layout: false
+class: clear, middle
+
+Podemos repetir esto **10,000 veces**.
+
+(Este ejercicio se llama simulación de (Monte Carlo) )
+
+---
+layout: false
+# Población *vs.* Muestra
+
+```{R, simulation scatter, echo = F, dev = "png", dpi = 300, cache = T}
+# Reshape sim_df
+line_df <- tibble(
+  intercept = sim_df %>% filter(term != "x") %>% select(estimate) %>% unlist(),
+  slope = sim_df %>% filter(term == "x") %>% select(estimate) %>% unlist()
+)
+ggplot() +
+geom_abline(data = line_df, aes(intercept = intercept, slope = slope), alpha = 0.01) +
+geom_point(data = pop_df, aes(x = x, y = y), size = 3, color = "darkslategray") +
+geom_abline(
+  intercept = lm0$coefficients[1], slope = lm0$coefficients[2],
+  color = red_pink, size = 1.5
+) +
+theme_empty
+```
+
+---
+layout: true
+# Población *vs.* Muestra
+
+**Pregunta:** Por qué nos preocupa eso de la *población vs. muestra*?
+
+---
+
+.pull-left[
+```{R, simulation scatter2, echo = F, dev = "png", dpi = 300, cache = T}
+# Reshape sim_df
+line_df <- tibble(
+  intercept = sim_df %>% filter(term != "x") %>% select(estimate) %>% unlist(),
+  slope = sim_df %>% filter(term == "x") %>% select(estimate) %>% unlist()
+)
+ggplot() +
+geom_abline(data = line_df, aes(intercept = intercept, slope = slope), alpha = 0.01, size = 1) +
+geom_point(data = pop_df, aes(x = x, y = y), size = 6, color = "darkslategray") +
+geom_abline(
+  intercept = lm0$coefficients[1], slope = lm0$coefficients[2],
+  color = red_pink, size = 3
+) +
+theme_empty
+```
+]
+
+.pull-right[
+
+- En **promedio**, nuestras líneas de regresión coinciden con la línea de la población de forma correcta.
+
+- Sin embargo, **Lineas individuales** (muestras) pueden fallar.
+
+- Las diferencias entre las muestras individuales y de la población generan **incertidumbre** para el econometrista.
+
+]
+
+---
+
+--
+
+**Respuesta:** La incertidumbre es importante.
+
+--
+
+- Se esta `interesado` en **describir** y **evaluar** la relación entre una variable determinada (denominada _explicada_ o _dependiente_) y una o más otras variables (comúnmente llamadas variables 
+_explicativas_ o independientes).
+
+--
+
+- Estableceremos como la variable _dependiente_ por $(y)$, mientras que las `independientes` por $x_{1}, x_{2}, x_{k}$. 
+
+--
+
+`r fa('magic')` Si $k=1$, solo hay una de las $k$-variables, por ende se estima una regresión `simple`.
+
+--
+
+`r fa('magic')` Si $k>1$, hay más de las $k$-variables, tenemos entonces un modelo de regresión `múltiple`.
+
+---
+layout: false
+class: title-slide-section-grey, middle
+
+# Modelos
+
+<br>
+<img src="images/lognig.png" width="380" />
+
+
+---
+# Modelos `r emo::ji("bullseye")`
+
+--
+
+`r fa('barcode')` Un ejemplo de modelos de regresión
+$$\begin{equation}
+y= \text{Salario por horas} \\ 
+x = \text{Años de educación}
+\end{equation}$$
+
+--
+
+- `Objetivo`: **Determinar la relación entre $(y)$ (Salario) y $(x)$ (años de educación)**.
+
+--
+
+- Un modelo mas general y con múltiples variables, como es el caso de los **Salario en función de la educación y otras carácteristicas**:
+
+--
+
+$$\begin{aligned}
+y &= \text{Salario por horas} \\ 
+x_{1} &= \text{Años de educación} \\ 
+x_{2} &= \text{Edad}\\ 
+x_{3} &= \text{Experiencia}
+\end{aligned}$$
+
+--
+
+- `Objetivo`: **Determinar la relación entre $(y)$ (salario ) y $(x's)$ (años de educación, edad y la experiencia)**.
+
+---
+# Modelos `r emo::ji("bullseye")`
+
+--
+
+**Hay varios** `objetivos` en estudiar este tipo de _relaciones_
+
+--
+
+-  Analizar los **efectos** de políticas que envuelven cambiar los $x's$ individuales.
+
+--
+
+- Pronosticar **el valor** de $y$ para un determinado conjunto de $x's$.
+
+--
+
+- Examinar si alguno de los $x's$ tiene un **efecto** significativo en $y$.
+
+--
+
+`r fa('flask')` <span style="color:blue"> **Comparaciones estadísticas y deterministicas** </span>
+
+--
+
+- En las relaciones **estadísticas** entre variables tratamos esencialmente con variables aleatorias (variables que tienen distribuciones de probabilidad).
+
+--
+
+- En la dependencia funcional o **determinística** también manejamos variables, pero no son aleatorias (ejemplo: leyes física).
+
+---
+class: title-slide-section-red, middle
+
+# Regresión vs. Causalidad 
+
+<br>
+<img src="images/lognig.png" width="380" />
+
+
+---
+# Regresión vs. Causalidad `r emo::ji("mountain")`
+
+--
+
+`r fa('play-circle')` A pesar de que el **análisis de regresión** tiene que ver con la _dependencia_ de una `variable` respecto a otras `variables`, esto no implica causalidad necesariamente.
+
+--
+
+`r fa('play-circle')` Para aducir **causalidad** se debe acudir a consideraciones a priori o teóricas.
+
+--
+
+`r fa('play-circle')` **Ejemplo**: Un estudio de la  dependencia existente entre el producto de una cosecha y la temperatura, lluvia, cantidad de sol y fertilizantes.
+
+--
+
+> No hay una relación estadística para suponer que la lluvia no depende del producto de la cosecha. El hecho que el producto de la cosecha se considere como dependiente de la lluvia (entre otros) es debido a otras consideraciones, como por ejemplo el _sentido común_.
+
+---
+# Regresión vs. Causalidad `r emo::ji("mountain")`
+
+--
+#### Estructura de un modelo `r emo::ji("jockey")`
+
+--
+
+(X,Y) son dos variables _aleatorias_, que representan a alguna población, y estamos interesados en `explicar Y en términos de X` o en "estudiar como _varia_ Y con cambios en X".
+
+--
+
+$$\begin{aligned}
+     \underbrace{Y}_{\text{Variable dependiente}} = \underbrace{\beta_{0}}_{\text{Parámetro intercepto}}+
+\underbrace{\beta_{1}}_{\text{Parámetro pendiente}} \underbrace{X}_{\text{Variable independiente}} +
+\underbrace{\mu}_{\text{Término de error}} 
+  \end{aligned}$$
+
+--
+
+- El parámetro $\mu$ es una variable aleatoria _no observable_ que toma valores positivos o negativos, en términos generales representa _otros_ factores de X que afectan a Y.
+
+--
+
+- La(s) variable(s) $X$ tiene un efecto lineal en $Y\;\Rightarrow \quad \triangle Y = \beta_{1} \triangle X$ si y solo si $\; \triangle \mu = 0$.
+
+---
+class: title-slide-section-red, middle
+
+# Otro ejemplo
+
+<br>
+<img src="images/lognig.png" width="380" />
+---
+# Piense en lo siguiente 🛑
+
+--
+
+`r fa('barcode')` La directora de escuelas primarias de una localidad de Barranquilla quiere responder la siguiente pregunta: 
+
+--
+
+- Si se reduce el **tamaño promedio** de las clases en dos (2) estudiantes, `¿cuál es el efecto en las calificaciones obtenidas por el resto del curso en un examen de cierta asignatura?`
+
+--
+
+> Una respuesta precisa a la _pregunta_ exige una cuantificación de las _variaciones_: si la directora varía el número de alumnos por clase en cierta cantidad, `¿qué variación esperaría que sucediese sobre las puntuaciones de los exámenes?` 
+
+--
+
+- Una posible respuesta es:
+
+--
+
+$$\beta_{i}\equiv\beta_{\text{Tamaño clase}}= \frac{\text{Variación Calif Examen}}{\text{Variación Tamaño Clase}} = \frac{\triangle \text{Calificación Examen}}{\triangle \text{Tamaño Clase}}$$ 
+---
+# Piense en lo siguiente 🛑
+
+--
+
+- Se podría `responder` a la pregunta real de la directora reorganizando la ecuación:
+$$\triangle \text{Calificación Examen} = \beta_{\text{Tamaño Clase}} \times \triangle \text{Tamaño Clase}$$
+--
+
+
+- Si por alguna manera $\beta_{\text{Tamaño Clase}}=-0.6$, una reducción en dos alumnos da como `variación` de las calificaciones esperadas de $(-0.6) \times (-2) =1.2$.
+
+--
+
+La **línea** recta que relaciona las _calificaciones_ y el _Tamaño de la clase_ puede escribirse como:
+
+$$\text{Calificación examen}= \beta_{0} + \beta_{i} \times \text{Tamaño Clase}$$
+
+--
+
+Recuerde que $\beta_{i}$ es el .blue[parámetro] del tamaño de la clase
+
+--
+
+>Esta **ecuación** no se cumple con exactitud para todas las **localidades**. Una versión de esta _relación lineal_ que se cumpliera en cada distrito debería incorporar otros factores que pueden influir en las calificaciones, incluyendo las características únicas de cada uno de los distritos (ejemplos: calidad maestros, características alumnos, fortuna estudiantes el día del examen, etc.)
+
+---
+# Piense en lo siguiente 🛑
+
+--
+
+`r fa("wrench", fill="red")` Suponga que quisiéramos `predecir` la nota del examen de matemáticas dado *cierto tamaño de la clase*, entonces tendremos:
+
+--
+
+$$\text{Calificación examen}= 27 -0.6 \times \text{Tamaño Clase} + \mu_i$$
+--
+
+Si colocamos como tamaño de clase el número de 40 estudiantes, entonces vamos a tener en promedio como resultado de nota 3.0. Observe que si el tamaño de la clase fuera ahora de 38. La **calificación** entonces estaría rondando una nota de 4.2.  
+
+---
+# Piense en lo siguiente 🛑
+
+--
+
+#### Un modelo completo 🍄
+
+--
+
+Es de pensar, que entonces un modelo más `completo` es:
+
+--
+
+$$\text{Calificación examen}= \beta_{0} + \beta_{\text{Tamaño Clase}} \times \text{Tamaño Clase} + \text{Otros factores}$$ 
+
+--
+
+`r fa('minus-square')` Siempre es bueno tener en cuenta los supuestos del **Modelo de regresión**
+
+--
+
+Estos son:
+
+--
+
+`r fa("adn", fill=red)` Sea $\left \{ (X_{i},Y_{i}: \; i= 1,2,3,\dots,n  ) \right\}$ una muestra _aleatoria_ de tamaño $n$ de la población:
+
+--
+
+$$Y_{i}= \beta_{0}+\beta_{1} X_{i}+ \mu_{i} \; i=1,2,3,\dots,n$$
+
+--
+
+Nuestro objetivo es tener estimado los **parámetros** desconocidos $\beta_{0}$ y $\beta_{1}$ dadas las $n$ observaciones de $(X,Y)$. _Para esto, tenemos algunos supuestos sobre $\mu$_.
+
+---
+# Piense en lo siguiente 🛑
+
+--
+
+.pull-left[
+----
+
+```{c1, warning=FALSE, message=FALSE, eval=FALSE, echo=TRUE}
+library(wooldridge)
+library(tidyverse)
+data("ceosal1")
+
+mi_modelo<-lm(salary~roe, ceosal1)
+summary(mi_modelo)
+```
+----
+
+.center[Qué interpretación tiene lo anterior?
+.hi-red[$$\hat{salary}=963.19+18501 \;roe$$]]
+- Lo que si el rendimiento del **capital** es cero $roe=0$, el sueldo (intercepto), la parte de 963.191 es el salario promedio que recibe el gerente. Ya que el salario se mide en miles esto se interpreta así en términos de las unidades de $\hat{y}$.
+]
+
+.pull-right[
+```{r, warning=FALSE, message=FALSE, eval=TRUE, echo=FALSE}
+library(wooldridge)
+library(tidyverse)
+data("ceosal1")
+
+mi_modelo<-lm(salary~roe, ceosal1)
+summary(mi_modelo)
+```
+
+
+- Lo que tenemos, el **cambio** que se predice para el sueldo en función del cambio en el `roe` se expresa tal que:
+
+$$\vartriangle \hat{salary}= 18,501 (\vartriangle roe)$$
+
+- Esto indica que cuando el rendimiento del capital de la empresa aumenta en un punto porcentual, $roe=1$, podemos predecir que el sueldo del gerente varie en aproximadamente $18.500 para un gerente, manteniendo todo lo demas constante
+
+]
+
+
+---
+class: title-slide-section-red, middle
+
+# Los supuestos de residuo y la estimación
+
+<br>
+<img src="images/lognig.png" width="380" />
+---
+# Supuestos de los residuos $\mu$ o $\epsilon$
+
+--
+
+1. **Media cero**: $E(\mu_{i})=0 \; \forall i$.
+
+--
+
+2. **Varianza común**: $var(\mu_{i})=\sigma^{2} \; \forall i$.
+
+--
+
+3. **Independencia (no correlación serial)**: $\mu_{i}$ y $\mu_{j}$ son independientes para todo $i\neq j$. Dado $(X_{i})$, las desviaciones de dos valores cualquiera de Y de su media no muestran valores _sistemáticos_.
+
+--
+
+4. **Independencia** de $X_{j}: \mu_{i} \; y \; X_{j}$ son independientes para todo i y j.  Intuitivamente, `si no se cumple` entonces es difícil aislar la influencia de X y $\mu$ sobre Y.
+
+--
+
+5. **Normalidad**: $\mu_{i}$ está normalmente distribuida para todo i.
+
+---
+class: title-slide-section-red, middle
+
+# Regresión lineal
+
+<br>
+<img src="images/lognig.png" width="380" />
+
+
+
+---
+# El estimador 🚩
+
+--
+
+Podemos estimar la regresión en .mono[R] (`lm(y ~ x, my_data)`). Pero esas estimaciones de donde provienen?
+
+--
+
+Repasemos
+
+> $$\hat{y}_i = \hat{\beta}_0 + \hat{\beta}_1 x_i$$
+
+--
+
+El cual nos da *mejor-ajuste* lineal de nuestros datos.
+Pero que significa eso de "Linea de mejor ajuste"?
+
+--
+
+- En (econometría), *mejor-ajuste* significa que la _linea_ de los datos minimiza la suma del error al cuadrado (SSE):
+
+.center[
+$\text{SSE} = \sum_{i = 1}^{n} e_i^2\quad$ donde $\quad e_i = y_i - \hat{y}_i$
+]
+
+--
+
+- Mínimos  **cuadrados ordinarios** (**MCO**) minimiza la suma de los errores al cuadrado.
+
+--
+
+- Basado en una serie de supuestos (en su mayoría aceptables), MCO:
+
+--
+
+  - Es insesgado (y consistente)
+  - Es el *mejor* (mínima varianza) estimador lineal insesgado (MELI)
+  
+---
+Tomemos como referencia la base de datos poblacional. $\color{#ffffff}{\bigg|}$
+
+--
+
+```{R, ols vs lines 1, echo = F, dev = "svg", fig.height = 6}
+ggplot(data = pop_df, aes(x = x, y = y)) +
+geom_point(size = 5, color = "darkslategray", alpha = 0.9) +
+theme_empty
+```
+
+---
+count: false
+
+Para cualquier linea $\left(\hat{y} = \hat{\beta}_0 + \hat{\beta}_1 x\right)$ $\color{#ffffff}{\bigg|}$
+
+```{R, vs lines 2, echo = F, dev = "svg", fig.height = 6}
+# Define a function
+y_hat <- function(x, b0, b1) {b0 + b1 * x}
+# Define line's parameters
+b0 <- 6
+b1 <- 0.2
+# The plot
+ggplot(data = pop_df, aes(x = x, y = y)) +
+# geom_segment(aes(x = x, xend = x, y = y, yend = y_hat(x, b0, b1)), size = 0.5, alpha = 0.2) +
+geom_point(size = 5, color = "darkslategray", alpha = 0.9) +
+geom_abline(intercept = b0, slope = b1, color = "orange", size = 2, alpha = 0.9) +
+theme_empty
+```
+
+---
+count: false
+
+Para cualquier linea $\left(\hat{y} = \hat{\beta}_0 + \hat{\beta}_1 x\right)$, podemos calcular sus errores: $e_i = y_i - \hat{y}_i$ $\color{#ffffff}{\bigg|}$
+
+```{R, ols vs lines 3, echo = F, dev = "svg", fig.height = 6}
+# Define a function
+y_hat <- function(x, b0, b1) {b0 + b1 * x}
+# Define line's parameters
+b0 <- 6
+b1 <- 0.2
+# The plot
+ggplot(data = pop_df, aes(x = x, y = y)) +
+geom_segment(aes(x = x, xend = x, y = y, yend = y_hat(x, b0, b1)), size = 0.5, alpha = 0.2) +
+geom_point(size = 5, color = "darkslategray", alpha = 0.9) +
+geom_abline(intercept = b0, slope = b1, color = "orange", size = 2, alpha = 0.9) +
+theme_empty
+```
+
+---
+count: false
+
+Para cualquier linea $\left(\hat{y} = \hat{\beta}_0 + \hat{\beta}_1 x\right)$, podemos calcular sus errores: $e_i = y_i - \hat{y}_i$ $\color{#ffffff}{\bigg|}$
+
+```{R, ols vs lines 4, echo = F, dev = "svg", fig.height = 6}
+# Define a function
+y_hat <- function(x, b0, b1) {b0 + b1 * x}
+# Define line's parameters
+b0 <- 3
+b1 <- 0.2
+# The plot
+ggplot(data = pop_df, aes(x = x, y = y)) +
+geom_segment(aes(x = x, xend = x, y = y, yend = y_hat(x, b0, b1)), size = 0.5, alpha = 0.2) +
+geom_point(size = 5, color = "darkslategray", alpha = 0.9) +
+geom_abline(intercept = b0, slope = b1, color = "orange", size = 2, alpha = 0.9) +
+theme_empty
+```
+
+---
+count: false
+
+Para cualquier linea $\left(\hat{y} = \hat{\beta}_0 + \hat{\beta}_1 x\right)$, podemos calcular sus errores: $e_i = y_i - \hat{y}_i$ $\color{#ffffff}{\bigg|}$
+
+```{R, ols vs lines 5, echo = F, dev = "svg", fig.height = 6}
+# Define a function
+y_hat <- function(x, b0, b1) {b0 + b1 * x}
+# Define line's parameters
+b0 <- 10
+b1 <- -0.8
+# The plot
+ggplot(data = pop_df, aes(x = x, y = y)) +
+geom_segment(aes(x = x, xend = x, y = y, yend = y_hat(x, b0, b1)), size = 0.5, alpha = 0.2) +
+geom_point(size = 5, color = "darkslategray", alpha = 0.9) +
+geom_abline(intercept = b0, slope = b1, color = "orange", size = 2, alpha = 0.9) +
+theme_empty
+```
+
+---
+count: false
+
+SSE errores al cuadrado $\left(\sum e_i^2\right)$: los errores mas grandes seran mayormente penalizados. $\color{#ffffff}{\bigg|}$
+
+```{R, ols vs lines 6, echo = F, dev = "svg", fig.height = 6}
+# Define a function
+y_hat <- function(x, b0, b1) {b0 + b1 * x}
+# Define line's parameters
+b0 <- 10
+b1 <- -0.8
+# The plot
+ggplot(data = pop_df, aes(x = x, y = y)) +
+geom_segment(aes(x = x, xend = x, y = y, yend = y_hat(x, b0, b1), color = (y - y_hat(x, b0, b1))^2), size = 0.5, alpha = 0.8) +
+geom_point(size = 5, color = "darkslategray", alpha = 0.9) +
+geom_abline(intercept = b0, slope = b1, color = "orange", size = 2, alpha = 0.9) +
+scale_color_viridis(option = "cividis", direction = -1) +
+theme_empty
+```
+
+---
+count: false
+
+La estimación MCO busca tener un $\hat{\beta}_0$ y un $\hat{\beta}_1$ que minimiza a SSE. $\color{#ffffff}{\bigg|}$
+
+```{R, ols vs lines 7, echo = F, dev = "svg", fig.height = 6}
+# Define a function
+y_hat <- function(x, b0, b1) {b0 + b1 * x}
+# Define line's parameters
+b0 <- lm0$coefficients[1]
+b1 <- lm0$coefficients[2]
+# The plot
+ggplot(data = pop_df, aes(x = x, y = y)) +
+geom_segment(aes(x = x, xend = x, y = y, yend = y_hat(x, b0, b1), color = (y - y_hat(x, b0, b1))^2), size = 0.5, alpha = 0.8) +
+geom_point(size = 5, color = "darkslategray", alpha = 0.9) +
+geom_abline(intercept = b0, slope = b1, color = red_pink, size = 2, alpha = 0.9) +
+scale_color_viridis(option = "cividis", direction = -1) +
+theme_empty
+```
+
+
+---
+layout: true
+# El estimador 🚩
+
+---
+
+### Formalmente
+
+En el modelo de regresión simple, el estimador MCO vendrá a ser obtenido mediante $\hat{\beta}_0$ y $\hat{\beta}_1$ que minimiza la suma de los residuos al cuadrado (SSE), _p.e._,
+
+--
+
+$$\min_{\hat{\beta}_0,\, \hat{\beta}_1} \text{SSE}$$
+
+--
+
+Pero ya sabemos que $\text{SSE} = \sum_i e_i^2$. Ahora definimos a los residuos  $e_i$ y el valor predicho de la .black[dependiente] $\hat{y}$.
+
+--
+
+$$
+\begin{aligned}
+  e_i^2 &= \left( y_i - \hat{y}_i \right)^2 = \left( y_i - \hat{\beta}_0 - \hat{\beta}_1 x_i \right)^2 \\
+  &= y_i^2 - 2 y_i \hat{\beta}_0 - 2 y_i \hat{\beta}_1 x_i + \hat{\beta}_0^2 + 2 \hat{\beta}_0 \hat{\beta}_1 x_i + \hat{\beta}_1^2 x_i^2
+\end{aligned}
+$$
+
+--
+
+**Recuerde:** Minimizar una función multivariada requiere (**1**) que la primera derivada (La condición de *1.super[er]-orden*) y (**2**) condición de segundo-orden o (concavidad).
+
+---
+Nos estamos acercando. Tenemos que **minimizar la SSE**. Hemos mostrado cómo se relaciona el SSE con nuestra muestra (nuestros datos: $x$ e $y$) y nuestras estimaciones (_p.e._, $\hat{\beta}_0$ y $\hat{\beta}_1$).
+
+--
+
+$$\text{SSE} = \sum_i e_i^2 = \sum_i \left( y_i^2 - 2 y_i \hat{\beta}_0 - 2 y_i \hat{\beta}_1 x_i + \hat{\beta}_0^2 + 2 \hat{\beta}_0 \hat{\beta}_1 x_i + \hat{\beta}_1^2 x_i^2 \right)$$
+
+--
+
+Para las condiciones de primer orden de minimización, tomamos ahora las primeras derivadas de SSE con respecto a $\hat{\beta}_0$ y $\hat{\beta}_1$.
+
+--
+
+$$
+\begin{aligned}
+  \dfrac{\partial \text{SSE}}{\partial \hat{\beta}_0} &= \sum_i \left( 2 \hat{\beta}_0 + 2 \hat{\beta}_1 x_i - 2 y_i \right) = 2n \hat{\beta}_0 + 2 \hat{\beta}_1 \sum_i x_i - 2 \sum_i y_i \\
+  &= 2n \hat{\beta}_0 + 2n \hat{\beta}_1 \overline{x} - 2n \overline{y}
+\end{aligned}
+$$
+
+--
+
+donde $\overline{x} = \frac{\sum x_i}{n}$ y $\overline{y} = \frac{\sum y_i}{n}$ son las medias muestrales de $x$ e $y$ (tamaño $n$).
+
+---
+Las condiciones de primer orden establecen que las derivadas son iguales a cero, por lo que:
+
+--
+
+$$\dfrac{\partial \text{SSE}}{\partial \hat{\beta}_0} = 2n \hat{\beta}_0 + 2n \hat{\beta}_1 \overline{x} - 2n \overline{y} = 0$$
+
+--
+
+Lo cual implica
+
+--
+
+$$\hat{\beta}_0 = \overline{y} - \hat{\beta}_1 \overline{x}$$
+--
+
+`r fa("arrow-alt-circle-right", fill="red")` Este .black[estimador] viene a ser la diferencia entre los promedios de nuestras variables dependientes e independientes teniendo presente el efecto de $\hat{\beta}_1$.
+
+--
+
+Ahora solo nos falta por hallar $\hat{\beta}_1$.
+
+---
+Hay que tomar la derivada de SSE con respecto a $\hat{\beta}_1$
+
+--
+
+$$
+\begin{aligned}
+  \dfrac{\partial \text{SSE}}{\partial \hat{\beta}_1} &= \sum_i \left( 2 \hat{\beta}_0 x_i + 2 \hat{\beta}_1 x_i^2 - 2 y_i x_i \right) = 2 \hat{\beta}_0 \sum_i x_i + 2 \hat{\beta}_1 \sum_i x_i^2 - 2 \sum_i y_i x_i \\
+  &= 2n \hat{\beta}_0 \overline{x} + 2 \hat{\beta}_1 \sum_i x_i^2 - 2 \sum_i y_i x_i
+\end{aligned}
+$$
+
+--
+
+todo igual a cero (condición de primer-orden, de nuevo)
+
+--
+
+$$\dfrac{\partial \text{SSE}}{\partial \hat{\beta}_1} = 2n \hat{\beta}_0 \overline{x} + 2 \hat{\beta}_1 \sum_i x_i^2 - 2 \sum_i y_i x_i = 0$$
+
+--
+
+y sustituimos $\hat{\beta}_0$, _p.e._, $\hat{\beta}_0 = \overline{y} - \hat{\beta}_1 \overline{x}$. Así,
+
+--
+
+$$
+ 2n \left(\overline{y} - \hat{\beta}_1 \overline{x}\right) \overline{x} + 2 \hat{\beta}_1 \sum_i x_i^2 - 2 \sum_i y_i x_i = 0
+$$
+
+---
+De lo anterior
+
+--
+
+$$ 2n \left(\overline{y} - \hat{\beta}_1 \overline{x}\right) \overline{x} + 2 \hat{\beta}_1 \sum_i x_i^2 - 2 \sum_i y_i x_i = 0 $$
+--
+
+a multiplicar
+
+--
+
+$$2n \overline{y}\,\overline{x} - 2n \hat{\beta}_1 \overline{x}^2 + 2 \hat{\beta}_1 \sum_i x_i^2 - 2 \sum_i y_i x_i = 0$$
+
+--
+
+$$\implies 2 \hat{\beta}_1 \left( \sum_i x_i^2 - n \overline{x}^2 \right) = 2 \sum_i y_i x_i - 2n \overline{y}\,\overline{x}$$
+
+--
+
+$$ \implies \hat{\beta}_1 = \dfrac{\sum_i y_i x_i - 2n \overline{y}\,\overline{x}}{\sum_i x_i^2 - n \overline{x}^2} = \dfrac{\sum_i (x_i - \overline{x})(y_i - \overline{y})}{\sum_i (x_i - \overline{x})^2} $$
+
+---
+Hecho!
+
+--
+
+Ahora tenemos estimadores OLS (encantadores) para la pendiente
+
+--
+
+$$\hat{\beta}_1 = \dfrac{\sum_i (x_i - \overline{x})(y_i - \overline{y})}{\sum_i (x_i - \overline{x})^2}$$
+--
+
+Para el intercepto o $\beta_{0}$
+
+$$\hat{\beta}_0 = \overline{y} - \hat{\beta}_1 \overline{x}$$
+
+--
+
+Y ahora **ya saben de dónde** viene la parte de *mínimos cuadrados* de MCO.
+
+---
+layout: false
+class: title-slide-section-red, middle
+
+# Otras condiciones 
+
+<br>
+<img src="images/lognig.png" width="380" />
+
+
+---
+# Propiedades de los estimadores de MCO ⚠
+
+--
+
+1. Los estimadores deben ser **lineales** sumado a las perturbaciones.
+
+--
+
+1. Nuestras variables .black[X] son exogenas, p.e: $E[\mu|X]=0$
+
+--
+
+1. La relación entre las variables explicativas .black[X] es inexistente, de lo contrario padecera de *multicolinealidad*.
+
+--
+
+1. La perturbación tiene media cero $E[\mu]=0$ y varianza constante $(\sigma^2)$, su distribución debe ser independiente e idénticamente distribuida.
+
+---
+# Propiedades de los estimadores de MCO ⚠
+
+--
+
+$$E[\mu|X]=0$$
+
+--
+
+Es una de las propiedades mas restrictivas. El cumplimiento de los supuestos 1-3 nos garantiza .black[insesgadez] en los estimadores. Ya se hace necesario tener 4 para decir que entonces es .black[mínima varianza].
+
+--
+
+_Un ejemplo_ 
+
+--
+
+$$E[\mu|X=10]=0 \quad \text{de igual manera}\quad E[\mu|X=100]=0$$
+
+--
+
+Incluso con variables cualitativas, la condición debe mantenerse, esto es:
+
+--
+
+$$E[\mu|X=mujer]=0 \quad \text{de igual manera}\quad E[\mu|X=hombre]=0$$
+---
+class: title-slide-section-grey, middle
+
+# Exogeneidad estricta
+
+<br>
+<img src="images/lognig.png" width="380" />
+
+---
+# Exogeneidad estricta
+
+```{R, conditional_expectation_setup, include = F, cache = T}
+# Setup ----------------------------------------------------------------------------------
+  # Options
+  options(stringsAsFactors = F)
+  # Packages
+  library(pacman)
+  p_load(ggridges)
+# Data work ------------------------------------------------------------------------------
+  # Set seed
+  set.seed(12345)
+  # Sample size
+  n <- 1e5
+  # Exogenous
+  e_good <- tibble(
+    x = runif(n = n, min = -4, max = 4),
+    e = rnorm(n)
+  ) %>% mutate(x = round(x))
+  # Endogenous
+  e_bad <- tibble(
+    x = runif(n = n, min = -4, max = 4),
+    e = rnorm(n) + 0.5 * x
+  ) %>% mutate(x = round(x))
+# Figures: Joint densities ---------------------------------------------------------------
+  # The joint plot: good
+  joint_good <- ggplot(data = e_good, aes(x = e)) +
+    geom_density() +
+    theme_pander()
+  # The joint plot: bad
+  joint_bad <- ggplot(data = e_bad, aes(x = e)) +
+    geom_density() +
+    theme_pander()
+# Figures: Conditional densities ---------------------------------------------------------
+  cond_good <- ggplot(data = e_good, aes(x = e, y = as.factor(x))) +
+    geom_density_ridges_gradient(
+      aes(fill = ..x..),
+      color = "white",
+      scale = 2.5,
+      size = 0.2
+    ) +
+    # geom_vline(xintercept = 0, alpha = 0.3) +
+    scale_fill_viridis(option = "magma") +
+    xlab("u") +
+    ylab("X") +
+    theme_pander(base_family = "Fira Sans Book", base_size = 18) +
+    theme(
+      legend.position = "none",
+      axis.title.y = element_text(angle = 0, vjust = 0.5, family = "MathJax_Math", size = 22),
+      axis.title.x = element_text(family = "MathJax_Math", size = 22)
+    )
+  cond_bad <- ggplot(data = e_bad, aes(x = e, y = as.factor(x))) +
+    geom_density_ridges_gradient(
+      aes(fill = ..x..),
+      color = "white",
+      scale = 2.5,
+      size = 0.2
+    ) +
+    # geom_vline(xintercept = 0, alpha = 0.3) +
+    scale_fill_viridis(option = "magma") +
+    xlab("u") +
+    ylab("X") +
+    theme_pander(base_family = "Fira Sans Book", base_size = 18) +
+    theme(
+      legend.position = "none",
+      axis.title.y = element_text(angle = 0, vjust = 0.5, family = "MathJax_Math", size = 22),
+      axis.title.x = element_text(family = "MathJax_Math", size = 22)
+    )
+```
+---
+Esa validez es, _p.e._, $\mathop{E}\left[ u \mid X \right] = 0$
+
+```{R, ex_good_exog, echo = F, dev = "svg"}
+cond_good
+```
+---
+Esa validez no se da cuando, _p.e._, $\mathop{E}\left[ u \mid X \right] \neq 0$
+
+```{R, ex_bad_exog, echo = F, dev = "svg"}
+cond_bad
+```
+
+---
+class: title-slide-section-red, middle
+
+# Estimación en `r fa("r-project", fill = "steelblue")` 
+
+<br>
+<img src="images/lognig.png" width="380" />
+
+---
+# Estimación en `r fa("r-project", fill = "steelblue")` 
+
+--
+
+### La opción por default es: `lm()`
+
+--
+
+La forma de estimación en .black[R] para usar como `base`.super[†]  para estimar los modelos de Regresión .RUred[l]ineal es `lm()`.
+
+--
+
+.footnote[† `base` es el formato por default del algoritmo <br> .RUred[††] Puede remover el intercepto solo colocando `-1` dentro de la formula, _p.e._, `lm(y ~ -1 + x)`.]
+
+--
+
+Puede hacerlo directamente
+
+--
+
+`lm(y ~ x)`
+
+--
+
+- Esto estima $y_i = \beta_0 + \beta_1 x_i + u_i$ (.black[R] lo hace automáticamente incluyendo el término del .blue[intercepto]).super[.RUred[††]]
+
+--
+
+- Los datos se vinculan como objetos columna `(y)` (dependiente) y ademas  `(x)` (independientes).
+
+--
+
+`lm(y ~ x, data = bd_Dane)`
+
+--
+
+- Estimamos $y_i = \beta_0 + \beta_1 x_i + u_i$
+
+--
+
+- Usando las columnas de `y` ademas de `x` del objeto `bd_Dane`.
+
+---
+# Estimación en `r fa("r-project", fill = "steelblue")` 
+
+--
+
+### Ademas de `lm()`
+
+--
+
+Si necesita incluir mas variables? Pues... fácil
+
+--
+
+`lm(y ~ x1 + x2 + x3, data = alguna_bd)`
+- Donde estima $y_i = \beta_0 + \beta_1 x_{1i} + \beta_2 x_{2i} + \beta_3 x_{3i} + u_i$
+- La referencia de `alguna_bd` es para estipular la base de datos a usar.
+
+---
+# Estimación en `r fa("r-project", fill = "steelblue")` 
+
+--
+
+### Algo mas de `lm()`
+
+--
+
+Si requiere transformar/interactuar con variables? También es fácil: debe usar para eso `I()`.
+
+--
+
+`lm(y ~ x1 + x2 + I(x1^2) + I(x2^2) + I(x1*x2), data = bd_Dane)`
+- Esto estima $y_i = \beta_0 + \beta_1 x_{1i} + \beta_2 x_{2i} + \beta_3 x_{1i}^2 + \beta_4 x_{2i}^2 + \beta_5 x_{1i} x_{2i} + u_i$
+- Utilizando las variables del objecto `bd_Dane` (donde están los datos)
+- o se crean/generan vía `I()`
+
+--
+
+.grey[Nota:] Los siguientes *ejemplos* son equivalentes:
+
+--
+
+- `lm(y ~ x1 + x2 + I(x1*x2))`
+- `lm(y ~ x1 + x2 + x1:x2)`
+- `lm(y ~ x1*x2)`
+
+
+---
+name: transformations
+# Estimación en `r fa("r-project", fill = "steelblue")` 
+
+--
+
+### Transformando variables con `lm()`
+
+--
+
+Observe lo siguiente:
+
+--
+
+`lm(y ~ x1 + x2 + I(x1^2) + I(x2^2) + I(x1*x2), data = bd_Dane)`
+
+--
+
+No necesitamos crear $x_1^2$, $x_2^2$, ademas de $x_1\times x_2$ en el conjunto de datos.
+
+--
+
+El programa de .mono[R] hace el calculo por nosotros (siempre y cuando `x1` y `x2` existan en la base de datos).
+
+--
+
+Cualquier **transformación** que quiera hace es posible
+
+--
+
+- Transformación Matemática/estadística: `I(x^2)`, `I(x/3)`, `I((x - mean(x))/sd(x))`
+- Log/exponenenciales : `log(x)`, `exp(x)`
+- Indicadores: `I(x < 100)`, `I(x == "Barranquilla")`
+
+
+---
+# Bibliografía
+
+`r fa('book')` Álvarez, R. A. R., Calvo, J. A. P., Torrado, C. A. M., & Mondragón, J. A. U. (2013). *Fundamentos de econometría intermedia: teoría y aplicaciones*. Universidad de los Andes.
+
+`r fa('book')` Stock, J. H., Watson, M. W., & Larrión, R. S. (2012). *Introducción a la Econometría*.
+
+`r fa('book')` Wooldridge, J. M. (2015). *Introductory econometrics: A modern approach*. Cengage learning.
+
+---
+class: title-slide-final, middle
+
+# Gracias por su atención!
+
+## Alguna pregunta adicional?
+
+### Carlos Andres Yanes Guerra
+`r fa("envelope", fill="red")` cayanes@uninorte.edu.co
+`r fa("twitter", fill="cyan")` keynes37
