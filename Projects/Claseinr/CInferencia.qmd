@@ -1,0 +1,272 @@
+---
+title: "Econometría I: Inferencia"
+subtitle: "Departamento de Economía"
+author: "Carlos A. Yanes G."
+format: 
+  revealjs:
+    footer: "Universidad del Norte"
+    theme: [simple, ob.scss]
+    logo: micrologouni.png
+    embed-resources: true
+    code-fold: true
+from: markdown+emoji
+editor: visual
+date: last-modified
+---
+
+
+
+## Paquetes con que se trabaja la sesión
+
+::: callout-note
+## R libraries
+
+Los paquetes que vamos a utilizar y que se deben [instalar]{.bg style="--col: #FFC7A2"} para uso en clase son:
+
+``` r
+install.packages(c("tidyverse", "kableExtra", "flextable", "extrafont", "broom"))
+```
+
+```{r setup, include=FALSE}
+library(pacman)
+p_load(tidyverse, kableExtra, flextable, extrafont, broom)
+```
+
+:::
+
+::: callout-note
+## Ejecución
+
+No olvide que debe desde luego tener presente en su documento de *R Markdown* cargar estos paquetes.
+
+``` r
+library(pacman)
+p_load(tidyverse, kableExtra, flextable, extrafont, broom)
+```
+:::
+
+
+## Pruebas de hipotesis
+::: panel-tabset
+## Hipotesis
+La validez de las estimaciones se dan a partir de las herramientas estadísticas que nos permiten determinar si algo es ***verdadero*** sobre todo para una muestra. Las pruebas de hipótesis surgen para eso.
+
+## Ejemplo
+Tome por ejemplo que quisiéramos ver que la media (promedio) de la nota de los estudiantes de economía es de 3.5. Plantear esto en términos de [hipótesis]{.alert} requerirá los siguientes elementos: Primero una parte nula - considérelo como el punto de partida- y que de ahora en adelante notaremos como $H_0$ y una parte **alternativa** que surge de lo que crea que va a suceder y que de cierta forma o manera le conviene a un investigador encontrar y la conoceremos de ahora en adelante como $H_a$.
+
+## Planteamiento
+
+$$\begin{aligned}
+H_0\; =\; &\text{Estudiantes con promedio de 3.5} \\
+H_a\; = \; &\text{Estudiantes con promedio diferente de 3.5}
+\end{aligned}$$
+
+## Versión
+
+$$\begin{aligned}
+H_0\; &: \; \bar{x} = 3.5 \\
+H_a\; &: \; \bar{x} \neq 3.5
+\end{aligned}$$
+:::
+
+## Valores críticos de prueba
+
+::: panel-tabset
+## Zonas de confianza
+
+```{r, salida1}
+x<-seq(-5,5,0.1) #Creamos los datos (estos son aleatorios)
+hist <- dnorm(x, mean=0, sd=1) #Guardamos el histograma
+#Toda esta parte a continuación debe correrla de un solo ``tajo'':
+plot(x, hist, type="l", xlab="Desviación estándar", ylab="Densidad de probabilidad",main="Grafico de Densidad con 90% de confianza",
+lty = 1, lwd = 2, yaxs="i") # yaxs="i" significa el límite del dato en el eje
+polygon(c(x[x >= 1.28], 1.28), c(dnorm(x[x >= 1.28]), 0), col="gray")
+polygon(c(x[x <=-1.28], -1.28), c(dnorm(x[x <= -1.28]), 0), col="gray")
+text(0, .1,"0.90")
+text(2, .01,expression(alpha==0.05), col = "red")
+text(-2, .01,expression(alpha==0.05), col = "red")
+```
+
+## Gr al 95%
+
+```{r, salida19671, echo=FALSE}
+x<-seq(-5,5,0.1) #Creamos los datos (estos son aleatorios)
+hist <- dnorm(x, mean=0, sd=1) #Guardamos el histograma
+#Toda esta parte a continuación debe correrla de un solo ``tajo'':
+plot(x, hist, type="l", xlab="Desviación estándar", ylab="Densidad de probabilidad",main="Grafico de Densidad con 95% de confianza",
+lty = 1, lwd = 2, yaxs="i") # yaxs="i" significa el límite del dato en el eje
+polygon(c(x[x >= 1.64], 1.7), c(dnorm(x[x >= 1.64]), 0), col="gray")
+polygon(c(x[x <=-1.64], -1.7), c(dnorm(x[x <= -1.64]), 0), col="gray")
+text(0, .1,"0.95")
+text(2.7, .01,expression(alpha==0.025), col = "red")
+text(-2.7, .01,expression(alpha==0.025), col = "red")
+```
+
+
+## Ejemplo
+
+Nivel a 90%
+```{r criticos1}
+#| echo: true
+# Buscar en las tabla de la normal en niveles de significancia
+qnorm(0.90)
+```
+
+Nivel a 95%
+```{r criticos2}
+#| echo: false
+# Buscar en las tabla de la normal en niveles de significancia
+qnorm(0.95)
+```
+
+Nivel a 99%
+```{r criticos3}
+#| echo: false
+# Buscar en las tabla de la normal en niveles de significancia
+qnorm(0.99)
+```
+:::
+
+## Intervalos de confianza
+::: panel-tabset
+## Definición
+Entendiendo mejor los valores críticos, podemos entonces construir **intervalos de confianza** que permitirán inferir donde se ubica o esta el promedio de una variable.
+
+$$\left[ \bar{y} - \text{Valor crítico} \frac{\alpha}{2} \times s.e(\bar{y}) \leq \bar{y} \leq \bar{y} + \text{Valor crítico} \frac{\alpha}{2} \times s.e(\bar{y}) \right]$$
+
+## Establecimiento
+
+$$\left[ \bar{y} - 1.65  \times s.e(\bar{y}) \leq \bar{y} \leq \bar{y} + 1.65 \times s.e(\bar{y}) \right]$$
+
+## Aplicación
+
+```{r inter}
+#| echo: true
+# Datos de ejemplo
+tratados<-c(10,1,6,.45,1.25,1.3,1.06,3,8.18,1.67,.98,1,.45,5.03,8,9,18,.28,
+        7,3.97)
+controles<-c(3,1,5,.5,1.54,1.5,.8,2,.67,1.17,.51,.5,.61,6.7,4,7,19,.2,5,3.83)
+# Creamos nuestro estadístico de prueba
+Cambio <- tratados - controles
+# Ingredientes para el intervalo y su formula: usamos parentesis para resultados
+avgCh<- mean(Cambio)
+n    <- length(Cambio)
+sdCh <- sd(Cambio)
+se   <- sdCh/sqrt(n)
+c    <- qt(.975, n-1)
+# Intervalo de confianza al 97.5%:
+c(avgCh - c*se, avgCh + c*se)
+```
+
+Siendo el intervalo:
+
+$$\left[0.030\leq \tau\leq 2.28\right]$$
+
+## T test
+
+```{r}
+#| echo: true
+# Ejemplo de dos colas: Intervalo de confianza
+t.test(Cambio)
+```
+:::
+
+## Regresión
+
+```{r}
+#| echo: true
+
+datos <- c(10,1,6,.45,1.25,1.3,1.06,3,8.18,1.67,.98,1,.45,5.03,8,9,18,.28, 7,3.97, 3,1,5,.5,1.54,1.5,.8,2,.67,1.17,.51,.5,.61,6.7,4,7,19,.2,5,3.83)
+
+# Generar la variable dummy
+binaria <- c(rep(1, 20), rep(0, length(datos) - 20))
+
+# Tener el dataframe
+base1 <- data.frame(datos = datos, tratamiento = binaria)
+md1<-lm(datos~tratamiento, base1) %>%
+  tidy() %>%
+  kable(
+    caption = "Modelo de regresión simple",
+    col.names = c("Variables", "Estimador", "SE", "t", "p"),
+    digits = c(0, 2, 3, 2, 3)
+  )
+md1
+```
+
+# Modelo de salarios
+
+## Datos
+
+::: callout-tip
+## Base de datos
+
+-   Salarios y variables sociales
+-   Ejemplo de econometría de modelos de regresión simple
+-   Datos de corte transversal
+:::
+
+## Ejemplo
+
+::: panel-tabset
+## Cargado de datos
+```{r}
+#| echo: true
+library(readxl) #Para cargar datos de excel (xls)
+datos <-read_excel("Salarios.xlsx")
+attach(datos) # Frame de la base de forma resumida
+# Saber el nombre de las columnas (variables) en los datos
+names(datos)
+```
+
+## Formulas
+
+$$\begin{aligned}
+    \widehat{\beta}_{0}=& \bar{y}-\widehat{\beta}_{1}\bar{x} \\
+    \widehat{\beta}_{1}=&  \frac{Cov(x, y)}{Var (x)}
+\end{aligned}$$
+
+:::
+
+## Forma manual
+
+::: panel-tabset
+
+## Estadisticas
+```{r}
+#| echo: true
+cov(exper, wage) 
+var(exper)
+mean(wage)
+mean(exper)
+```
+
+## Parámetros
+
+```{r}
+#| echo: true
+# Beta pendiente
+( b1hat <- cov(exper, wage )/var(exper) )
+# Beta intercepto
+( b0hat <- mean(wage) - b1hat*mean(exper) )
+
+```
+
+## Forma directa
+
+```{r}
+#| echo: true
+md2<-lm(wage ~ exper) %>%
+  tidy() %>%
+  kable(
+    caption = "Modelo de regresión simple de salarios",
+    col.names = c("Variables", "Estimador", "SE", "t", "p"),
+    digits = c(0, 2, 3, 2, 3)
+  )
+md2
+```
+
+:::
+
+
+# Gracias por su atención!! {background-color="#cc0000"}
+

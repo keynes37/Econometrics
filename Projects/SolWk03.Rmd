@@ -1,0 +1,228 @@
+---
+title: Econometría I
+subtitle: "Solución Workclass 03"
+author:
+  name: Carlos A. Yanes Guerra
+  affiliation: Universidad del Norte | Departamento de Economía
+# date: "`r format(Sys.time(), '%d %B %Y')`" ## Or "Lecture no."
+output: 
+  html_document:
+    keep_md: false
+    theme: journal
+    highlight: haddock
+    # code_folding: show
+    toc: yes
+    toc_depth: 4
+    toc_float: yes
+    css: css/preamble.css ## For multi-col environments
+  pdf_document:
+    latex_engine: xelatex
+    keep_tex: false ## Change to true if want keep intermediate .tex file
+    toc: true
+    toc_depth: 3
+    dev: cairo_pdf
+    # fig_width: 7 ## Optional: Set default PDF figure width
+    # fig_height: 6 ## Optional: Set default PDF figure height
+    extra_dependencies: ['booktabs', 'threeparttable', 'float'] # "longtable"
+    includes:
+      in_header: tex/preamble.tex ## For multi-col environments
+    pandoc_args:
+        --template=tex/mytemplate.tex ## For affiliation field. See: https://bit.ly/2T191uZ
+always_allow_html: true
+urlcolor: blue
+mainfont: cochineal
+sansfont: Fira Sans
+monofont: Fira Code ## Although, see: https://tex.stackexchange.com/q/294362
+## Automatically knit to both formats:
+knit: (function(inputFile, encoding) {
+ rmarkdown::render(inputFile, encoding = encoding, 
+ output_format = 'all') 
+ })
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE, dpi=300, fig.align = "center")
+```
+
+## Antes de empezar
+
+Este tercer **workclass** puede ser entregado en grupo de máximo dos (2) estudiantes. En esta ocasión vamos a interactuar con una base de datos (ficticia). El tiempo para entrega es de _1 hora y 40 minutos_. El formato de recepción solo es en word o pdf en la carpeta del curso de **Brightspace**. No se admite por correo ni en formato distinto al solicitado.
+
+## Objetivo
+
+Entender el manejo **interpretativo** de los datos. Familiarizarse con los paquetes de `tidyverse` y `moments` para hacer un análisis descriptivo de una base de datos.
+
+## Base de datos
+
+  | Tiempo    | Plan   | Ingreso | Genero | Servicio  |
+  |-----------|--------|---------|--------|-----------|
+  | 4312      | 43000  | 1840000 | NB     | Estudiante|
+  | 5208      | 84000  | 1960000 | NB     | Premium   |
+  | 8311      | 42000  | 2320000 | M      | Estudiante|
+  | 4712      | 42000  | 1810000 | M      | Estudiante|
+  | 5645      | 84000  | 2890000 | F      | Premium   |
+  | 3765      | 62000  |  890000 | F      | Sencillo  |
+  | 2455      | 62000  |  920000 | F      | Sencillo  |
+  | 3664      | 62000  |  890000 | NB     | Sencillo  |
+  | 5535      | 91000  | 3490000 | F      | Premium   |
+  | 5212      | 92000  | 3650000 | F      | Premium   |
+  | 5245      | 94000  | 1290000 | M      | Premium   |
+  | 5141      | 92000  | 1790000 | M      | Premium   |
+  | 5425      | 92000  | 2890000 | F      | Premium   |
+  | 4312      | 42000  | 1850000 | M      | Estudiante|
+  | 5711      | 42000  | 1810000 | M      | Estudiante|
+  | 6642      | 44000  | 1980000 | F      | Estudiante|
+  | 6842      | 44000  | 1000000 | M      | Estudiante|
+  | 6712      | 45000  | 1850000 | NB     | Estudiante|
+
+La base de datos anterior contiene información un grupo de estudiantes de sus hábitos televisivos, se encuentran el número de horas que dedica en un mes a mirar cualquier contenido de entretenimiento, el valor del plan que paga, nivel de ingresos, género y por último el tipo de suscripción que tiene. Las últimas, son variables de tipo *binaria* y categórica que toman valores cualitativos.
+
+## Preguntas y solicitudes
+
+De acuerdo a las respuestas situadas en la base, importe a R y/o Rstudio. _Si importa directamente y debe trabajar con este tipo de variables (cualitativas) la idea es convertirlas en un factor o etiqueta estipulada._ Esta etiqueta de cada variable cualitativa debe tomar un número o clasificación. Por ejemplo: (1=Premium, 2=  Sencillo, 3= Estudiante). Las de genero puede codificarla con el orden que usted desee pero respetando la numeración de 0, 1 y 2 respectivamente para cada genero expuesto.
+
+1. Piense por un segundo que desea agregar información de una persona de genero femenino, con un ingreso de dos millones seiscientos mil pesos m/lc, un plan sencillo, y que reporta utilizar en el mes alrededor de 6023 horas. Paga regularmente $54900. Utilice el operador pipe `%>%` y adicione la fila. Cree una nueva variable (para todxs) con la opción de `mutate`, que nos diga que porcentaje del ingreso se destina al pago del servicio. No olvide activar el paquete de `tidyverse` para eso. _Muestre todo el proceso_. 
+
+**R./**
+
+- Primero se cargan los paquetes correspondientes a utilizar datos, algunos son `readxl` y `tidyverse` para inclusive transformar los datos que nos solicitan
+
+- Esta vez lo que se hizo fue que manualmente se subieron los datos, esto es crear cada vector de ellos y finalmente con la opción de `add_row` se adiciona el nuevo valor solicitado. El resultado de esto nos da:
+
+```{r, message=FALSE, warning=FALSE}
+# Importamos la base de datos
+library(readxl)
+library(tidyverse)
+library(moments)
+library(ggplot2)
+
+# Creación del data frame
+data <- data.frame(
+  Tiempo = c(4312, 5208, 8311, 4712, 5645, 3765, 2455, 
+             3664, 5535, 5212, 5245, 5141, 5425, 4312, 
+             5711, 6642, 6842, 6712),
+  Plan = c(43000, 84000, 42000, 42000, 84000, 62000, 
+           62000, 62000, 91000, 92000, 94000, 92000, 
+           92000, 42000, 42000, 44000, 44000, 45000),
+  Ingreso = c(1840000, 1960000, 2320000, 1810000, 2890000, 
+              890000, 920000, 890000, 3490000, 3650000, 
+              1290000, 1790000, 2890000, 1850000, 
+              1810000, 1980000, 1000000, 1850000),
+  Genero = c("NB", "NB", "M", "M", "F", "F", "F", 
+             "NB", "F", "F", "M", "M", "F", 
+             "M", "M", "F", "M", "NB"),
+  Servicio = c("Estudiante", "Premium", "Estudiante", "Estudiante", "Premium", "Sencillo", "Sencillo", 
+               "Sencillo", "Premium", "Premium", 
+               "Premium", "Premium", "Premium", 
+               "Estudiante", "Estudiante", "Estudiante", "Estudiante", "Estudiante")
+)
+# Añadimos los datos que hagan falta
+data<-data %>% 
+  add_row(Tiempo=6023, Plan=54900, Ingreso= 2600000, 
+          Genero="F", Servicio= "Sencillo")
+data
+```
+
+- Luego se procede a darle estructura a la base de datos de tal manera que se establezcan las etiquetas correspondiente a la orden de plan en el factor a utilizar. Eso se realiza de la siguiente manera:
+
+```{r}
+dt<-data%>%
+  transmute(Tiempo=as.numeric(Tiempo),
+            Plan=as.numeric(Plan),
+            Ingreso=as.numeric(Ingreso),
+            Genero=as.factor(Genero),
+            Servicio=factor(Servicio,labels = c("3=Estudiante","1=Premium","2=Sencillo")))
+```
+
+Para la parte de agregar una nueva variable que tiene el porcentaje de planes sobre el nivel de ingresos de los individuos, esto es:
+
+```{r}
+dt<-dt %>% 
+  mutate(PartporIng=Plan/Ingreso*100)
+dt
+```
+
+Ya con lo anterior tenemos parte de la míneria de datos ya resuelta para trabajar.
+
+2. Presente una tabla con un resumen estadístico de las variables _Plan_, _Ingreso_ y _Tiempo_ en formato `tibble`. No solo plantee el código, interprete los resultados.
+
+**R./**
+
+- Una de las maneras de mostrar un resumen de datos es a partir de la función `summarise_each` seleccionando solo las variables cuantitativas o de formato double. 
+
+```{r, warning=FALSE, message=FALSE}
+dt # es el nombre de la data que se trabaja
+summarise_each(dt[1:3], funs(mean, var, min, max))
+```
+
+- La interpretación data con los datos que nos brinda la salida:
+
+La media de tiempo que se gastan en entretenimiento las personas ronda las 5309 horas en los últimos 5 años de tener o poseer una suscripción. eso es  o se trata de alrededor unas 900 horas de entretenimiento al año siendo mensualmente un dato de 75 horas. La persona que menos ha gastado horas en ocio ha sido de unos 2455. en materia de ingresos, los individuos en promedio tienen casi dos salarios mínimos legales vigentes, quien menos se gana es de 890 mil pesos y se paga en promedio por canales de entretención 63 mil pesos con desviación de 21619 pesos por plan. 
+
+3. ¿Qué porcentaje de hombres, mujeres y no binarios tienen plan premium? ¿Considera que el nivel de ingreso tiene que ver con esa selección de plan?. ¿Qué tipo de servicio por ende es el mas usado entre todos los suscritos?. ¿Qué porcentaje de estudiantes de genero binario usan el tipo de servicio de estudiante? Pista
+
+**R./**
+
+Este lo resolvemos por partes
+
+```{r}
+el1<-table(dt$Genero, dt$Servicio)
+porcentaje_gen <- prop.table(el1)
+porcentaje_gen
+```
+
+El 21% de Mujeres o genero femenino tiene plan premium, tan solo el 10% de los masculinos y en un 5.2% los no-binarios
+
+Solo un 10.5% de los No-binarios usan el servicio de estudiantes. El mayor uso con respecto a los demás servicios, puesto que todos los generos lo poseen en su hogar.
+
+#### Nivel de ingreso y plan
+
+```{r}
+select(filter(dt, Ingreso > 2000000), Plan)
+```
+
+Podemos decir que un mayor nivel de ingreso conlleva a que las personas demanden mas del servicio Premium que los demás niveles de ingreso.
+
+4. ¿Qué tipo de distribución, curtosis y asimetría posee las horas de entretenimiento de las personas encuestadas? _Explique._
+
+```{r}
+hist(dt$Tiempo, main="Histograma de tiempo de entretenimiento", xlab="Horas de uso en los últimos 5 años")
+### 
+library(moments) 
+kurtosis(dt$Tiempo) # La curtosis es
+## Asímetria
+skewness(dt$Tiempo)
+```
+
+La distribución es normal, mesocurtica y con un poco de simetria positiva. Al parecer los encuestados tienen uniformidad en el uso del tiempo de entretenimiento.
+
+5. Desarrolle la gráfica de dispersión y linea de ajuste con el siguiente código base:
+
+```{r, warning=FALSE, message=FALSE}
+grafico<- dt %>%
+ ggplot(aes(y = Tiempo, x = Ingreso))+
+ geom_point() +
+ ylab("Tiempo (en horas)")+xlab("Ingreso")+
+ geom_smooth(method = 'lm', col = 'red', size = 0.5)
+
+grafico # Salida de Gráfico
+```
+
+- Interprete el gráfico que observa entre las variables
+
+**R./**
+
+Esto nos quiere decir que existe una relación positiva entre el ingreso y las horas que se dedica al entretenimiento. Si bien hay dispersión por lo menos en linea con la teoría de demanda y los bienes normales, el entretenimiento aumenta cuando el ingreso tambien lo hace.
+
+- Escriba la ecuación econométrica de regresión de lo anterior
+
+**R./**
+
+$$\text{tiempo}=\beta_0+ \beta_1 Ingreso_i+e_t$$
+
+Si se estima, tenemos en regresión:
+
+```{r, message=FALSE}
+modelo<-lm(Tiempo ~ Ingreso, dt)
+summary(modelo)
+```
