@@ -1,0 +1,943 @@
+---
+title: "Econometría I"
+subtitle: "Test de Parámetros"
+author: "Carlos Yanes"
+date: "Universidad del Norte </br> `r Sys.Date()`"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    css: ["rutgers", "rutgers-fonts"]
+    nature:
+      beforeInit: "http://www.jvcasillas.com/ru_xaringan/js/ru_xaringan.js"
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+      ratio: "16:9"
+    seal: false
+---
+name: xaringan-title
+class: left, middle
+
+
+# Econometría I
+<br>
+## Test de Parámetros de MCO
+
+<br>
+<br>
+<img src="images/lognig.png" width="280" />
+
+### Carlos A. Yanes | Departamento de Economía | `r Sys.Date()`
+
+---
+
+```{r Setup, include = F}
+options(htmltools.dir.version = FALSE)
+library(pacman)
+p_load(broom, latex2exp, ggplot2, ggthemes, ggforce, viridis, dplyr, magrittr, knitr, parallel)
+
+library(tidyverse)
+library(babynames)
+library(fontawesome) # from github: https://github.com/rstudio/fontawesome
+library(DiagrammeR)
+library(fpp2)
+
+# Knitr options
+opts_chunk$set(
+  comment = "#>",
+  fig.align = "center",
+  fig.height = 7,
+  fig.width = 10.5,
+  warning = F,
+  message = F
+)
+# A blank theme for ggplot
+theme_empty <- theme_bw() + theme(
+  line = element_blank(),
+  rect = element_blank(),
+  strip.text = element_blank(),
+  axis.text = element_blank(),
+  plot.title = element_blank(),
+  axis.title = element_blank(),
+  plot.margin = structure(c(0, 0, -0.5, -1), unit = "lines", valid.unit = 3L, class = "unit"),
+  legend.position = "none"
+)
+theme_simple <- theme_bw() + theme(
+  line = element_blank(),
+  panel.grid = element_blank(),
+  rect = element_blank(),
+  strip.text = element_blank(),
+  axis.text.x = element_text(size = 14),
+  axis.text.y = element_blank(),
+  axis.ticks = element_blank(),
+  plot.title = element_blank(),
+  axis.title = element_blank(),
+  # plot.margin = structure(c(0, 0, -1, -1), unit = "lines", valid.unit = 3L, class = "unit"),
+  legend.position = "none"
+)
+theme_axes <- theme_empty + theme(
+  axis.title = element_text(size = 18),
+  plot.margin = structure(c(0, 0, 0.1, 0), unit = "lines", valid.unit = 3L, class = "unit"),
+)
+
+theme_axes_math <- theme_void() + theme(
+  text = element_text(family = "MathJax_Math"),
+  axis.title = element_text(size = 22),
+  axis.title.x = element_text(hjust = .95, margin = margin(0.15, 0, 0, 0, unit = "lines")),
+  axis.title.y = element_text(vjust = .95, margin = margin(0, 0.15, 0, 0, unit = "lines")),
+  axis.line = element_line(
+    color = "grey70",
+    size = 0.25,
+    arrow = arrow(angle = 30, length = unit(0.15, "inches")
+  )),
+  plot.margin = structure(c(1, 0, 1, 0), unit = "lines", valid.unit = 3L, class = "unit"),
+  legend.position = "none"
+)
+theme_axes_serif <- theme_void() + theme(
+  text = element_text(family = "MathJax_Main"),
+  axis.title = element_text(size = 22),
+  axis.title.x = element_text(hjust = .95, margin = margin(0.15, 0, 0, 0, unit = "lines")),
+  axis.title.y = element_text(vjust = .95, margin = margin(0, 0.15, 0, 0, unit = "lines")),
+  axis.line = element_line(
+    color = "grey70",
+    size = 0.25,
+    arrow = arrow(angle = 30, length = unit(0.15, "inches")
+  )),
+  plot.margin = structure(c(1, 0, 1, 0), unit = "lines", valid.unit = 3L, class = "unit"),
+  legend.position = "none"
+)
+
+```
+
+```{R, colors, include = F}
+# Definir los colores
+red_pink <- "#e64173"
+turquoise <- "#20B2AA"
+orange <- "#FFA500"
+red <- "#fb6107"
+blue <- "#2b59c3"
+green <- "#8bb174"
+grey_light <- "grey70"
+grey_mid <- "grey50"
+grey_dark <- "grey20"
+purple <- "#6A5ACD"
+blue_ty <- "#3b29e3"
+```
+
+background-size: 100%
+background-image: url(https://media.giphy.com/media/3ohzdGLk3o5mkA9ZPW/giphy.gif)
+
+???
+
+Image test. Taken from gyfty.
+
+---
+class: middle, inverse
+.left-column[
+
+# `r emo::ji("confused")`
+
+]
+
+.right-column[
+# Preguntas de la sesión anterior?
+]
+---
+# Preliminar
+
+--
+
+La última vez:
+
+--
+
+1. Trabajamos la primera estimación de modelos (MCO).
+
+--
+
+1. Miramos las demostraciones del **M.C.O**.
+
+--
+
+1. Analizamos los parámetros del **Modelo**.
+
+--
+
+1. Hablé rápidamente lo de **Normalidad**.
+
+--
+
+1. Hoy, inferencia y prueba de hipótesis de forma teórica.
+
+
+
+
+
+---
+class: title-slide-section-red, middle
+
+# Normalidad 
+
+<br>
+<img src="images/lognig.png" width="380" />
+
+---
+# Estadístico JB 🆒
+
+--
+
+> Es un test creado por Jarque-Bera para mirar los picos de una distribución y concluir si esta lo hace de forma normal. En este caso, la inferencia se hace hacia los errores del modelo $(\epsilon_i)$ 
+
+--
+
+Debe ser <span style="color:red"> menor </span> al $\chi^{2}$ _critico_ con el objeto de constatar que:
+
+--
+
+$$\begin{aligned}
+    H_{0}&= \epsilon_i \sim N(0, \sigma^{2})\\
+    H_{a}&= \epsilon_i  \nsim N(0, \sigma^{2})
+\end{aligned}$$
+
+--
+
++ En caso de que $\epsilon_{i}$ no se distribuya `normal`, los $\beta's$ dejan de ser **eficientes** o _mínima varianza_, y no puede hacerse en principio inferencia estadística.
+
+--
+
++ Los intervalos de confianza no son **validos**.
+
+---
+# Estadístico JB 🆒
+
+--
+
+### Mire lo siguiente 🛑
+
+--
+
+```{R, ejemplo1, echo = F, dev = "svg", fig.height = 3}
+df   <- 24
+p    <- 0.05
+gg   <- data.frame(x=seq(5,50,0.1))
+gg$y <- dchisq(gg$x,df)
+
+library(ggplot2)
+ggplot(gg) + 
+  geom_path(aes(x,y)) +
+  geom_linerange(data=gg[gg$x>qchisq(p,df,lower.tail=F),],
+                 aes(x, ymin=0, ymax=y),
+                 colour="pink") + annotate("text", x = 44, y = 0.009, label = "Zona de Rechazo de H0") + theme_simple +
+theme(axis.text.x = element_text(size = 12))
+```
+
+--
+
+Si por algún motivo nuestro estadístico **Jarque-Bera** cae en la zona de **rechazo** entonces podemos argumentar que nuestros residuos **NO** se distribuyen de forma normal.
+
+---
+# Estadístico JB 🆒
+
+--
+
+Simulemos un modelo y extraigamos su residuo
+
+--
+
+```r
+regresion <- lm(y ~ x, datos)
+u.hat <- resid(regresion)
+```
+
+--
+
+Algo como:
+
+--
+
+```{r, echo=FALSE}
+# Modelo dum
+library(tidyverse)
+set.seed(1)
+tb <- tibble(
+  x = rnorm(10000),
+  u = rnorm(10000),
+  y = 5.5*x + 12*u
+) 
+reg_tb <- tb %>% 
+  lm(y ~ x, .)
+u.hat <- resid(reg_tb)
+
+tabla_valores <- data.frame(
+  y = tb$y,
+  y.hat = predict(reg_tb),
+  u.hat = resid(reg_tb)
+)
+# Mostrar la tabla
+print(tabla_valores)
+
+```
+
+
+
+---
+# Estadístico JB 🆒
+
+
+--
+
+$$JB=\left [ \frac{s^2}{6} \times \frac{(k-3)^2}{24} \right ]\sim \chi^2$$
+
+--
+
+Donde $(s)$ es el tercer momento (Asimetría) y $(k)$ viene siendo la curtosis. La prueba por naturaleza se hace con la tabla `ji-cuadrado`
+
+--
+
+
+```{r}
+library(moments) # Paquete estadístico
+jarque.test(u.hat)
+```
+
+--
+
+Observe que la probabilidad de caer en la **zona de no rechazo** es tan solo de un 3.5%, -demasiado pequeña-. Necesitamos que $JB<\chi_{Critico}$. Para el caso, el estadístico nos da $JB=7.20>3.84$
+
+---
+# Estadístico JB 🆒
+
+--
+
+Observe que el valor crítico cambia de acuerdo al **nivel de significancia** de la prueba. Empecemos con el mas noble (10%)
+
+```{r}
+qchisq(0.10,1, lower.tail = F)
+```
+
+--
+
+Si somos estrictos, entonces al 95% vamos a tener lo siguiente
+
+```{r}
+qchisq(0.05,1, lower.tail = F)
+```
+
+--
+
+Ahora miremos al nivel de testeo mas alto, esto es 99%
+
+```{r}
+qchisq(0.01,1, lower.tail = F)
+```
+
+
+
+---
+# Estadístico JB 🆒
+
+
+--
+
+```{r, echo=FALSE}
+residuos=abs(runif(100,-2,5))
+hist(residuos, main = "Histograma de los residuos")
+```
+
+--
+
++ Concluimos que no es normal ese comportamiento de los **residuos**
++ La parte gráfica ayuda, pero no siempre es concluyente. Hay que hacer el .RUred[test estadístico].
+
+---
+name: setup
+class: middle, inverse
+
+# Que sigue a continuación... <br> 
+
+## Errores o residuos del Modelo
+
+---
+# De los errores y/o residuos ✅
+
+Como vimos la última vez, nuestro problema que va con la **incertidumbre** es que no sabemos si nuestra estimación muestral está *cerca* o *lejos* del parámetro poblacional desconocido.
+
+--
+
+Sin embargo, no "todo está perdido". Podemos utilizar los errores $\left(e_i = y_i - \hat{y}_i\right)$ para tener una idea de lo <span style="color:red"> **bien** </span> que nuestro <span style="color:blue"> **modelo** </span> explica la variación observada en $y$.
+
+--
+
+Cuando nuestro **modelo** parece estar haciendo un "buen" trabajo, podemos tener un poco más de confianza en su uso para aprender acerca de la relación entre $y$ y $x$.
+
+--
+
+Ahora sólo tenemos que **formalizar** lo que significa realmente un "buen trabajo".
+
+---
+# De los errores y/o residuos ✅
+
+--
+
+En primer lugar, estimaremos la varianza de $u_i$ (recordemos: $\mathop{\text{Var}} \left( u_i \right) = \sigma^2$) utilizando nuestros errores al cuadrado (SEC):
+
+--
+
+$$SEC=\sigma^2 = \frac{\sum_i e_i^2}{n - k}$$
+
+--
+
+Donde $k$ da el número de términos de pendiente e interceptos que estimamos ( _p.e_, $\beta_0$ y $\beta_1$ darían $k=2$).
+
+--
+
+$\sigma^2$ es un estimador **insesgado**.
+
+--
+
+A continuación, se muestra que la varianza de $\hat{\beta}_1$ (para la regresión lineal simple) es:
+
+--
+
+$$\mathop{\text{Var}} \left( \hat{\beta}_1 \right) = \dfrac{\sigma^2}{\sum_i \left( x_i - \overline{x} \right)^2}$$
+
+--
+
+Que muestra que la <span style="color:red"> **varianza** </span> de nuestro estimador de la pendiente:
+
+--
+
++ Aumenta a medida que nuestras perturbaciones se vuelven más ruidosas
+
+--
+
++ Disminuye a medida que la varianza de $x$ aumenta
+
+---
+name: setup
+class: middle, inverse
+
+# Lo que sigue a continuación... <br> 
+
+## es intentarlo hacer mas interesante
+
+---
+# De los errores y/o residuos `r fa("r-project", fill = "steelblue")` 
+
+```{r enforce, echo=FALSE, warning=FALSE}
+library(dplyr) #Paquete para manejo de variables
+library(readxl) #Para cargar datos de excel (xls)
+datos <-read_excel("Salarios.xlsx")
+Salario<-datos$wage
+Experiencia<- datos$exper
+```
+
+```{r modti, warning=FALSE}
+tidy(lm(Salario ~ Experiencia))
+```
+
+--
+
+`r fa('minus-square')` Utilizamos el error estándar de $\hat{\beta}_1$, junto con $\hat{\beta}_1$ mismo, para aprender sobre el parámetro $\beta_1$.
+
+--
+
+Después de derivar la distribución de $\hat{\beta}_1$, tenemos dos opciones (relacionadas) para hacer inferencia estadística formal y entonces (aprender) sobre nuestro parámetro desconocido $\beta_1$:
+
+--
+
+- **Intervalos de confianza:** Utiliza la estimación y su error estándar para crear un intervalo que, al repetirse, generalmente contiene el verdadero parámetro.
+
+--
+
+- **Pruebas de hipótesis:** Determinan si hay evidencia estadística lo suficiente significativa para rechazar un valor o rango de valores de la hipótesis nula.
+
+
+---
+class: title-slide-section-red, middle
+
+# Intervalos de confianza
+
+<br>
+<img src="images/lognig.png" width="380" />
+
+---
+# Intervalos de confianza `r fa("microphone", fill = "steelblue")`
+
+--
+
+- Construimos intervalos de confianza a un nivel de $(1- \alpha)$ para $\beta_1$:
+
+$$\hat{\beta}_1 \pm t_{\alpha/2,\;\text{df}} \, \mathop{\hat{\text{SE}}} \left( \hat{\beta}_1 \right)$$
+
+--
+
+- Por ejemplo, con 100 obs., tenemos dos coeficientes, $(\hat{\beta}_0 \; \text{y} \; \hat{\beta}_1 \implies k = 2), \; \text{y tenemos un}\; \alpha = 0.025$ (Para un intervalo de confianza del 98%) nos brinda un .black[estadístico] de $t_{0.025,\,98}$ = `r qt(0.025, 98) %>% round(2)`
+
+--
+
+```{R, t distr, echo = F, dev = "svg", fig.height = 3}
+d6 <- tibble(x = seq(-4, 4, 0.01), y = dt(x, df = 98)) %>%
+  rbind(., tibble(x = seq(4, -4, -0.01), y = 0))
+ggplot() +
+geom_polygon(data = d6, aes(x, y), fill = "grey85") +
+geom_polygon(data = d6 %>% filter(x <= qt(0.025, 98)), aes(x, y), fill = red_pink) +
+geom_hline(yintercept = 0, color = "black") +
+geom_vline(xintercept = qt(0.025, 98), size = 0.35, linetype = "solid") +
+theme_simple +
+theme(axis.text.x = element_text(size = 12))
+```
+
+---
+# Intervalos de confianza `r fa("microphone", fill = "steelblue")`
+
+```{R, gen dataset, include = F, cache = T}
+# Poblacion y muestra
+n_p <- 100
+n_s <- 30
+# Semilla
+set.seed(12468)
+# Generar datos
+pop_df <- tibble(
+  i = 3,
+  x = rnorm(n_p, mean = 5, sd = 1.5),
+  e = rnorm(n_p, mean = 0, sd = 1),
+  y = i + 0.5 * x + e,
+  row = rep(1:sqrt(n_p), times = sqrt(n_p)),
+  col = rep(1:sqrt(n_p), each = sqrt(n_p)),
+  s1 = sample(x = c(rep(T, n_s), rep(F, n_p - n_s))),
+  s2 = sample(x = c(rep(T, n_s), rep(F, n_p - n_s))),
+  s3 = sample(x = c(rep(T, n_s), rep(F, n_p - n_s)))
+)
+# Regresiones
+lm0 <- lm(y ~ x, data = pop_df)
+lm1 <- lm(y ~ x, data = filter(pop_df, s1 == T))
+lm2 <- lm(y ~ x, data = filter(pop_df, s2 == T))
+lm3 <- lm(y ~ x, data = filter(pop_df, s3 == T))
+# Simulación
+set.seed(12468)
+sim_df <- mclapply(mc.cores = 10, X = 1:1e4, FUN = function(x, size = n_s) {
+  lm(y ~ x, data = pop_df %>% sample_n(size = size)) %>% tidy()
+}) %>% do.call(rbind, .) %>% as_tibble()
+```
+
+```{R, simulation ci data, include = F}
+# Creando los intervalos de confianza para b1
+ci_df <- sim_df %>% filter(term == "x") %>%
+  mutate(
+    lb = estimate - std.error * qt(.975, 28),
+    ub = estimate + std.error * qt(.975, 28),
+    ci_contains = (lm0$coefficients[2] >= lb) & (lm0$coefficients[2] <= ub),
+    ci_above = lm0$coefficients[2] < lb,
+    ci_below = lm0$coefficients[2] > ub,
+    ci_group = 2 * ci_above + (!ci_below)
+  ) %>%
+  arrange(ci_group, estimate) %>%
+  mutate(x = 1:1e4)
+```
+
+**Del lo anterior** Tenemos certeza que con un `r ci_df$ci_contains %>% multiply_by(100) %>% mean() %>% round(1)`% de confiabilidad nuestros intervalos de confianza contienen el verdadero valor de nuestro $\beta_1$.
+
+```{R, simulation ci, echo = F, dev = "svg", fig.height = 5}
+# Plot
+ggplot(data = ci_df) +
+geom_segment(aes(y = lb, yend = ub, x = x, xend = x, color = ci_contains)) +
+geom_hline(yintercept = lm0$coefficients[2]) +
+scale_y_continuous(breaks = lm0$coefficients[2], labels = TeX("$\\beta_1$")) +
+scale_color_manual(values = c(red_pink, "grey85")) +
+theme_simple +
+theme(
+  axis.text.x = element_blank(),
+  axis.text.y = element_text(size = 18)
+)
+```
+
+
+---
+# Intervalos de confianza `r fa("microphone", fill = "steelblue")`
+
+--
+
+- Construimos intervalos de confianza a un nivel de $(1- \alpha)$ para $\beta_1$:
+
+$$\hat{\beta}_1 \pm t_{\alpha/2,\;\text{df}} \, \mathop{\hat{\text{SE}}} \left( \hat{\beta}_1 \right)$$
+--
+
+**Ejemplo:**
+```{R ic, echo = T, highlight.output = 5}
+lm(Salario ~ Experiencia) %>% tidy()
+```
+
+--
+
++ Nuestro intervalo de confianza del 98% es en nuestro caso $0.202 \pm 1.98 \times 3.03 = \left[ -5.7364,\; 6.1412 \right]$
+
+--
+
+.RUred[Recuerde que el valor crítico puede obtenerlo de:]
+
+--
+
+```{R cttable, echo = T}
+qt(0.975,100)
+```
+
+
+---
+# Intervalos de confianza `r fa("r-project", fill = "steelblue")`
+
+--
+
+- Construimos intervalos de confianza a un nivel de $(1- \alpha)$ para $\beta_1$:
+
+$$\hat{\beta}_1 \pm t_{\alpha/2,\;\text{df}} \, \mathop{\hat{\text{SE}}} \left( \hat{\beta}_1 \right)$$
+
+--
+
+Directamente en .black[R]:
+
+```{r confin, highlight.output = 3}
+modelo.1<- lm(Salario~Experiencia)
+confint(modelo.1)
+```
+
+--
+
+`r fa('pagelines')` _si esta interesado(a)_ en mirar los otros niveles de confianza es usar el código con la opción **level** _p.e_: 
+
+`confint(modelo.1, level=0.99)`
+
+---
+# Intervalos de confianza `r fa("microphone", fill = "steelblue")`
+
+
+--
+
+`r fa("puzzle-piece", fill= "red")` Qué significa el intervalo:
+
+--
+
+<font size="+5">$$\left[ -5.7364 \leq \hat{\beta}_{i} \leq 6.1412 \right]$$</font>
+
+
+--
+
+`r fa("share")` **Informalmente:** El intervalo de confianza nos da una región (intervalo) en la que podemos depositar cierta confianza para contener el parámetro estimado.
+
+--
+
+`r fa("share")` **Más formalmente:** Si con nuestras muestras de la población repetimos el proceso n veces y construimos intervalos de confianza para cada una de estas, $(1-\alpha)$ por ciento de nuestros intervalos ( _p.e_, 97.5%) contendrán el parámetro poblacional *en algún lugar del intervalo*.
+
+---
+# Hipótesis `r fa("thumbs-up", fill = "steelblue")`
+
+--
+
+> **Pruebas de hipótesis**:
+En muchas aplicaciones, queremos saber algo más que una estimación puntual o un rango de valores. Queremos saber qué dicen nuestras pruebas estadísticas sobre las **teorías** existentes.
+
+--
+
+- Queremos comprobar las hipótesis planteadas por funcionarios, políticos, economistas, científicos, amigos, vecinos raros, etc.
+
+--
+
+*Ejemplos*:
+
+--
+
+`r fa("star", fill="blue")` ¿El aumento de la presencia policial **reduce la delincuencia**?
+
+--
+
+`r fa("star", fill="blue")` ¿Construir un muro gigante **reduce la delincuencia**?
+
+--
+
+`r fa("star", fill="blue")` ¿Influye el cierre de un gobierno **en la economía**?
+
+--
+
+`r fa("star", fill="blue")` ¿Se reduce con la **legalización del uso** de cannabis el numero de casos de conducir (manejar un vehículo) bajo los efectos del alcohol o con consumo de las opioides?
+
+--
+
+`r fa("star", fill="blue")`  ¿Las normas de calidad del aire **aumentan la salud** y/o **reducen el empleo**?
+
+---
+# Hipótesis `r fa("thumbs-up", fill = "steelblue")`
+
+--
+
+Las pruebas de hipótesis se basan en resultados e intuiciones muy similares.
+
+--
+
+Aunque no cabe duda de que existe **incertidumbre**, podemos elaborar pruebas estadísticas fiables (rechazar o no rechazar una hipótesis planteada).
+
+--
+
+En **MCO** las pruebas de hipotesis se hacen a los parámetros:
+
+$\beta_1$ es igual al valor $(c)$, _p.e._, planteamos que $H_o:\: \beta_1 = c$
+
+--
+
+Luego esta el _test_ para hacerlo:
+
+$$t_\text{estadístico} = \dfrac{\hat{\beta}_1 - c}{\mathop{\hat{\text{SE}}} \left( \hat{\beta}_1 \right)}$$
+--
+
+> Note que c regularmente se iguala a cero (0) y la hipotesis nula pasa a ser $H_o:\: \beta_1 = 0$.
+
+---
+# Hipótesis `r fa("thumbs-up", fill = "steelblue")`
+
+--
+
+`r fa("umbrella", fill="red")` Para un nivel $\alpha$ y un test de **dos colas**, vamos a rechazar la _hipotesis nula_ cuando ocurra lo siguiente:
+
+--
+
+$$\left|t_\text{estadístico}\right| > \left|t_{1-\alpha/2,\;df}\right|$$
+--
+
+Lo que significa que nuestro **estadístico de prueba es más extremo que el valor crítico**.
+
+--
+
+De otra forma, podemos calcular el **valor p** que acompaña a nuestro estadístico de prueba, que nos da efectivamente la probabilidad de ver nuestro estadístico de prueba *o un estadístico de prueba más extremo* si la hipótesis nula fuera cierta.
+
+--
+
+Los **valores p** muy pequeños (generalmente < 0,05) _significan_ que sería poco probable ver nuestros resultados si la hipótesis nula fuera realmente cierta; tendemos a rechazar la hipótesis nula para valores p inferiores a 0,05.
+
+--
+
+En **R**:
+
+--
+
+```{r outmo}
+library(broom) # Para tener el p-value
+modelo.1<- lm(Salario~Experiencia)
+glance(modelo.1)$p.value
+```
+
+---
+# Hipótesis `r fa("thumbs-up", fill = "steelblue")`
+
+```{R testeo, echo = T, highlight.output = 5}
+lm(Salario~Experiencia) %>% tidy()
+```
+
+--
+
+H.sub[o]: $\beta_1 = 0$ *vs.* H.sub[a]: $\beta_1 \neq 0$
+
+--
+
+ $t_\text{estadístico} = 0.0669$ y el $t_\text{0.95, 28} = `r qt(0.95, 933) %>% round(2)`$
+
+--
+
+El cual implica que *p*-value $> 0.05$
+
+--
+
+Entonces, no podemos .black[rechazar Ho].
+
+---
+# Hipótesis `r fa("thumbs-up", fill = "steelblue")`
+
+.left-column[
+Cómo se lee el siguiente modelo desde la probabilidad?
+]
+
+--
+
+.right-column[
+```{r, echo=FALSE}
+library(flextable)
+mod<-lm(Salario ~ Experiencia + I(Experiencia^2))
+mod<- as_flextable(mod) # Mejor formato de salida
+mod<- add_header_lines(mod, values = "Modelo de Prueba")
+mod
+```
+]
+
+---
+# Hipótesis `r fa("thumbs-up", fill = "steelblue")`
+
+--
+
+`r fa("angle-double-right", fill="blue")` El p-value o .black[p-valor] nos dice que probabilildad tenemos de caer en la zona de **no rechazo** (la zona mas grande de toda la distribución).
+
+--
+
+> Cientificamente, esto implica la probabilidad que tenemos de cometer el error tipo I en las pruebas de hipótesis. _Esto es, usted .grey[rechaza] Ho cuando ella es verdadera_ 
+
+--
+
+La formula de cálculo es:
+
+--
+
+$$\text{p-value}= \color{#0000FF}{2 \times P(T_{n-1}> |t|)} \equiv 2 \times (1-Ft_{n-1}(|t|))$$
+--
+
+_Donde $|t|$ es el **valor crítico** y $Ft$ es la función de densidad_ 
+
+--
+
+en **R**:
+
+--
+
+```{r, hiptest}
+n<- 935 # Por el tamaño muestral del ejemplo de salarios/educación 
+t<- 0.0669 # Valor de T-calculado 
+(p<-2*(1-pt(abs(t), n-1)))
+```
+
+---
+# Hipótesis `r fa("thumbs-up", fill = "steelblue")`
+
+--
+
+```{R, simulation t data, include = F}
+# Calculamos los test estadisticos del sim
+t_df <- sim_df %>%
+  filter(term == "x") %>%
+  mutate(
+    t_stat = (estimate - lm0$coefficients[2]) / std.error,
+    reject = abs(t_stat) > abs(qt(0.975, 28))
+  )
+t_density <- density(t_df$t_stat, from = -5, to = 4) %$%
+  data.frame(x = x, y = y) %>%
+  mutate(area = abs(x) > abs(qt(0.975, 28)))
+```
+
+En nuestro ejemplo con los salarios, hay un 94% (por ciento) que nuestro $t$ estadístico esté en la zona de **no rechazo** y por ende la .black[experiencia] _no explique las variaciones del salario_ 
+
+--
+
+La distribución de nuestro $t$ estadístico es: (teniendo presente las zonas de rechazo).
+
+--
+
+```{R, simulacion t plot, echo = F, dev = "svg", fig.height = 3.75}
+ggplot(data = t_density, aes(x = x, ymin = 0, ymax = y)) +
+geom_vline(xintercept = 0) +
+geom_vline(xintercept = 0.06, linetype = "dashed", colour = "red") +  
+geom_ribbon(fill = "grey85", alpha = 0.8) +
+geom_ribbon(
+  data = t_density %>% filter(x < qt(0.025, 28)),
+  fill = red_pink
+) +
+geom_ribbon(
+  data = t_density %>% filter(x > qt(0.975, 28)),
+  fill = red_pink
+) +
+geom_hline(yintercept = 0) +
+# geom_vline(xintercept = qt(c(0.025, 0.975), df = 28), color = red_pink) +
+theme_simple
+```
+
+
+
+---
+class: title-slide-section-red, middle
+
+# Otras Métricas: R-Cuadrado 
+
+<br>
+<img src="images/lognig.png" width="380" />
+ 
+
+---
+# Otras Métricas `r fa("space-shuttle", fill="steelblue")`
+
+--
+
+- **Suma Total de Cuadrados** (SST): Mide variación muestral total de $y_{i}$.
+
+$$SST \equiv \sum \limits_{i=1}^{n} \left ( y_{i} - \bar{y} \right )^{2}$$
+--
+
+- **Suma Explicada de Cuadrados** (SSE): Mide variación de $\hat{y}_{i}$.
+
+$$SSE \equiv \sum \limits_{i=1}^{n} \left ( \hat{y}_{i} - \bar{y} \right )^{2}$$
+--
+
+- **Suma de los Residuos al Cuadrado** (SSR): Mide variación en $\mu_{i}$.
+
+$$SSR \equiv \sum \limits_{i=1}^{n} \hat{\mu}_{i}^{2}$$
+
+--
+
+La **variación total** en $y$ puede ser expresada como la suma de la variación explicada y la no explicada:
+
+$$SST= SSE+SSR$$
+
+---
+# Otras Métricas `r fa("space-shuttle", fill="steelblue")`
+
+--
+
+- **Coeficiente de determinación** $R^2$: Mide el grado de precisión del modelo, la proporción de la variación de la variable _dependiente_ que es explicado por $x$.
+
+$$R^{2} \equiv \frac{SSE}{SST}=1-\frac{SSR}{SST} \quad R^{2} \in \left [ 0,1 \right ]$$
+--
+
+`r fa("paperclip", fill="red")` Cuando se interpreta se multiplica por 100 para interpretarlo como porcentaje.
+
+--
+
+`r fa("paperclip", fill="red")` Un $R^{2}$ **cercano a cero** indica un ajuste bajo a la linea de M.C.O.
+
+--
+
+`r fa("paperclip", fill="red")` Un $R^{2}$ **cercano a uno**, $x$ explica la mayoría de $y$.
+
+---
+# Otras Métricas `r fa("r-project", fill="steelblue")`
+
+- En **R** se puede implementar así:
+
+--
+
+
+```{r r2}
+modelo.1 <- lm(Salario ~ Experiencia)
+sal.pred <- fitted(modelo.1) #Predichos
+u.hat <- resid(modelo.1) 
+
+# R cuadrado puede obtenerse:
+Sal <- datos$wage
+var(sal.pred)/var(Sal) #Primera forma
+
+1 - var(u.hat)/ var(Sal) #Segunda forma
+
+cor(Sal, sal.pred)^2 # Tercera forma 
+```
+
+---
+# Bibliografía
+
+`r fa('book')` Álvarez, R. A. R., Calvo, J. A. P., Torrado, C. A. M., & Mondragón, J. A. U. (2013). *Fundamentos de econometría intermedia: teoría y aplicaciones*. Universidad de los Andes.
+
+`r fa('book')` Stock, J. H., Watson, M. W., & Larrión, R. S. (2012). *Introducción a la Econometría*.
+
+`r fa('book')` Wooldridge, J. M. (2015). *Introductory econometrics: A modern approach*. Cengage learning.
+
+---
+class: title-slide-final, middle
+
+# Gracias por su atención!
+
+## Alguna pregunta adicional?
+
+### Carlos Andres Yanes Guerra
+`r fa("envelope", fill="red")` cayanes@uninorte.edu.co
+`r fa("twitter", fill="cyan")` keynes37
