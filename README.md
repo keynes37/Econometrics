@@ -11,6 +11,8 @@ Análisis Inferencial [EDA 2](https://keynes37.github.io/Econometrics/Class/Clas
 
 Modelo Mínimos Cuadrados [MCO](https://keynes37.github.io/Econometrics/Class/Class03/Class03.html#1)
 
+Intervalos en Mínimos Cuadrados [Test de parámetros](https://keynes37.github.io/Econometrics/Class/Class04/Class04.html#1)
+
 
 ### nota de clase
 
