@@ -274,7 +274,7 @@ tabla_valores <- data.frame(
   u.hat = resid(reg_tb)
 )
 # Mostrar la tabla
-print(tabla_valores)
+print(head(tabla_valores, 10))
 
 ```
 
