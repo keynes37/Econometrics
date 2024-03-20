@@ -18,3 +18,5 @@ Intervalos en Mínimos Cuadrados [Test de parámetros](https://keynes37.github.i
 
 [Guia Inferencia](https://keynes37.github.io/Econometrics/Projects/Claseinr/CInferencia.html)
 
+[Guia test modelo](https://raw.githack.com/keynes37/Econometrics/main/Projects/Claseinr/Cmodels.html)
+
