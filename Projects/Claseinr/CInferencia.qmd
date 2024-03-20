@@ -14,8 +14,6 @@ editor: visual
 date: last-modified
 ---
 
-
-
 ## Paquetes con que se trabaja la sesión
 
 ::: callout-note
@@ -31,7 +29,6 @@ install.packages(c("tidyverse", "kableExtra", "flextable", "extrafont", "broom")
 library(pacman)
 p_load(tidyverse, kableExtra, flextable, extrafont, broom)
 ```
-
 :::
 
 ::: callout-note
@@ -45,13 +42,15 @@ p_load(tidyverse, kableExtra, flextable, extrafont, broom)
 ```
 :::
 
-
 ## Pruebas de hipotesis
+
 ::: panel-tabset
 ## Hipotesis
+
 La validez de las estimaciones se dan a partir de las herramientas estadísticas que nos permiten determinar si algo es ***verdadero*** sobre todo para una muestra. Las pruebas de hipótesis surgen para eso.
 
 ## Ejemplo
+
 Tome por ejemplo que quisiéramos ver que la media (promedio) de la nota de los estudiantes de economía es de 3.5. Plantear esto en términos de [hipótesis]{.alert} requerirá los siguientes elementos: Primero una parte nula - considérelo como el punto de partida- y que de ahora en adelante notaremos como $H_0$ y una parte **alternativa** que surge de lo que crea que va a suceder y que de cierta forma o manera le conviene a un investigador encontrar y la conoceremos de ahora en adelante como $H_a$.
 
 ## Planteamiento
@@ -102,10 +101,10 @@ text(2.7, .01,expression(alpha==0.025), col = "red")
 text(-2.7, .01,expression(alpha==0.025), col = "red")
 ```
 
-
 ## Ejemplo
 
 Nivel a 90%
+
 ```{r criticos1}
 #| echo: true
 # Buscar en las tabla de la normal en niveles de significancia
@@ -113,6 +112,7 @@ qnorm(0.90)
 ```
 
 Nivel a 95%
+
 ```{r criticos2}
 #| echo: false
 # Buscar en las tabla de la normal en niveles de significancia
@@ -120,6 +120,7 @@ qnorm(0.95)
 ```
 
 Nivel a 99%
+
 ```{r criticos3}
 #| echo: false
 # Buscar en las tabla de la normal en niveles de significancia
@@ -128,8 +129,10 @@ qnorm(0.99)
 :::
 
 ## Intervalos de confianza
+
 ::: panel-tabset
 ## Definición
+
 Entendiendo mejor los valores críticos, podemos entonces construir **intervalos de confianza** que permitirán inferir donde se ubica o esta el promedio de una variable.
 
 $$\left[ \bar{y} - \text{Valor crítico} \frac{\alpha}{2} \times s.e(\bar{y}) \leq \bar{y} \leq \bar{y} + \text{Valor crítico} \frac{\alpha}{2} \times s.e(\bar{y}) \right]$$
@@ -209,6 +212,7 @@ md1
 
 ::: panel-tabset
 ## Cargado de datos
+
 ```{r}
 #| echo: true
 library(readxl) #Para cargar datos de excel (xls)
@@ -224,14 +228,13 @@ $$\begin{aligned}
     \widehat{\beta}_{0}=& \bar{y}-\widehat{\beta}_{1}\bar{x} \\
     \widehat{\beta}_{1}=&  \frac{Cov(x, y)}{Var (x)}
 \end{aligned}$$
-
 :::
 
 ## Forma manual
 
 ::: panel-tabset
-
 ## Estadisticas
+
 ```{r}
 #| echo: true
 cov(exper, wage) 
@@ -264,9 +267,6 @@ md2<-lm(wage ~ exper) %>%
   )
 md2
 ```
-
 :::
 
-
 # Gracias por su atención!! {background-color="#cc0000"}
-

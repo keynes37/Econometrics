@@ -1,0 +1,283 @@
+---
+title: "Econometría I: Varianza de Estimadores"
+subtitle: "Departamento de Economía"
+author: "Carlos A. Yanes G."
+format: 
+  revealjs:
+    footer: "Universidad del Norte"
+    theme: [simple, ob.scss]
+    logo: micrologouni.png
+    embed-resources: true
+    code-fold: true
+from: markdown+emoji
+editor: visual
+date: last-modified
+---
+
+## Paquetes con que se trabaja la sesión
+
+::: callout-note
+## R libraries
+
+Los paquetes que vamos a utilizar y que se deben [instalar]{.bg style="--col: #FFC7A2"} para uso en clase son:
+
+``` r
+install.packages(c("tidyverse", "kableExtra", "flextable", "extrafont", "broom"))
+```
+
+```{r setup, include=FALSE}
+library(pacman)
+p_load(tidyverse, kableExtra, flextable, extrafont, broom)
+```
+:::
+
+::: callout-note
+## Ejecución
+
+No olvide que debe desde luego tener presente en su documento de *R Markdown* o *script* cargar estos paquetes.
+
+``` r
+library(pacman)
+p_load(tidyverse, kableExtra, flextable, extrafont, broom)
+```
+:::
+
+## Trabajo en R
+
+Hoy haremos uso del cálculo de varianzas de estimadores $\hat\beta_i$ en este caso tanto para el parámetro **marginal** quien acompaña a nuestra variable de control como en efecto al autónomo o $\hat\beta_0$ que es nuestro parámetro constante.
+
+Ademas de eso, miraremos la parte de cálculo `elasticidad` (tal como se hacia en microeconomía) y la parte de formas funcionales de nuestros modelos de regresión, que ayudan en gran parte a presentar mejores modelos.
+
+## Datos
+
+Recuerde que siempre hay que preparar nuestros datos o involucrarlos en **R**, esto es:
+
+```{r recuerdo}
+#| echo: true
+#| warning: false
+library(readxl) # Cargar datos de excel (xls)
+datos <-read_excel("Salarios.xlsx")
+Salario<-datos$wage
+Experiencia<- datos$exper
+```
+
+Para la siguientes formulas, vamos a requerir el tamaño de la muestra (n), podemos hacerlo de la siguiente forma:
+
+```{r, etsvar}
+#| echo: true
+# Estimamos nuestro modelo de regresión lineal
+resultado <- lm(Salario ~ Experiencia, data = datos)
+# Numero de observaciones:
+( n <- nobs(resultado) )
+```
+
+# Varianza del modelo
+
+## Varianza del residuo del modelo
+::: panel-tabset
+## Formula
+Luego procedemos a calcular la **varianza** de nuestro residuo. Para esto
+
+$$\widehat{\sigma}^{2}= \frac{1}{n-2} \times \sum\limits_{i=1}^{n}\mu_{i}^{2}\equiv \frac{n-1}{n-2}\times Var(\mu_{i})$$
+
+## Estimación
+```{r, est var}
+#| echo: true
+# Var.res: Varianza de los residuos (forma 1)
+(var.res <- sqrt(sum(resid(resultado)^2) / (n-2)) ) 
+
+# Sig.res: Varianza de los residuos estándar de la regresión (forma 2)
+(Sig.res <- sd(resid(resultado)) * sqrt((n-1)/(n-2)) )
+```
+
+## S.e Est
+Luego realizamos el **calculo** para los respectivos *estimadores*
+
+$$SE\left ( \beta_{1} \right )=\sqrt\frac{\sigma^{2}}{\sum \limits_{i=1}^{n}\left ( x_{i} - \bar{x} \right )^{2}}=\frac{1}{\sqrt{n-1}} \cdot\frac{\sigma}{sd(x_i)}$$
+
+```{r, betauno}
+#| echo: true
+Sig.res / sd(datos$exper) / sqrt(n-1)
+```
+
+## SD
+Recuerde que la SD es
+
+$$\sqrt{\frac{1}{n-1}\cdot \sum_{i=1}^n (x_i - \bar{x})^2}$$
+
+## Se
+Lo mismo para $\hat\beta_0$, la formula cambia un poco, sin embargo podemos tener entonces:
+
+$$SE\left ( \hat\beta_{0} \right )=\sqrt{\frac{\sigma^{2} \bar{x}^2 }{\sum \limits_{i=1}^{n}\left ( x_{i} - \bar{x} \right )^{2}}}=\color{#fc0317}{\frac{1}{\sqrt{n-1}} \cdot\frac{\sigma}{sd(x_i)}\cdot \sqrt{\bar{x}^2}}$$
+
+```{r, betacero}
+#| echo: true
+Sig.res / sd(datos$exper) / sqrt(n-1) * sqrt(mean(datos$exper^2))
+```
+:::
+
+## Modelo
+Ya conociendo de donde sale el cálculo de cada uno, podemos entonces tenerlo en el resumen del modelo.
+
+```{r}
+#| echo: true
+# Modelo de Salarios
+library(flextable)
+mod<-lm(Salario ~ Experiencia)
+mod<- as_flextable(mod) # Mejor formato de salida
+mod<- add_header_lines(mod, values = "Tabla #1")
+mod
+```
+
+# Coeficiente de determinación $R^2$
+
+
+## Coeficiente de determinación $R^2$
+
+Trabajamos con las siguientes ecuaciones:
+
+$$\textrm{Suma total de cuadrados} \equiv SST= \sum_{i=1}^{n} \left ( y_{i}- \bar{y} \right )^{2}$$
+ 
+$$\textrm{Suma explicada de los cuadrados} \equiv SSE= \sum_{i=1}^{n} \left( \hat{y}_{i}- \bar{y} \right)^{2}$$
+
+$$\textrm{Suma de los residuos al cuadrado} \equiv SEC= \sum_{i=1}^{n} \hat{\mu}_{i}^{2}$$
+
+## Coeficiente de determinación $R^2$
+Estimamos nuestra predicción y error individual
+
+```{r, tab1}
+#| echo: true
+# Calculamos valores predichos y los residuos del modelo:
+sal.hat <- fitted(resultado)
+u.hat <- resid(resultado)
+tab1<-cbind(sal.hat,u.hat)
+head(tab1)
+```
+
+
+## Coeficiente de determinación $R^2$
+Ya lo habíamos hecho en clases
+
+```{r, rcuad}
+#| echo: true
+# tres formas diferentes de calcular el R^2:
+sal <- datos$wage  # Usamos la variable dependiente
+(var(sal.hat) / var(sal))*100 # Forma 1
+(1 - var(u.hat) / var(sal))*100 # Forma 2
+(cor(sal, sal.hat)^2)*100 # Forma 3
+```
+
+## Coeficiente de determinación $R^2$
+
+Recuerde los criterios
+
+$$R^{2}=\left\{\begin{matrix} >95\%&= \text{Excelente ajuste} \\ 
+ \text{Entre}\; 50\%-94\% & = \text{Muy buen ajuste}\\ 
+ \text{Entre}\; 25\%-49\% & = \text{Buen ajuste}\\
+ \text{Entre}\; 5\%-24\% & = \text{Ajuste regular}\\
+  <5\% & = \text{Ajuste muy bajo}\end{matrix}\right.$$
+
+
+Si el $R^2$ llega a ser 99%, debe empezar a preocuparse.
+
+# Formas funcionales
+
+## Formas funcionales
+
+Debe conocer que las formas de medida inciden en la **interpretación**
+
+$$\begin{aligned}
+\widehat{y} &= \beta_{0}+\beta_{1}x +\mu \quad \text{Lineal en niveles}    \\ 
+ln(\widehat{y}) &= \beta_{0}+\beta_{1}x +\mu \quad \text{Log-Lin}    \\ 
+\widehat{y} &= \beta_{0}+\beta_{1}lnx +\mu \quad \text{Lin-Log}   \\ 
+ln(\widehat{y}) &= \beta_{0}+\beta_{1}lnx +\mu \quad \text{Log-Log}
+\end{aligned}$$
+
+## Formas funcionales
+Este es cambiando las opciones del `lm` en la parte del modelo, un ejemplo de eso es:
+
+```{r, nm}
+#| echo: true
+# Para otras formas funcionales:
+#Log-Lin
+l1<-lm(log(wage) ~ exper, data=datos)
+#Lin-Log
+l2<-lm(wage ~ log(exper), data=datos)
+#Log-Log
+l3<-lm(log(wage) ~ log(exper), data=datos)
+```
+
+## Formas funcionales {.scrollable .smaller}
+
+::: panel-tabset
+## Modelo
+```{r, formasF2}
+#| echo: true
+library(huxtable)
+huxreg(resultado, statistics = c(N = "nobs", R2 = "r.squared"))
+```
+
+## Variables
+```{r, multiplesal, echo=FALSE}
+#| echo: true
+grupo <- list("Modelo Lineal" = resultado, "Modelo Log-Lin" = l1, 
+             "Modelo Lin-log" = l2, "Modelo Log-Log" = l3)
+
+huxreg(grupo, statistics = c(N = "nobs", R2 = "r.squared"),
+       note = "Nota: Los resultados deben interpretarse completamente")
+```
+:::
+
+# Elasticidad
+
+## Elasticidad
+
+Una medida muy conocida, ahora implica un calculo en econometría.
+
+```{r elast}
+#| echo: true
+#Para elasticidad
+attach(datos)
+(b1hat <- cov(exper,wage)/var(exper)) #Hallar beta de reg
+elasticidad<-b1hat*(exper/sal.hat)
+melasticidad<-b1hat*(mean(exper)/mean(wage))  #Forma 1
+melasticidad2<-b1hat*(mean(exper)/mean(sal.hat)) #Forma 2
+
+# Fusionar Data
+cbind(wage, exper, elasticidad, melasticidad, melasticidad2 )[1:10,]
+detach(datos)
+```
+
+
+# Otras formas funcionales
+
+## Otras formas funcionales {.scrollable .smaller}
+
+```{r, mnb}
+#| echo: true
+reg1 <- lm(wage ~ exper, data=datos)
+reg2 <- lm(wage ~ 0 + exper, data=datos)
+reg3 <- lm(wage ~ 1 , data=datos)
+
+# Todo el grupo de regresiones
+regfh <- list("Modelo Lineal" = reg1, "Modelo sin constante" = reg2, 
+             "Modelo sin explicativa" = reg3)
+
+huxreg(regfh, statistics = c(N = "nobs", R2 = "r.squared"),
+       note = "Nota: Son transformaciones simples")
+```
+
+# Gráfico
+
+## Grafico de las regresiones
+```{r, plotdf}
+#| echo: true
+# Gráfico de las 3 regresiones
+plot(datos$exper, datos$wage, xlab = "Experiencia en años", ylab = "Salario en millones")
+abline(reg1, lwd=2, lty=1)
+abline(reg2, lwd=2, lty=2)
+abline(reg3, lwd=2, lty=3)
+legend("topleft",c("Completo","A traves del origen","Solo la constante"),lwd=2,lty=1:3)
+```
+
+# Gracias por su atención!! {background-color="#cc0000"}
