@@ -1,0 +1,80 @@
+---
+title: Econometría I
+subtitle: "Workclass 04"
+author:
+  name: Carlos A. Yanes Guerra
+  affiliation: Universidad del Norte | Departamento de Economía
+# date: "`r format(Sys.time(), '%d %B %Y')`" ## Or "Lecture no."
+output: 
+  html_document:
+    keep_md: false
+    theme: journal
+    highlight: haddock
+    # code_folding: show
+    toc: yes
+    toc_depth: 4
+    toc_float: yes
+    css: css/preamble.css ## For multi-col environments
+  pdf_document:
+    latex_engine: xelatex
+    keep_tex: false ## Change to true if want keep intermediate .tex file
+    toc: true
+    toc_depth: 3
+    dev: cairo_pdf
+    # fig_width: 7 ## Optional: Set default PDF figure width
+    # fig_height: 6 ## Optional: Set default PDF figure height
+    extra_dependencies: ['booktabs', 'threeparttable', 'float'] # "longtable"
+    includes:
+      in_header: tex/preamble.tex ## For multi-col environments
+    pandoc_args:
+        --template=tex/mytemplate.tex ## For affiliation field. See: https://bit.ly/2T191uZ
+always_allow_html: true
+urlcolor: blue
+mainfont: cochineal
+sansfont: Fira Sans
+monofont: Fira Code ## Although, see: https://tex.stackexchange.com/q/294362
+## Automatically knit to both formats:
+knit: (function(inputFile, encoding) {
+ rmarkdown::render(inputFile, encoding = encoding, 
+ output_format = 'all') 
+ })
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE, dpi=300, fig.align = "center")
+```
+
+## Antes de empezar
+
+Va el **workclass** \#4, al igual que todos los anteriores puede ser entregado en grupo de máximo dos (2) estudiantes. En esta ocasión se va hacer estimación de modelo e **inferencia** y lo haremos con el modelo de mínimos cuadrados ordinarios o MCO. Recuerde que el tiempo para entrega ahora será de _1 hora y 50 minutos_. El formato de recepción solo es en **word** o **pdf** en la carpeta del curso de **Brightspace** para eso. No se admite por correo ni en formato (Rmd) que es distinto al solicitado.
+
+## Objetivo
+
+Recordar la parte de microeconomía y realizar un par de modelos para comprobación de algunas teorías y aplicarlas a un caso de estudio.
+
+## Base de datos
+
+El archivo esta situado en la página web del profesor. Tome en consideración la base de datos (datoscons.txt). La base contiene tres variables que tienen que ver con el consumo (en unidades) de cajas de tomates, el ingreso del agente que compra (en pesos colombianos) y el precio por libra (en pesos colombianos) del producto que paga el comprador.
+
+La pregunta central en esta ocasión es:
+
+<center>**Qué tan sensible es la demanda de la empresa vendedora de tómates con respecto a los precios que revela el producto?**</center>
+
+\newpage
+
+## Preguntas y solicitudes
+
+Esta vez le toca importar los datos a R. Esta se encuentra en formato texto. Use el directorio de descarga e importe con la opción de `library(readr)`.
+
+1. Establezca las estadísticas descriptivas de todas las variables de la base de datos (media, varianza, desviación estándar, máximos y mínimos). Use el formato que desee, pero *interprete los resultados*. 
+
+2. Ejecute una primera regresión (1) cuando la variable dependiente es el `consumo` y tiene como explicativa a la variable `precio`. *Muestre el encabezado de los resultados, incluyendo valores predichos y residuales. Luego establezca la prueba de Jarque-Bera para residuos e interprete*. 
+
+3. Ahora haga una segunda regresión (2), pero cuando las variables son logarítmicas. Por ejemplo log(consumo) y log(precios). Por último, haga una tercera (3) y cuarta (4) regresión pero cuando la variable explicativa es el ingreso (tiene que replicar la regresión (1) y (2) pero teniendo ahora el ingreso como variable explicativa o control). ¿Qué tipo de modelo de regresión está estimando? Específicamente, ¿Qué tipo de relación supone que existe entre qué variables? ¿qué diferencias hay entre los modelos?. Use el formato de `huxreg`. Deben salirle en total (4) regresiones por columna en una misma tabla. *Describa los resultados. El uso de ecuaciones formales le dará mas puntos*.
+
+4. Haga una prueba de hipótesis e interprétela con los resultados de los parámetros del modelo 1 y 2.
+
+5. Escoja el modelo de regresión para responder a la **pregunta central** de la consultoría. Diganos que sensibilidad tiene de forma lineal el modelo y muestre la forma de elasticidad. *Plantee una tabla con solo 5 datos que muestre lo anterior*. Establezca que modelo es el mejor para la empresa y justifique.
+
+#### Ayudas
+En la parte final debe estimar desde luego de forma manual las elasticidades solo del modelo de regresión (1) y tener presente la regresión (2). En la guía \#5 aparece como hacerlo. Puede establecerlo de forma individual (elasticidad) o en efecto de la elasticidad promedio o la conocida como elasticidad arco (melasticidad). 
