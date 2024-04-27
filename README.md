@@ -1,7 +1,7 @@
 # Econometrics
 Econometrics course with note for undergraduate students
 
-## Class overhead v 0.2
+## Class overhead v 0.3
 
 Introducción [Clase 1](https://keynes37.github.io/Econometrics/Class/Class00/Class00.html#1)
 
@@ -19,4 +19,6 @@ Intervalos en Mínimos Cuadrados [Test de parámetros](https://keynes37.github.i
 [Guia Inferencia](https://keynes37.github.io/Econometrics/Projects/Claseinr/CInferencia.html)
 
 [Guia test modelo](https://raw.githack.com/keynes37/Econometrics/main/Projects/Claseinr/Cmodels.html)
+
+### Busqueda
 
