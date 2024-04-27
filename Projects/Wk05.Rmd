@@ -1,0 +1,127 @@
+---
+title: Econometría I
+subtitle: "Workclass 05"
+author:
+  name: Carlos A. Yanes Guerra
+  affiliation: Universidad del Norte | Departamento de Economía
+# date: "`r format(Sys.time(), '%d %B %Y')`" ## Or "Lecture no."
+output: 
+  html_document:
+    keep_md: false
+    theme: journal
+    highlight: haddock
+    # code_folding: show
+    toc: yes
+    toc_depth: 4
+    toc_float: yes
+    css: css/preamble.css ## For multi-col environments
+  pdf_document:
+    latex_engine: xelatex
+    keep_tex: false ## Change to true if want keep intermediate .tex file
+    toc: true
+    toc_depth: 3
+    dev: cairo_pdf
+    # fig_width: 7 ## Optional: Set default PDF figure width
+    # fig_height: 6 ## Optional: Set default PDF figure height
+    extra_dependencies: ['booktabs', 'threeparttable', 'float'] # "longtable"
+    includes:
+      in_header: tex/preamble.tex ## For multi-col environments
+    pandoc_args:
+        --template=tex/mytemplate.tex ## For affiliation field. See: https://bit.ly/2T191uZ
+always_allow_html: true
+urlcolor: blue
+mainfont: cochineal
+sansfont: Fira Sans
+monofont: Fira Code ## Although, see: https://tex.stackexchange.com/q/294362
+## Automatically knit to both formats:
+knit: (function(inputFile, encoding) {
+ rmarkdown::render(inputFile, encoding = encoding, 
+ output_format = 'all') 
+ })
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE, dpi=300, fig.align = "center")
+```
+
+## Antes de empezar
+
+Es hora del **workclass** \#5, recuerde que debe ser entregado en grupo de máximo dos (2) estudiantes. Esta vez haremos un caso especial con modelos donde la dependiente es una variable **cualitativa**, es decir, binaria. Sabe que cuenta con tiempo de _1 hora y 50 minutos_. Las extensiones generan penalidades consecuentes en las notas. El Formato para evaluar es en **word** o **pdf**. Solo se aceptan entregas en el **Brightspace**.
+
+## Objetivo
+
+- Comprender el uso de técnicas del modelo logístico para su uso en econometría con enfasis a casos cuya respuesta va en medio de las probabilidades.
+
+## Base de datos
+
+Vamos a intentar a entender (asistido por el profesor) el modelo de probabilidad lineal y el modelo **Logit**. Las indicaciones van en cada `chunk` que pueden no ser modificados y otros que si debe hacer quizás una pequeña modificación. El merito va ser plenamente interpretativo y vamos hablar de mercado laboral. Recuerde que una manera de hacer política pública es mirar problemas macroeconómicos como lo es el desempleo y en un caso puntual la parte de la oferta laboral que tiene que ver con las mujeres. Miramos como una variable como el número de hijos inciden en la intención de ellas de querer participar en el mercado laboral. 
+
+La pregunta central (con base al texto de referencia de wooldridge) en esta ocasión es:
+
+<center>**Qué probabilidad tienen las mujeres con hijos menores de participar en el mercado laboral?**</center>
+
+\newpage
+
+## Preguntas y solicitudes
+
+Primero preparemos el espacio de trabajo e instalemos el paquete de Wooldridge para hacer uso de su base de datos y con ella responder lo solicitado.
+
+### Preparación:
+
+Usaremos dos paquetes, uno ya conocido y el otro a instalar "wooldridge"
+```r
+## Instalación
+install.package("wooldridge")
+library(pacman)
+p_load(wooldridge, tidyverse)
+```
+
+1. Antes que nada interprete el siguiente gráfico de edad (cuantitativa) y una cualitativa `inlf` que significa (¿Está en al fuerza laboral?)
+
+```r
+data(mroz, package = "wooldridge") # Datos del paquete de wooldridge
+plot(factor(inlf) ~ age, data = mroz, 
+     ylevels = 2:1,
+     ylab = "Está en la fuerza laboral?")
+```
+- La base de datos *mroz* contiene un grupo de variables que vamos a usar.
+
+2. Estimemos una regresión de probabilidad lineal o MPL. Para ello vamos a usar las siguientes variables: `faminc` que es el ingreso de la familia en dolares, `educ` es el número de años de educación aprobados, `exper` como los años de experiencia, `age` como la edad del individuo y la variable `kidslt6` que es el \# de hijos menores de 6 años que tiene esa persona. 
+
+```r
+MPL = lm(inlf ~ faminc + educ + exper 
+         + I(exper^2) + age +I(age^2) + kidslt6, mroz)
+broom::tidy(MPL)
+```
+Qué dice ese modelo? interprete
+
+3. Ahora tome el siguiente código y diga lo que puede inferir de él:
+
+```r
+pr = predict(MPL)
+plot(pr[order(pr)],ylab = "p(inlf = 1)")
+abline(a = 0, b = 0, col = "red",lw = 3)
+abline(a = 1, b = 0, col = "red",lw = 3)
+```
+
+4. Vamos al modelo Logit. Estime el modelo en esta versión de código, recuerde que debe ajustarlo, de tal manera que obtenga los estimadores e interpretelos por favor. Hagalo en la versión de **odds** (chances)
+
+```r
+probit <- glm(y ~ x, 
+                    data = mroz, 
+                    family = binomial(link = "logit"))
+```
+
+5. Hagamos una mejor interpretación en forma de **probabilidad**. Halle la derivada de la función y busque como se interpreta un **efecto marginal**
+
+```r
+modelo <- "y ~ x1 + x2 + x3 + x4" # vamos a recortar la ecuación
+glms <- list()
+glms$logit <- glm(formula = modelo, 
+                    data = mroz, 
+                    family = binomial(link = "logit"))
+## Efecto Marginal
+glms$logitMean <- mfx::logitmfx(formula = modelo, 
+                    data = mroz, atmean = TRUE)                 
+```
+
