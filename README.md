@@ -14,11 +14,12 @@ Modelo Mínimos Cuadrados [MCO](https://keynes37.github.io/Econometrics/Class/Cl
 Intervalos en Mínimos Cuadrados [Test de parámetros](https://keynes37.github.io/Econometrics/Class/Class04/Class04.html#1)
 
 
-### nota de clase
+### Notas de clase
 
 [Guia Inferencia](https://keynes37.github.io/Econometrics/Projects/Claseinr/CInferencia.html)
 
 [Guia test modelo](https://raw.githack.com/keynes37/Econometrics/main/Projects/Claseinr/Cmodels.html)
 
-### Busqueda
+### Corte final
 
+Regresión Múltiple [Sesgo y variables cualitativas](https://keynes37.github.io/Econometrics/Class/Class06/Class06.html#1)
