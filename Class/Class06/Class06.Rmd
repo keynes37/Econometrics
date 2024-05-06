@@ -1,0 +1,1235 @@
+---
+title: "Econometria I"
+subtitle: "Regresión con Variables Cualitativas"
+author: "Carlos Yanes"
+date: "Universidad del Norte </br> `r Sys.Date()`"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    css: ["rutgers", "rutgers-fonts"]
+    nature:
+      beforeInit: "http://www.jvcasillas.com/ru_xaringan/js/ru_xaringan.js"
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+      ratio: "16:9"
+    seal: false
+---
+name: xaringan-title
+class: left, middle
+
+
+# Econometría I
+<br>
+## Variables Cualitativas
+
+<br>
+<br>
+<img src="images/lognig.png" width="280" />
+
+### Carlos Yanes | Departamento de Economía | `r Sys.Date()`
+
+---
+class: middle, inverse
+
+.left-column[
+
+# `r emo::ji("sweat_smile")`
+
+]
+
+.right-column[
+# Preguntas de la sesion anterior?
+]
+
+---
+
+```{r Setup, include = F}
+options(htmltools.dir.version = FALSE)
+library(pacman)
+p_load(broom, latex2exp, ggplot2, ggthemes, ggforce, viridis, dplyr, magrittr, knitr, parallel)
+
+library(tidyverse)
+library(babynames)
+library(fontawesome) # from github: https://github.com/rstudio/fontawesome
+library(DiagrammeR)
+
+# Knitr options
+opts_chunk$set(
+  comment = "#>",
+  fig.align = "center",
+  fig.height = 7,
+  fig.width = 10.5,
+  warning = F,
+  message = F
+)
+# A blank theme for ggplot
+theme_empty <- theme_bw() + theme(
+  line = element_blank(),
+  rect = element_blank(),
+  strip.text = element_blank(),
+  axis.text = element_blank(),
+  plot.title = element_blank(),
+  axis.title = element_blank(),
+  plot.margin = structure(c(0, 0, -0.5, -1), unit = "lines", valid.unit = 3L, class = "unit"),
+  legend.position = "none"
+)
+theme_simple <- theme_bw() + theme(
+  line = element_blank(),
+  panel.grid = element_blank(),
+  rect = element_blank(),
+  strip.text = element_blank(),
+  axis.text.x = element_text(size = 14),
+  axis.text.y = element_blank(),
+  axis.ticks = element_blank(),
+  plot.title = element_blank(),
+  axis.title = element_blank(),
+  # plot.margin = structure(c(0, 0, -1, -1), unit = "lines", valid.unit = 3L, class = "unit"),
+  legend.position = "none"
+)
+theme_axes <- theme_empty + theme(
+  axis.title = element_text(size = 18),
+  plot.margin = structure(c(0, 0, 0.1, 0), unit = "lines", valid.unit = 3L, class = "unit"),
+)
+
+theme_axes_math <- theme_void() + theme(
+  text = element_text(family = "MathJax_Math"),
+  axis.title = element_text(size = 22),
+  axis.title.x = element_text(hjust = .95, margin = margin(0.15, 0, 0, 0, unit = "lines")),
+  axis.title.y = element_text(vjust = .95, margin = margin(0, 0.15, 0, 0, unit = "lines")),
+  axis.line = element_line(
+    color = "grey70",
+    size = 0.25,
+    arrow = arrow(angle = 30, length = unit(0.15, "inches")
+  )),
+  plot.margin = structure(c(1, 0, 1, 0), unit = "lines", valid.unit = 3L, class = "unit"),
+  legend.position = "none"
+)
+theme_axes_serif <- theme_void() + theme(
+  text = element_text(family = "MathJax_Main"),
+  axis.title = element_text(size = 22),
+  axis.title.x = element_text(hjust = .95, margin = margin(0.15, 0, 0, 0, unit = "lines")),
+  axis.title.y = element_text(vjust = .95, margin = margin(0, 0.15, 0, 0, unit = "lines")),
+  axis.line = element_line(
+    color = "grey70",
+    size = 0.25,
+    arrow = arrow(angle = 30, length = unit(0.15, "inches")
+  )),
+  plot.margin = structure(c(1, 0, 1, 0), unit = "lines", valid.unit = 3L, class = "unit"),
+  legend.position = "none"
+)
+
+```
+
+```{R, colors, include = F}
+# Define pink color
+red_pink <- "#e64173"
+turquoise <- "#20B2AA"
+orange <- "#FFA500"
+red <- "#fb6107"
+blue <- "#2b59c3"
+green <- "#8bb174"
+grey_light <- "grey70"
+grey_mid <- "grey50"
+grey_dark <- "grey20"
+purple <- "#6A5ACD"
+```
+
+background-size: 100%
+background-image: url(https://media.giphy.com/media/IkmyynhYBEqme9IMFH/giphy.gif)
+
+???
+
+Image test. Taken from gyfty.
+
+---
+# Modelos de Regresión Múltiple: (k) Parámetros
+
+--
+
+- Recordemos que:
+
+--
+
+$$y_{i}=\beta_{0}+\beta_{1}x_{1i}+\beta_{2}x_{2i}+\beta_{3}x_{3i}+ \cdots+\beta_{k-1}x_{(k-1)i}+ \mu_{i}$$
+
+--
+
+- Se tiene que:
+
+--
+   
+`r fa('angle-double-right', fill="blue")` Un número de $k$ parámetros desconocidos que depende del número de variables de control.
+
+--
+   
+`r fa('angle-double-right', fill="blue")` $k-1$ regresores.
+   
+---
+# Modelos de Regresión Múltiple: K Parámetros
+
+--
+
+Recuerde que de lo que tenemos estadísticamente, podemos expresarlo de forma **matricial**:
+
+--
+
+- Una medida de variabilidad de la variable _dependiente_ es:
+
+--
+
+$$y'y = \sum \limits_{i=1}^{n} y_{i}^{2}$$
+--
+
+- De la descomposición **ortogonal** de (Y) podemos tener:
+
+--
+
+$$\begin{aligned}
+y'y=& (\widehat{y}+u)'(\widehat{y}+u)\\
+  =& \widehat{y}'\widehat{y}+ 2\widehat{y}'\widehat{u}+\widehat{u}'\widehat{u}\\
+           =& \widehat{y}'\widehat{y}+\widehat{u}'\widehat{u}
+\end{aligned}$$
+
+--
+
+- Lo que también puede ser establecido como:
+
+--
+
+$$\sum \limits_{i=1}^{n} y_{i}^{2}= \sum \limits_{i=1}^{n} \widehat{y}_{i}^{2} + \sum \limits_{i=1}^{n} \widehat{u}_{i}^{2}$$
+---
+# Modelos de Regresión Múltiple: K Parámetros
+
+Si de la expresión anterior restamos su media con un vector de unos (1) llamado **f** de tamaño $n \times 1$ entonces encontramos:
+
+--
+
+$$(y-\textbf{f}\bar{y})'(y-\textbf{f}\bar{y})=(\widehat{y}-\textbf{f}\bar{y})'(\widehat{y}-\textbf{f}\bar{y})+\widehat{u}'\widehat{u}$$
+
+--
+
+- De tal forma que es lo mismo que:
+$$\underbrace{\sum \limits_{i=1}^{n} (y_{i}-\bar{y})^{2}}_{SST}= \underbrace{\sum \limits_{i=1}^{n} (\widehat{y}_{i}-\bar{y})^{2}}_{SSE} + \underbrace{\sum \limits_{i=1}^{n} \widehat{u}_{i}^{2}}_{SSR}$$
+
+--
+
+Los términos de la expresión **SST** hacen referencia a la suma total al cuadrado (fuente de variación principal), **SSE** es la suma al cuadrado del modelo o _suma explicada_ y por último, **SSR** la suma de los residuos al cuadrado de nuestro modelo.
+
+---
+# Modelos de Regresión Múltiple: K Parámetros
+
+--
+
+`r fa("android", fill="red")` De lo anterior, para tener al **coeficiente de determinación**, la formula mas usada es:
+$$R^{2}=1-\frac{SSR}{SST}$$
+
+--
+
+Note que $SSR= \sum_i \left( y_i - \hat{y}_i \right)^2 = \sum_i e_i^2$ y que $SST= \sum_i \left( y_i - \bar{y}_i \right)^2$
+
+--
+
+Para lo cual se debe **pensar** que:
+
+--
+
+$$\text{Si} \quad SSR \downarrow \; \Rightarrow R^{2} \; \uparrow$$
+
+--
+
+> A medida que se _adicionan_ nuevas variables al modelo de regresión, automaticamente el .blue[R2] aumenta.
+
+--
+
+- Al tener ese problema entonces, hay que entrar a solucionarlo.
+
+---
+class: title-slide-section-grey, middle
+
+# Nuevamente.. El $R^2-Ajustado$
+
+<br>
+<img src="images/lognig.png" width="380" />
+
+---
+# Modelos de Regresión Múltiple: $R^2$ ajustado
+
+--
+
+`r fa("check-circle", fill="blue")` Una **solución** es .blue[penalizar] el número de variables, _p.e_ con el $R^2$ **ajustado**.
+
+--
+
+$$ \overline{R}^{2} = 1 - \dfrac{\sum_i \left( y_i - \hat{y}_i \right)^2/(n-k-1)}{\sum_i \left( y_i - \overline{y} \right)^2/(n-1)}$$
+
+--
+
+*Nota:* $R^2$ Ajustado necesariamente no esta entre 0 y 1.
+
+--
+
+### Mucho cuidado!!
+
+--
+
+Hay que tener en cuenta las ventajas y desventajas de añadir o quitar variables:
+
+--
+
+**Menos variables**
+
+--
+
+- Generalmente explican menos variación en $y$
+- Proporcionan interpretaciones y visualizaciones sencillas (*parsimoniosas*)
+- Puede ser necesario preocuparse por el sesgo de las variables omitidas
+
+---
+# Modelos de Regresión Múltiple: $R^2$ ajustado
+
+--
+
+**Más variables**
+
+--
+
+- Es más probable que se encuentren relaciones *espúreas* (estadísticamente significativas debido a la casualidad; no reflejan una verdadera relación a nivel de la población)
+
+--
+
+- Es más difícil interpretar el modelo
+
+--
+
+- Es posible que se pasen por alto variables importantes: sigue habiendo un sesgo de variables omitidas
+
+---
+# Modelos de Regresión Múltiple: $R^2$ ajustado
+```{R import, echo=F}
+library(haven)
+auto <- read_dta("auto.dta")
+```
+
+Tomemos los datos de _autos_ :
+
+```{R, mod1, echo=F}
+library(flextable)
+mod1<-lm(price~mpg, data = auto)
+me1<- as_flextable(mod1) # Mejor formato de salida
+me1<- add_header_lines(me1, values = "Tabla #1: Regresión Simple")
+me1
+```
+---
+# Modelos de Regresión Múltiple: $R^2$ ajustado
+
+Con dos variables:
+
+```{R, mod2, echo= F}
+mod2<-lm(price~mpg+length, data = auto)
+me2<- as_flextable(mod2) # Mejor formato de salida
+me2<- add_header_lines(me2, values = "Tabla #2: Regresión Múltiple")
+me2
+```
+
+---
+# Modelos de Regresión Múltiple: $R^2$ ajustado
+
+Con tres variables:
+
+```{R, mod3, echo=F}
+mod3<-lm(price~mpg+length+weight, data = auto)
+me3<- as_flextable(mod3) # Mejor formato de salida
+me3<- add_header_lines(me3, values = "Tabla #3: Regresión Múltiple con mas k")
+me3
+```
+
+---
+# Modelos de Regresión Múltiple: $R^2$ ajustado
+
+--
+
+- Nuestro modelo en la medida que hemos incorporado nuevas variables ha cambiado la métrica del $R^2$.
+
+--
+
+| **Variables** | **Coeficiente R2** | **Variación R** | **R-Ajustado**         | **Variación Ajustado** |
+|---------------|--------------------|-----------------|------------------------|------------------------|
+| 1             | 0.2196             |                 | 0.2087                 |                        |
+| 2             | 0.2291             | 4%              | 0.2073                 | -0.6%                 |
+| 3             | 0.3574             | 56%             | 0.3298                 | 59%                   |
+
+
+--
+
+<ru-blockquote> **Proporción** de la _variación_ muestral de $Y$ que es explicada por las $X_{i}$, o también se puede definir como la variación en (Y) que es explicada por las variables **independientes** pero con _castigo_ en los grados de libertad por incluir esas nuevas variables.</ru-blockquote>
+
+--
+
+- Otra forma de establecer la .blue[formula] del $R^2$ ajustado es:
+
+--
+
+$$\overline{R}^{2} = 1 - \dfrac{SSR/(n-k-1)}{SST/(n-1)}$$
+
+---
+class: title-slide-section-red, middle
+
+# Sesgo por variable omitida
+
+<br>
+<img src="images/lognig.png" width="380" />
+
+---
+# Sesgo por variable omitida
+
+--
+
+**El sesgo de la variable omitida** (SVO) surge cuando omitimos una variable que
+
+--
+
+1. Afecta a nuestra variable de resultado $y$
+
+--
+
+2. Se correlaciona con una variable explicativa $x_j$.
+
+--
+
+Como su nombre indica, esta situación provoca un sesgo en nuestra estimación de $\beta_j$.
+
+--
+
+**Ejemplo**
+
+--
+
+Imagine un modelo de regresión con varios individuos $i$ de su nivel de ingresos
+
+--
+
+$$ \text{Pago}_i = \beta_0 + \beta_1 \text{Escolaridad}_i + \beta_2 \text{Genero}_i + u_i $$
+
+--
+
+Donde
+
+--
+
+- $\text{Escolaridad}_i$ son los años aprobados y cursados por el individuo $i$.
+
+--
+
+- $\text{Genero}_i$ una variable _indicador_ (dummy) del genero de $i$ haciendo referencia a si este es masculino.
+
+---
+# Sesgo por variable omitida
+
+Entonces
+
+--
+
+- $\beta_1$: Es el retorno económico por cada año de educación que tiene el individuo (*ceteris paribus*)
+
+--
+
+- $\beta_2$: la prima por ser hombre (*ceteris paribus*)
+<br>Si $\beta_2 > 0$ o $\beta_2 < 0$, entonces existe una **discriminación** contra las mujeres (hombres): ya que alguno(a)s reciben menos salario por razón de su género.
+
+--
+
+Para nuestro modelo poblacional
+
+--
+
+$$\text{Pago}_i = \beta_0 + \beta_1 \text{Escolaridad}_i + \beta_2 \text{Genero}_i + u_i$$
+
+--
+
+Si nos concentramos en la estimación solo de **Escolaridad**, es decir, omitimos la variable de genero, el modelo ahora será _p.e._,
+
+--
+
+$$\text{Pago}_i = \beta_0 + \beta_1 \text{Escolaridad}_i + \left(\beta_2 \text{Genero}_i + u_i\right)$$
+
+--
+
+Ahora vamos a tener
+
+--
+
+$$\text{Pago}_i = \beta_0 + \beta_1 \text{Escolaridad}_i + \varepsilon_i$$
+--
+
+Donde $\varepsilon_i = \beta_2\; \text{Genero}_i + u_i$.
+
+---
+# Sesgo por variable omitida
+
+--
+
+La condición de **exogeneidad** ya no se cumple. pero incluso si
+
+--
+
+$\mathop{\boldsymbol{E}}\left[ u | X \right] = 0$, no es cierto que $\mathop{\boldsymbol{E}}\left[ \varepsilon | X \right] = 0$ de tal forma que $\beta_2 \neq 0$.
+
+--
+
+Esto es, $\mathop{\boldsymbol{E}}\left[ \varepsilon | \text{genero} = 1 \right] = \beta_2 + \mathop{\boldsymbol{E}}\left[ u | \text{genero} = 1 \right] \neq 0$.
+
+--
+ 
+ **Ahora entonces MCO es Sesgado.**
+
+---
+# Sesgo por variable omitida
+Veamos un gráfico:
+
+```{R, generate data, include = F, cache = T}
+# Set seed
+set.seed(1234)
+# Tamaño de muestra
+n <- 1e3
+# Parametetros
+beta0 <- 20; beta1 <- 0.5; beta2 <- 10
+# Datos
+sesgo_df <- tibble(
+  genero = sample(x = c(T, F), size = n, replace = T),
+  escolaridad = runif(n, 3, 9) - 3 * genero,
+  pago = beta0 + beta1 * escolaridad + beta2 * escolaridad + rnorm(n, sd = 7)
+)
+lm_sesgo <- lm(pago ~ escolaridad, data = sesgo_df)
+bb0 <- lm_sesgo$coefficients[1] %>% round(1)
+bb1 <- lm_sesgo$coefficients[2] %>% round(1)
+lm_inses <- lm(pago ~ escolaridad + genero, data = sesgo_df)
+bu0 <- lm_inses$coefficients[1] %>% round(1)
+bu1 <- lm_inses$coefficients[2] %>% round(1)
+bu2 <- lm_inses$coefficients[3] %>% round(1)
+```
+
+```{R, plot1, echo = F, dev = "svg", fig.height = 5}
+ggplot(data = sesgo_df, aes(x = escolaridad, y = pago)) +
+geom_point(size = 2.5, color = "black", alpha = 0.4, shape = 16) +
+geom_hline(yintercept = 0) +
+geom_vline(xintercept = 0) +
+xlab("Escolaridad") +
+ylab("Pago") +
+theme_empty +
+theme(
+  axis.title = element_text(size = 18),
+  plot.margin = structure(c(0, 0, 0.1, 0), unit = "lines", valid.unit = 3L, class = "unit"),
+)
+```
+---
+# Sesgo por variable omitida
+Tenemos un modelo: $\text{Pago}_i = `r bb0` + `r bb1` \times \text{Escolaridad}_i$
+
+```{R, plot2, echo = F, dev = "svg", fig.height = 5}
+ggplot(data = sesgo_df, aes(x = escolaridad, y = pago)) +
+geom_point(size = 2.5, color = "black", alpha = 0.4, shape = 16) +
+geom_hline(yintercept = 0) +
+geom_vline(xintercept = 0) +
+geom_smooth(se = F, color = "orange", method = lm) +
+xlab("Escolaridad") +
+ylab("Pago") +
+theme_empty +
+theme(
+  axis.title = element_text(size = 18),
+  plot.margin = structure(c(0, 0, 0.1, 0), unit = "lines", valid.unit = 3L, class = "unit"),
+)
+```
+
+---
+# Sesgo por variable omitida
+Variable omitida: Genero (**<font color="#e64173">Masculino</font>** y **<font color="#314f4f">Femenino</font>**)
+
+```{R, plot3, echo = F, dev = "svg", fig.height = 5}
+ggplot(data = sesgo_df, aes(x = escolaridad, y = pago))  +
+geom_point(size = 2.5, alpha = 0.8, aes(color = genero, shape = genero)) +
+geom_hline(yintercept = 0) +
+geom_vline(xintercept = 0) +
+geom_line(stat = "smooth", color = "orange", method = lm, alpha = 0.5, size = 1) +
+xlab("Escolaridad") +
+ylab("Pago") +
+theme_empty +
+theme(
+  axis.title = element_text(size = 18),
+  plot.margin = structure(c(0, 0, 0.1, 0), unit = "lines", valid.unit = 3L, class = "unit"),
+) +
+scale_color_manual("", values = c(red_pink, "darkslategrey"), labels = c("Masculino", "Femenino")) +
+scale_shape_manual("", values = c(16, 1), labels = c("Masculino", "Femenino"))
+```
+
+---
+# Sesgo por variable omitida
+Variable omitida: Genero (**<font color="#e64173">Masculino</font>** y **<font color="#314f4f">Femenino</font>**)
+
+```{R, plot4, echo = F, dev = "svg", fig.height = 5}
+ggplot(data = sesgo_df, aes(x = escolaridad, y = pago))  +
+geom_point(size = 2.5, alpha = 0.8, aes(color = genero, shape = genero)) +
+geom_hline(yintercept = 0) +
+geom_vline(xintercept = 0) +
+geom_line(stat = "smooth", color = "orange", method = lm, alpha = 0.2, size = 1) +
+geom_abline(
+  intercept = lm_inses$coefficients[1],
+  slope = lm_inses$coefficients[2],
+  color = red_pink, size = 1
+) +
+geom_abline(
+  intercept = lm_inses$coefficients[1] + lm_inses$coefficients[3],
+  slope = lm_inses$coefficients[2],
+  color = "darkslategrey", size = 1
+) +
+xlab("Escolaridad") +
+ylab("Pago") +
+theme_empty +
+theme(
+  axis.title = element_text(size = 18),
+  plot.margin = structure(c(0, 0, 0.1, 0), unit = "lines", valid.unit = 3L, class = "unit"),
+) +
+scale_color_manual("", values = c(red_pink, "darkslategrey"), labels = c("Masculino", "Femenino")) +
+scale_shape_manual("", values = c(16, 1), labels = c("Masculino", "Femenino"))
+```
+
+---
+# Sesgo por variable omitida
+Regresión insesgada: $\text{Pago}_i = `r bu0` + `r bu1` \times \text{Escolaridad}_i +  `r bu2` \times \text{Genero}_i$
+
+```{R, plot5, echo = F, dev = "svg", fig.height = 5}
+ggplot(data = sesgo_df, aes(x = escolaridad, y = pago))  +
+geom_point(size = 2.5, alpha = 0.8, aes(color = genero, shape = genero)) +
+geom_hline(yintercept = 0) +
+geom_vline(xintercept = 0) +
+geom_line(stat = "smooth", color = "orange", method = lm, alpha = 0.2, size = 1) +
+geom_abline(
+  intercept = lm_inses$coefficients[1],
+  slope = lm_inses$coefficients[2],
+  color = red_pink, size = 1
+) +
+geom_abline(
+  intercept = lm_inses$coefficients[1] + lm_inses$coefficients[3],
+  slope = lm_inses$coefficients[2],
+  color = "darkslategrey", size = 1
+) +
+xlab("Escolaridad") +
+ylab("Pago") +
+theme_empty +
+theme(
+  axis.title = element_text(size = 18),
+  plot.margin = structure(c(0, 0, 0.1, 0), unit = "lines", valid.unit = 3L, class = "unit"),
+) +
+scale_color_manual("", values = c(red_pink, "darkslategrey"), labels = c("Masculino", "Femenino")) +
+scale_shape_manual("", values = c(16, 1), labels = c("Masculino", "Femenino"))
+```
+---
+
+```{R, venng2, dev = "svg", echo = F}
+# Tipos (order: x1, x2, x3, y)
+venn_lines <- c("solid", "dotted", "dotted", "solid")
+
+# Colores (order: x1, x2, x3, y)
+venn_colors <- c(purple, red, "grey60", orange)
+
+# venn en datos
+venn_df <- tibble(
+  x  = c( 0.0,   -0.5,    1.5,   -1.0),
+  y  = c( 0.0,   -2.5,   -1.8,    2.0),
+  r  = c( 1.9,    1.5,    1.5,    1.3),
+  l  = c( "Y", "X[1]", "X[2]", "X[3]"),
+  xl = c( 0.0,   -0.5,    1.6,   -1.0),
+  yl = c( 0.0,   -2.5,   -1.9,    2.2)
+)
+# Venn
+ggplot(data = venn_df, aes(x0 = x, y0 = y, r = r, fill = l, color = l)) +
+geom_circle(aes(linetype = l), alpha = 0.3, size = 0.75) +
+theme_void() +
+theme(legend.position = "none") +
+scale_fill_manual(values = venn_colors) +
+scale_color_manual(values = venn_colors) +
+scale_linetype_manual(values = venn_lines) +
+geom_text(aes(x = xl, y = yl, label = l), size = 9, family = "Fira Sans Book", parse = T) +
+annotate(
+  x = -5.5, y = 3.3,
+  geom = "text", label = "Variables Omitidas", size = 9, family = "Fira Sans Book", hjust = 0
+) +
+xlim(-5.5, 4.5) +
+ylim(-4.2, 3.4) +
+coord_equal()
+```
+---
+class: title-slide-section-grey, middle
+
+# Sesgo por variable omitida
+
+<br>
+<img src="images/lognig.png" width="380" />
+
+---
+# Sesgo por variable omitida
+
+--
+
+## Como corregirlo
+
+--
+
+1. No **omita variables**
+
+--
+
+2. Instrumentalizando o por MCO (dos etapas) 
+
+---
+# Modelos de Regresión Múltiple: variables irrelevantes
+
+--
+
+Se tiene:
+$$y= \beta_{0}+\beta_{1}x_{1}+\beta_{2}x_{2}+\beta_{3}x_{3}+\mu$$
+
+--
+
+- $x_{3}$ no tiene efecto sobre $y$ una vez se controló por 
+$x_{1}$ y $x_{2}$, es decir, $\beta_{3}=0$.
+
+--
+
+- Puede o no estar **correlacionado** $x_{3}$ con $x_{1}$ o $x_{2}$.
+
+--
+
+- $E[y|x_{1},x_{2},x_{3}]=E[y|x_{1},x_{2}]=\beta_{0}+\beta_{1}x_{1}+\beta_{2}x_{2}$
+
+--
+
+- No sabemos que $\beta_{3}=0$, por lo que estimamos:
+$$\widehat{y}= \widehat{\beta}_{0}+\widehat{\beta}_{1}x_{1}+\widehat{\beta}_{2}x_{2}+\widehat{\beta}_{3}x_{3}+\mu$$
+--
+
+- .blue[Sobre-especificar] el modelo, no afecta el **insesgamiento** de los estimadores de MCO.
+
+---
+class: title-slide-section-grey, middle
+
+# Variables Cualitativas
+
+<br>
+<img src="images/lognig.png" width="380" />
+
+---
+# Variables Cualitativas
+
+--
+
+`r fa("check-square", fill="red")` **Dummy** Son variables que son catalogadas como _ficticias_ y su manera de abordar se hace a partir de una variable _binaria_.
+
+--
+
+`r fa("check-square", fill="red")` Generalmente son variables de **escala nominal** o característica.
+
+--
+
+$$D=\left\{\begin{matrix}
+1 & \text{si la característica está presente}\\
+0 & \text{si la característica no está presente}
+\end{matrix}\right.$$
+
+--
+
+`r fa("check-square", fill="red")` Debe escogerse un grupo **base** con la cual se hacen _comparaciones_ (elección puede ser arbitraria).
+
+---
+# Variables Cualitativas
+
+| **Obs**      | **Ingreso**      | **Educación**      | **Experiencia**      | **Masculino**      |
+|--------------|------------------|--------------------|----------------------|-------------------|
+| 1            | 3.15             | 11                 | 12                   | 0                 |
+| 2            | 2.92             | 12                 | 3                    | 1                 |
+| 3            | 5.4              | 16                 | 5                    | 0                 |
+| $\vdots$     | 6.00             | 14                 | 7                    | 0                 |
+| 324          | 11.2             | 15                 | 6                    | 1                 |
+| 325          | 15.3             | 16                 | 12                   | 0                 |
+
+---
+# Variables Cualitativas
+
+<ru-blockquote>Son de tipo **categórico** p.e: (sexo, estrato, sector, religión, raza, etc). En los modelos debemos _transformarlas_ en variables *binarias* o de tipo (0,1)</ru-blockquote>
+
+--
+
+- Considere por ejemplo la siguiente estimación:
+
+--
+
+$$Ingreso_i=\beta_0+ \beta_1 \; \text{Masculino}_i+ \mu_i$$
+
+--
+
+_Donde_ 
+
+`r fa('angle-right', fill='blue')` $Ingreso_i$ es una variable _continua_ que mide el nivel de ingreso (pago recibido) de un individuo cualquiera.
+
+--
+
+`r fa('angle-right', fill='blue')` $Masculino_i$ es una variable _cualitativa_ que mide define el sexo o genero de un individuo cualquiera.
+
+--
+
+> La interpretación de $\beta_1$ es la diferencia esperada entre hombres y mujeres en el ingreso. El parámetro $\beta_0$ es el ingreso promedio de las mujeres $(Masculino_{i}=0)$ y la parte de $\beta_0+\beta_1$ es el ingreso promedio de las **hombres** 
+
+
+
+---
+# Variables Cualitativas
+
+Derivación
+
+--
+
+$$
+\begin{aligned}
+ \mathop{\boldsymbol{E}}\left[ \text{Ingreso} | \text{Femenino} \right] &=
+ \mathop{\boldsymbol{E}}\left[ \beta_0 + \beta_1\times 0 + u_i \right] \\
+ &= \mathop{\boldsymbol{E}}\left[ \beta_0 + 0 + u_i \right] \\
+ &= \beta_0
+\end{aligned}
+$$
+
+--
+
+$$
+\begin{aligned}
+ \mathop{\boldsymbol{E}}\left[ \text{Ingreso} | \text{Masculino} \right] &=
+ \mathop{\boldsymbol{E}}\left[ \beta_0 + \beta_1\times \color{#e64173}{1} + u_i \right] \\
+ &= \mathop{\boldsymbol{E}}\left[ \beta_0 + \beta_1 + u_i \right] \\
+ &= \beta_0 + \beta_1
+\end{aligned}
+$$
+
+--
+
+**Nota:** Si no hay mas _variables_ explicativas o controles, entonces $\hat{\beta}_1$ es igual a la diferencia de medias, _p.e._, $\overline{x}_\text{Masculino} - \overline{x}_\text{Femenino}$.
+
+--
+
+**Nota<sub>2</sub>:** El supuesto de *mantener todo lo demas constante* se aplica de igual manera para los modelos de regresión múltiple.
+
+---
+# Variables Cualitativas
+
+$y_i = \beta_0 + \beta_1 x_i + u_i$ para variable binaria $Masculino_i$ o $x_i = \{\color{#314f4f}{0}, \, \color{#e64173}{1}\}$
+
+```{R, datos regc, include = F}
+# Set seed
+set.seed(1234)
+# tamaño muestral
+n <- 5e3
+# datos aleatorios
+bd_c <- tibble(
+  x = sample(x = c(0, 1), size = n, replace = T),
+  y = 5 + 14 * x + rnorm(n, sd = 2)
+)
+# Regresion
+bd_rg <- lm(y ~ x, data = bd_c)
+```
+
+```{R, ploty 1, echo = F, dev = "svg", fig.height = 5}
+set.seed(1234)
+ggplot(data = bd_c, aes(x = x, y = y, color = as.factor(x))) +
+geom_jitter(width = 0.3, size = 1.5, alpha = 0.5) +
+scale_color_manual(values = c("darkslategrey", red_pink)) +
+theme_empty
+```
+---
+# Variables Cualitativas
+
+$y_i = \beta_0 + \beta_1 x_i + u_i$ para variable binaria $Masculino_i$ o $x_i = \{\color{#314f4f}{0}, \, \color{#e64173}{1}\}$
+
+```{R, ploty 2, echo = F, dev = "svg", fig.height = 5}
+set.seed(1234)
+ggplot(data = bd_c, aes(x = x, y = y, color = as.factor(x))) +
+geom_jitter(width = 0.3, size = 1.5, alpha = 0.5) +
+scale_color_manual(values = c("darkslategrey", red_pink)) +
+geom_hline(yintercept = bd_rg$coefficients[1], size = 1, color = "darkslategrey") +
+geom_hline(yintercept = bd_rg$coefficients[1] + bd_rg$coefficients[2], size = 1, color = red_pink) +
+annotate(
+  geom = "text",
+  x = 0.5,
+  y = -1 + bd_rg$coefficients[1],
+  label = TeX("$\\hat{\\beta}_0 = \\bar{Grupo_0}$"),
+  size = 7
+) +
+annotate(
+  geom = "text",
+  x = 0.5,
+  y = 1 + bd_rg$coefficients[1] + bd_rg$coefficients[2],
+  label = TeX("$\\hat{\\beta}_0 + \\hat{\\beta}_1 = \\bar{Grupo_1}$"),
+  size = 7,
+  color = red_pink
+) +
+theme_empty
+```
+
+---
+# Variables Cualitativas : mas categorías
+
+--
+
+`r fa("chevron-circle-right")` Si tuviéramos una variable _ordinal_ con 3 **categorías**
+
+--
+
+- El grupo _base_ es el primero por "default" _se omite por multicolinealidad_ .
+
+--
+
+$$D_{2}=\left\{\begin{matrix}
+1 & \text{para grupo 2}\\
+0 & \text{en otro caso}
+\end{matrix}\right. \quad \quad
+D_{3}=\left\{\begin{matrix}
+1 & \text{para grupo 3}\\
+0 & \text{en otro caso}
+\end{matrix}\right.$$
+
+--
+
+- Lo que tendríamos a modo de ecuaciones:
+
+--
+
+$$\begin{aligned}
+    y &= \beta_{0} + \left( \beta_{2}-\beta_{0}  \right) D_{2} +\left( \beta_{3}-\beta_{0}  \right) D_{3} +\beta_i x_i + \mu \\
+    &= \beta_{0} + \alpha_{2} D_{2} + \alpha_{3} D_{3} +\beta_i x_i + \mu \\
+\end{aligned}$$
+
+--
+
+`r fa("exclamation-triangle", fill= "red")` Hay que mirar que todas son _diferencias_ $\alpha_i$ _p.e_ $(\alpha_2, \alpha_3)$ son los mismos parámetros de la regresión, solo que son diferencias con respecto al grupo base.
+
+---
+# Variables Cualitativas en `r fa("r-project", fill = "steelblue")`
+
+.pull-left[
+
+```{R, ex1, echo= FALSE}
+# create df
+
+n <- 20
+set.seed(123)
+base_1 <- tibble(
+  x = sample( LETTERS[1:3], n, replace=TRUE, prob=c(0.3, 0.4, 0.2)),
+  y  = rnorm(n = n, mean = 5000, sd = 400))
+```
+
+```{R, ex2, echo=FALSE}
+reg1<- lm(y~x, data = base_1)
+summary(reg1)
+```
+]
+
+.pull-right[
+
+- **R** y muchos softwares automáticamente generan las dummies múltiple 
+
+- La variable $x$ hace referencia a los tipos de A, B y C respectivamente.
+
+- Note que **A** es el grupo base o de referencia, es decir, $\beta_0$ es el _promedio_ de esa variable.
+
+- Los parámetros $xB$ y $xC$ son en efecto $\beta_2$ y $\beta_3$ que son las diferencias con respecto al grupo de **referencia** o base.
+
+- La significancia es utíl para decir si existe o no diferencias entre grupos.
+
+]
+
+---
+# Variables Cualitativas en `r fa("r-project", fill = "steelblue")`
+
+.pull-left[
+```{R, ex3, echo=FALSE}
+reg1<- lm(y~0+x, data = base_1)
+summary(reg1)
+```
+]
+
+.pull-right[
+- Cuando se da la opción sin intercepto, todas las características de la variable **cualitativa** muestran sus respectivos promedios.
+
+- Esta opción solo se usa mas como información que como objetivo final de la estimación de la regresión.
+
+- El _asunto_ de _omitir_ una de las características de la variable **categórica** es para evitar caer en la trampa de _dummies_ y entonces tener el problema de multicolinealidad.
+
+]
+
+---
+# Variables Cualitativas en `r fa("r-project", fill = "steelblue")`
+
+.pull-left[
+```{R, ex4, echo=FALSE}
+base_1$x<-as.factor(base_1$x)
+base_1$x<- relevel(base_1$x,"B")
+reg1<- lm(y~x, data = base_1)
+summary(reg1)
+```
+]
+
+.pull_right[
+- En **R** para cambiar el grupo de referencia solo es usar la opción `relevel`, _p.e_ : `datos$x<- relevel(datos$x,"B")`.
+
+- Recuerde que la variable categórica o cualitativa debe ser clasificada _primero_ como `factor` para poder interactuar con ella _p.e_ : `datos$x<-as.factor(datos$x)`. Si ya su variable de entrada es clasificada como factor, se puede omitir esta parte.
+
+- Las diferencias ahora son con base a la opción **B**.
+]
+
+
+
+---
+class: middle, inverse, center
+
+
+
+# 🔵 Y de las interacciones?
+
+---
+class: inverse
+# Variables Cualitativas con interacciones
+
+--
+
+Las interacciones permiten que el efecto de una variable cambie en función del nivel de otra variable.
+
+--
+
+**Preguntas**
+
+--
+
+1. ¿Cambia el efecto de la escolarización sobre el salario en función del genero (sexo)?
+
+--
+
+1. ¿Cambia el efecto del género en el salario según la raza?
+
+--
+
+1. ¿Cambia el efecto de la escolaridad en el salario según la experiencia?
+
+---
+# Variables Cualitativas con interacciones
+
+--
+
+`r fa("diamond")` Dos _variables_ cualitativas: sexo, estado civil.
+
+--
+
+`r fa("diamond")` Grupo <span style="color:blue">**base**</span>: hombre soltero.
+
+--
+
+$$Mujer=\left\{\begin{matrix}
+1 & \text{si es mujer}\\
+0 & \text{si es hombre}
+\end{matrix}\right.
+\quad \quad
+Casado=\left\{\begin{matrix}
+1 & \text{si está casado}\\
+0 & \text{si está soltero}
+\end{matrix}\right.$$
+
+--
+
+- La base de datos puede ser:
+
+| **Obs**      | **Ingreso**      | **Genero (Fem=1)** | **E. Civil (Cas=1)** | **Interacción**   |
+|--------------|------------------|--------------------|----------------------|-------------------|
+| 1            | 3.15             | 0                  | 1                    | 0                 |
+| 2            | 2.92             | 1                  | 0                    | 0                 |
+| 3            | 5.4              | 0                  | 1                    | 0                 |
+| $\vdots$     | 6.00             | 0                  | 0                    | 0                 |
+| 324          | 11.2             | 1                  | 1                    | 1                 |
+| 325          | 15.3             | 0                  | 0                    | 0                 |
+
+
+
+---
+
+# Variables Cualitativas con interacciones
+
+--
+
+`r fa("paperclip")` Suponga que tiene el siguiente modelo:
+$$y= \beta_0+\beta_1 \; femenino + \beta_2 casado + \beta_3 \; femenino \times casado +\beta_i x_i + \mu_i$$
+$$\begin{aligned}
+  E(y_{i}|x_{i}, mujer=0, \: casado=0)&= \beta_0+\beta x_{i}\\ 
+  E(y_{i}|x_{i}, mujer=0, \: casado=1)&= \beta_0+\beta_2 +\beta x_{i}\\ 
+  E(y_{i}|x_{i}, mujer=1, \: casado=0)&= \beta_0+ \beta_1 +\beta x_{i}\\ 
+  E(y_{i}|x_{i}, mujer=1, \: casado=1)&= \beta_0+ \beta_1 + \beta_2 + \beta_3 + \beta x_{i}
+  \end{aligned}$$
+  
+
+--
+
+`r fa("paperclip")` Donde $\beta_1$ es el _efecto diferencial de ser mujer_; $\beta_2$ es el 
+<span style="color:blue">efecto diferencial de ser casado</span> y $\beta_3$ es el <span style="color:black">**efecto diferencial de ser mujer casada**</span>. Puede probarse si _diferencial_ en sexo (estado civil) depende del estado civil (sexo). $H_{0}:\beta_3=0$.
+
+---
+# Variables Cualitativas con interacciones
+
+--
+
+`r fa("paper-plane", fill="blue")` Tomemos ahora otro ejemplo pero haciendo **interacción** con una variable _cuantitativa_.
+
+--
+
+`r fa("rocket", fill="red")` Mediremos ahora en un nuevo modelo: el salario, el genero y añadiremos la escolaridad o número de años de estudio de la persona.
+
+$$Salario_i= \beta_0+\beta_1 \; Femenino_i + \beta_2 \; Escolaridad_i +\mu_i$$
+_En el anterior se mira la escolaridad de igual forma o manera para todos._
+
+--
+
+- Al añadir un término de **interacción**, se hace con el objeto de ver como varia la escolaridad por genero o grupo. El modelo entonces es:
+
+--
+
+$Salario_i= \beta_0+\beta_1 \; Femenino_i + \beta_2 \; Escolaridad_i +\color{#2b59c3}{\beta_3} \; Femenino_i \times \color{#e64173}{Escolaridad_i}+\mu_i$
+
+---
+# Variables Cualitativas con interacciones
+
+La _escolaridad_ tiene el mismo efecto para todos (**<font color="#e64173">F</font>**) y para (**<font color="#314f4f">M</font>**)
+
+```{R, datosint1, include = F, cache = T}
+set.seed(12345)
+# Muestra
+n <- 1e3
+# Parametros
+beta0 <- 25; beta1 <- 0.8; beta2 <- 12; beta3 <- 4
+# Datos
+bs_int <- tibble(
+  Masc = sample(x = c(F, T), size = n, replace = T),
+  Escol = runif(n, 4, 10) - 3 * Masc,
+  Ingreso = beta0 + beta1 * Escol + beta2 * Masc + rnorm(n, sd = 8) + beta3 * Masc * Escol
+)
+reg_noit <- lm(Ingreso ~ Escol + Masc, bs_int)
+reg_it <- lm(Ingreso ~ Escol + Masc + Escol:Masc, bs_int)
+```
+
+```{R, it graph 1, echo = F, dev = "svg", fig.height = 5}
+ggplot(data = bs_int, aes(x = Escol, y = Ingreso)) +
+geom_point(aes(color = Masc, shape = Masc), size = 2.5) +
+geom_hline(yintercept = 0) +
+geom_vline(xintercept = 0) +
+geom_abline(
+  intercept = reg_noit$coefficients[1] + reg_noit$coefficients[3],
+  slope = reg_noit$coefficients[2],
+  color = "darkslategrey", size = 1, alpha = 0.8
+) +
+geom_abline(
+  intercept = reg_noit$coefficients[1],
+  slope = reg_noit$coefficients[2],
+  color = red_pink, size = 1, alpha = 0.8
+) +
+xlab("Escolaridad") +
+ylab("Ingreso") +
+theme_empty +
+theme(
+  axis.title = element_text(size = 18),
+  plot.margin = structure(c(0, 0, 0.1, 0), unit = "lines", valid.unit = 3L, class = "unit"),
+) +
+scale_color_manual("", values = c(red_pink, "darkslategrey"), labels = c("Femenino", "Masculino")) +
+scale_shape_manual("", values = c(16, 1), labels = c("Femenino", "Masculino"))
+```
+
+---
+# Variables Cualitativas con interacciones
+
+La _escolaridad_ tiene distinto efecto para los grupos de (**<font color="#e64173">F</font>**) y (**<font color="#314f4f">M</font>**)
+
+```{R, it graph 2, echo = F, dev = "svg", fig.height = 5}
+ggplot(data = bs_int, aes(x = Escol, y = Ingreso)) +
+geom_point(aes(color = Masc, shape = Masc), size = 2.5) +
+geom_hline(yintercept = 0) +
+geom_vline(xintercept = 0) +
+geom_abline(
+  intercept = reg_noit$coefficients[1] + reg_noit$coefficients[3],
+  slope = reg_noit$coefficients[2],
+  color = "darkslategrey", size = 0.75, alpha = 0.2
+) +
+geom_abline(
+  intercept = reg_noit$coefficients[1],
+  slope = reg_noit$coefficients[2],
+  color = red_pink, size = 0.75, alpha = 0.2
+) +
+geom_abline(
+  intercept = reg_it$coefficients[1] + reg_it$coefficients[3],
+  slope = reg_it$coefficients[2] + reg_it$coefficients[4],
+  color = "darkslategrey", size = 1, alpha = 0.8
+) +
+geom_abline(
+  intercept = reg_it$coefficients[1],
+  slope = reg_it$coefficients[2],
+  color = red_pink, size = 1, alpha = 0.8
+) +
+xlab("Escolaridad") +
+ylab("Ingreso") +
+theme_empty +
+theme(
+  axis.title = element_text(size = 18),
+  plot.margin = structure(c(0, 0, 0.1, 0), unit = "lines", valid.unit = 3L, class = "unit"),
+) +
+scale_color_manual("", values = c(red_pink, "darkslategrey"), labels = c("Femenino", "Masculino")) +
+scale_shape_manual("", values = c(16, 1), labels = c("Femenino", "Masculino"))
+```
+
+---
+# Variables Cualitativas con interacciones
+
+--
+
+> La interpretación del  _efecto de la interacción_ puede ser un poco complejo, pero la clave<sup>.pink[*]</sup> es entender la parte matematica.
+
+.footnote[.pink[*] Como suele ocurrir con la econometría.]
+
+$$\text{Ingreso}_i = \beta_0 + \beta_1 \, \text{Femenino}_i + \beta_2 \, \text{Escolaridad}_i + \beta_3 \, \text{Femenino}_i\times\text{Escolaridad}_i + u_i$$
+--
+
+Rendimiento esperado de un año adicional de escolarización para las mujeres:
+
+$$\begin{aligned}
+ \mathop{\boldsymbol{E}}\left[ \text{Ingreso}_i | \text{Femenino} \land \text{Escolaridad} = \phi + 1 \right] -
+    \mathop{\boldsymbol{E}}\left[ \text{Ingreso}_i | \text{Femenino} \land \text{Escolaridad} = \phi \right] &= \\
+ \mathop{\boldsymbol{E}}\left[ \beta_0 + \beta_1 (\phi+1) + \beta_2 + \beta_3 (\phi + 1) + u_i \right] -
+    \mathop{\boldsymbol{E}}\left[ \beta_0 + \beta_1 \phi + \beta_2 + \beta_3 \phi + u_i  \right] &= \\
+ \beta_1 + \beta_3
+\end{aligned}$$
+
+--
+
+Del mismo modo, $\beta_1$ da el rendimiento esperado de un año adicional de escolarización para los hombres. Así, $\beta_3$ da la **diferencia en los rendimientos de la escolarización** para mujeres y hombres.
+
+---
+class: title-slide-section-grey
+# Bibliografía
+
+`r fa('book')` Gujarati, D. N., & Porter, D. C. (2011). *Econometria Básica*. Ed. Porto Alegre: AMGH..
+
+`r fa('book')` Stock, J. H., Watson, M. W., & Larrión, R. S. (2012). *Introducción a la Econometría*.
+
+`r fa('book')` Wooldridge, J. M. (2015). *Introductory econometrics: A modern approach*. Cengage learning.
+
+---
+class: title-slide-final, middle
+
+# Gracias por su atención!
+
+## Alguna pregunta adicional?
+
+### Carlos Andres Yanes Guerra
+`r fa("envelope", fill="red")` cayanes@uninorte.edu.co
+`r fa("twitter", fill="cyan")` keynes37
+
+
