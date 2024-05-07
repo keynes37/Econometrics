@@ -23,3 +23,5 @@ Intervalos en Mínimos Cuadrados [Test de parámetros](https://keynes37.github.i
 ### Corte final
 
 Regresión Múltiple [Sesgo y variables cualitativas](https://keynes37.github.io/Econometrics/Class/Class06/Class06.html#1)
+
+Regresión Múltiple [Heterocedasticidad](https://keynes37.github.io/Econometrics/Class/Class07/Class07.html#1)
