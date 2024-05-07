@@ -1,0 +1,1028 @@
+---
+title: "Econometria I"
+subtitle: "Heterocedasticidad"
+author: "Carlos Yanes"
+date: "Universidad del Norte </br> `r Sys.Date()`"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    css: ["rutgers", "rutgers-fonts"]
+    nature:
+      beforeInit: "http://www.jvcasillas.com/ru_xaringan/js/ru_xaringan.js"
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+      ratio: "16:9"
+    seal: false
+---
+name: xaringan-title
+class: left, middle
+
+
+# Econometría I
+<br>
+## Heterocedasticidad
+
+<br>
+<br>
+<img src="images/lognig.png" width="280" />
+
+### Carlos Yanes | Departamento de Economía | `r Sys.Date()`
+
+---
+class: middle, inverse
+
+.left-column[
+
+# `r emo::ji("sweat_smile")`
+
+]
+
+.right-column[
+# Preguntas de la sesion anterior?
+]
+
+---
+class: middle, inverse
+
+.left-column[
+
+# `r emo::ji("sweat_smile")`
+
+]
+
+.right-column[
+# Preguntas de la sesion anterior?
+]
+
+---
+
+```{r Setup, include = F}
+options(htmltools.dir.version = FALSE)
+library(pacman)
+p_load(broom, latex2exp, ggplot2, ggthemes, ggforce, viridis, dplyr, magrittr, knitr, parallel)
+
+library(tidyverse)
+library(babynames)
+library(fontawesome) # from github: https://github.com/rstudio/fontawesome
+library(DiagrammeR)
+
+# Knitr options
+opts_chunk$set(
+  comment = "#>",
+  fig.align = "center",
+  fig.height = 7,
+  fig.width = 10.5,
+  warning = F,
+  message = F
+)
+# A blank theme for ggplot
+theme_empty <- theme_bw() + theme(
+  line = element_blank(),
+  rect = element_blank(),
+  strip.text = element_blank(),
+  axis.text = element_blank(),
+  plot.title = element_blank(),
+  axis.title = element_blank(),
+  plot.margin = structure(c(0, 0, -0.5, -1), unit = "lines", valid.unit = 3L, class = "unit"),
+  legend.position = "none"
+)
+theme_simple <- theme_bw() + theme(
+  line = element_blank(),
+  panel.grid = element_blank(),
+  rect = element_blank(),
+  strip.text = element_blank(),
+  axis.text.x = element_text(size = 14),
+  axis.text.y = element_blank(),
+  axis.ticks = element_blank(),
+  plot.title = element_blank(),
+  axis.title = element_blank(),
+  # plot.margin = structure(c(0, 0, -1, -1), unit = "lines", valid.unit = 3L, class = "unit"),
+  legend.position = "none"
+)
+theme_axes <- theme_empty + theme(
+  axis.title = element_text(size = 18),
+  plot.margin = structure(c(0, 0, 0.1, 0), unit = "lines", valid.unit = 3L, class = "unit"),
+)
+
+theme_axes_math <- theme_void() + theme(
+  text = element_text(family = "MathJax_Math"),
+  axis.title = element_text(size = 22),
+  axis.title.x = element_text(hjust = .95, margin = margin(0.15, 0, 0, 0, unit = "lines")),
+  axis.title.y = element_text(vjust = .95, margin = margin(0, 0.15, 0, 0, unit = "lines")),
+  axis.line = element_line(
+    color = "grey70",
+    size = 0.25,
+    arrow = arrow(angle = 30, length = unit(0.15, "inches")
+  )),
+  plot.margin = structure(c(1, 0, 1, 0), unit = "lines", valid.unit = 3L, class = "unit"),
+  legend.position = "none"
+)
+theme_axes_serif <- theme_void() + theme(
+  text = element_text(family = "MathJax_Main"),
+  axis.title = element_text(size = 22),
+  axis.title.x = element_text(hjust = .95, margin = margin(0.15, 0, 0, 0, unit = "lines")),
+  axis.title.y = element_text(vjust = .95, margin = margin(0, 0.15, 0, 0, unit = "lines")),
+  axis.line = element_line(
+    color = "grey70",
+    size = 0.25,
+    arrow = arrow(angle = 30, length = unit(0.15, "inches")
+  )),
+  plot.margin = structure(c(1, 0, 1, 0), unit = "lines", valid.unit = 3L, class = "unit"),
+  legend.position = "none"
+)
+
+```
+
+```{R, colors, include = F}
+# Define pink color
+red_pink <- "#e64173"
+turquoise <- "#20B2AA"
+orange <- "#FFA500"
+red <- "#fb6107"
+blue <- "#2b59c3"
+green <- "#8bb174"
+grey_light <- "grey70"
+grey_mid <- "grey50"
+grey_dark <- "grey20"
+purple <- "#6A5ACD"
+```
+background-size: 100%
+background-image: url(https://media.giphy.com/media/Gnh8nS5DgqyZy/giphy.gif)
+---
+# Heterocedasticidad
+
+--
+
+Debemos recordar los **supuestos** de M.C.O
+
+--
+
+1. Nuestra ***muestra*** es aleatoria las variables $(x_k)$ y $(y_i)$ son **representativas** de una población.
+
+--
+
+2. La variable $(y)$ es una **función lineal** de los $(\beta_k)$'s del modelo y del residuo $(u_i)$.
+
+--
+
+3. No hay **multicolinealidad perfecta** (relación) de las variables explicativas.
+
+--
+
+4. Las variables explicativas son **exogenas**: $\mathop{\boldsymbol{E}}\left[ u \middle| X \right] = 0 \left(\implies \mathop{\boldsymbol{E}}\left[ u \right] = 0\right)$.
+
+--
+
+5. Tenemos **varianza constante** de los residuos del modelo, es decir, $\sigma^2$ se mantiene siempre o es estable, _p.e._,
+
+--
+
+  - $\mathop{\boldsymbol{E}}\left[ u_i^2 \middle| X \right] = \mathop{\text{Var}} \left( u_i \middle| X \right) = \sigma^2 \implies \mathop{\text{Var}} \left( u_i \right) = \sigma^2$
+
+--
+
+  - $\mathop{\text{Cov}} \left( u_i, \, u_j \middle| X \right) = \mathop{\boldsymbol{E}}\left[ u_i u_j \middle| X \right] = 0$ para $i\neq j$
+
+--
+
+6. Los residuos tienen distribución normal, _p.e._, $u_i \overset{\text{iid}}{\sim} \mathop{\text{N}}\left( 0, \sigma^2 \right)$.
+
+---
+# Heterocedasticidad
+
+--
+
+`r fa("comments", fill="red")` Nos enfocamos hoy en el supuesto \# .RUred[5]:
+
+--
+
+Tenemos **varianza constante** de los residuos del modelo, es decir, $\sigma^2$ se mantiene siempre o es estable, _p.e._,
+
+--
+
+  - $\mathop{\boldsymbol{E}}\left[ u_i^2 \middle| X \right] = \mathop{\text{Var}} \left( u_i \middle| X \right) = \sigma^2 \implies \mathop{\text{Var}} \left( u_i \right) = \sigma^2$
+  
+--
+
+  - $\mathop{\text{Cov}} \left( u_i, \, u_j \middle| X \right) = \mathop{\boldsymbol{E}}\left[ u_i u_j \middle| X \right] = 0$ para $i\neq j$
+
+--
+
+- Nos enfocamos en la violación de este **supuesto** porque nos va a generar .RUred[problemas] en el modelo, _p.e_:.
+
+--
+
+**Heterocedasticidad** $\mathop{\text{Var}} \left( u_i \right) = \sigma^2_i$ y $\sigma^2_i \neq \sigma^2_j$ para algunos $i\neq j$.
+
+--
+
+En otras palabras: nuestros residuos o (*perturbaciones*) tienen **varianzas** distintas o diferentes.
+
+---
+# Heterocedasticidad
+
+--
+
+Aunque se hace necesario que un modelo de regresión cumpla con este supuesto, es bueno saber que en otros momentos es bueno *relajarlo*. Piense que esta midiendo la relación existente entre `educación` y la `habilidad` de una persona (a veces no observable) esta se mantenga constante es muy estricto.
+
+--
+
+El problema de **heterocedasticidad** va mas que todo enfocada en el sesgo pero de los errores estandar de los estimadores de la regresión.
+
+---
+# Heterocedasticidad
+
+--
+
+`r fa("rocket", fill="red")` La varianza de $\mu_i$ se incrementa en la medida que las $x$ lo hacen.
+
+--
+
+```{R, heteroce 11, dev = "svg", echo = F, fig.height = 5}
+set.seed(12345)
+ggplot(data = tibble(
+  x = runif(1e3, -4, 4),
+  e = rnorm(1e3, 0, sd = 4 + 1.5 * x)
+), aes(x = x, y = e)) +
+geom_point(color = "darkslategrey", size = 2.75, alpha = 0.5) +
+labs(x = "x", y = "u") +
+theme_axes_math
+```
+
+---
+# Heterocedasticidad
+
+--
+
+`r fa("rocket", fill="red")` Varianza de $\mu_i$ se incrementa con los extremos de $x$
+
+--
+
+```{R, hetero 12 , dev = "svg", echo = F, fig.height = 5}
+set.seed(12345)
+ggplot(data = tibble(
+  x = runif(1e3, -3, 3),
+  e = rnorm(1e3, 0, sd = 2 + x^2)
+), aes(x = x, y = e)) +
+geom_point(color = "darkslategrey", size = 2.75, alpha = 0.5) +
+labs(x = "x", y = "u") +
+theme_axes_math
+```
+
+---
+# Heterocedasticidad
+
+--
+
+`r fa("rocket", fill="red")` Otro ejemplo de heterocedasticidad pero cuando $\mu_i$ varia por grupos
+
+--
+
+```{R, hetero 13, dev = "svg", echo = F, fig.height = 5}
+set.seed(12345)
+ggplot(data = tibble(
+  g = sample(c(F,T), 1e3, replace = T),
+  x = runif(1e3, -3, 3),
+  e = rnorm(1e3, 0, sd = 0.5 + 2 * g)
+), aes(x = x, y = e, color = g, shape = g, alpha = g)) +
+geom_point(size = 2.75) +
+scale_color_manual(values = c("darkslategrey", red_pink)) +
+scale_shape_manual(values = c(16, 1)) +
+scale_alpha_manual(values = c(0.5, 0.8)) +
+labs(x = "x", y = "u") +
+theme_axes_math
+```
+
+---
+# Heterocedasticidad
+
+--
+
+### Consecuencias
+
+--
+
+- Entonces que consecuencias hay cuando es heterocedástico el modelo? es **Sesgado**? es **Ineficienciente**?
+
+--
+
+- Hay que mirar la insesgadez
+
+--
+
+**Recordeis<sub>1</sub>:** MCO para ser insesgado requiere $\mathop{\boldsymbol{E}}\left[ \hat{\beta}_k \middle| X \right] = \beta_k$ para todo $k$.
+
+--
+
+**Recordeis<sub>2</sub>:** habiamos visto que $\hat{\beta}_1 = \dfrac{\sum_i\left(y_i-\overline{y}\right)\left(x_i-\overline{x}\right)}{\sum_i\left(x_i -\overline{x}\right)^2}$
+
+--
+
+Esto permite reescribir nuestro estimador como:
+
+--
+
+$$\hat{\beta}_1 = \beta_1 + \dfrac{\sum_i \left( x_i - \overline{x} \right) u_i}{\sum_i \left( x_i - \overline{x} \right)^2}$$
+---
+# Heterocedasticidad
+
+Demostración de lo anterior
+
+--
+
+Asuma que $y_i = \beta_0 + \beta_1 x_i + u_i$
+
+--
+
+$$
+\begin{aligned}
+  \hat{\beta}_1
+  &= \dfrac{\sum_i\left(y_i-\overline{y}\right)\left(x_i-\overline{x}\right)}{\sum_i\left(x_i -\overline{x}\right)^2} \\
+  &= \dfrac{\sum_i\left(\left[ \beta_0 + \beta_1 x_i + u_i \right]- \left[ \beta_0 + \beta_1 \overline{x} + \overline{u} \right] \right)\left(x_i-\overline{x}\right)}{\sum_i\left(x_i -\overline{x}\right)^2} \\
+  &= \dfrac{\sum_i\left(\beta_1 \left[ x_i - \overline{x} \right] + \left[u_i - \overline{u}\right]  \right)\left(x_i-\overline{x}\right)}{\sum_i\left(x_i -\overline{x}\right)^2} \\
+  &= \dfrac{\sum_i\left(\beta_1 \left[ x_i - \overline{x} \right]^2 + \left[ x_i - \overline{x} \right] \left[u_i - \overline{u}\right]\right)}{\sum_i\left(x_i -\overline{x}\right)^2} \\
+  &= \beta_1 + \dfrac{\sum_i\left(x_i - \overline{x}\right) \left(u_i - \overline{u}\right)}{\sum_i\left(x_i -\overline{x}\right)^2}
+\end{aligned}
+$$
+---
+# Heterocedasticidad
+
+--
+
+$$
+\begin{aligned}
+  \hat{\beta}_1
+  &= \cdots = \beta_1 + \dfrac{\sum_i\left(x_i - \overline{x}\right) \left(u_i - \overline{u}\right)}{\sum_i\left(x_i -\overline{x}\right)^2} \\
+  &= \beta_1 + \dfrac{\sum_i\left(x_i - \overline{x}\right) u_i - \overline{u} \sum_i\left(x_i - \overline{x}\right)}{\sum_i\left(x_i -\overline{x}\right)^2} \\
+  &= \beta_1 + \dfrac{\sum_i\left(x_i - \overline{x}\right) u_i - \overline{u} \left(\sum_i x_i - \sum_i \overline{x}\right)}{\sum_i\left(x_i -\overline{x}\right)^2} \\
+  &= \beta_1 + \dfrac{\sum_i\left(x_i - \overline{x}\right) u_i - \overline{u} \left(\sum_i x_i - n \overline{x}\right)}{\sum_i\left(x_i -\overline{x}\right)^2} \\
+  &= \beta_1 + \dfrac{\sum_i\left(x_i - \overline{x}\right) u_i - \overline{u} \color{#e64173}{\left(\sum_i x_i - \sum_i x_i\right)}}{\sum_i\left(x_i -\overline{x}\right)^2} \\
+  &= \beta_1 + \dfrac{\sum_i\left(x_i - \overline{x}\right) u_i}{\sum_i\left(x_i -\overline{x}\right)^2} \quad \text{😅}
+\end{aligned}
+$$
+---
+# Heterocedasticidad
+
+--
+
+$$
+\begin{aligned}
+  \mathop{\boldsymbol{E}}\left[ \hat{\beta}_1 \middle| X \right]
+  &= \mathop{\boldsymbol{E}}\left[ \beta_1 + \dfrac{\sum_i\left(x_i - \overline{x}\right) u_i}{\sum_i\left(x_i -\overline{x}\right)^2} \middle| X \right] \\
+  &= \beta_1 + \mathop{\boldsymbol{E}}\left[ \dfrac{\sum_i\left(x_i - \overline{x}\right) u_i}{\sum_i\left(x_i -\overline{x}\right)^2} \middle| X \right] \\
+  &= \beta_1 + \dfrac{\sum_i\left(x_i - \overline{x}\right)}{\sum_i\left(x_i -\overline{x}\right)^2} \color{#e64173}{\underbrace{\mathop{\boldsymbol{E}}\left[ u_i \middle| X \right]}_{=0}} \\
+  &= \beta_1 \quad \text{😹}
+\end{aligned}
+$$
+
+--
+Ohhh. **MCO se mantiene insesgado** para los $\beta_k$.
+
+
+---
+# Heterocedasticidad
+
+--
+
+- Con insesgadez no hay problema
+
+--
+
+- Con **ineficiencia** si que lo hay
+
+--
+
+## Cómo así?
+
+--
+
+La eficiencia y la inferencia de MCO no sobreviven a la heterocedasticidad.
+
+--
+
+- En presencia de heterocedasticidad, MCO **ya no es el más eficiente** (mejor) estimador lineal insesgado.
+
+--
+
+
+- Sería más (eficiente) **ponderar las observaciones** inversamente a la varianza de su $u_i$.
+
+--
+
+  - Disminuir la ponderación de los $u_i$ de alta varianza (demasiado difícil para aprender por ahora).
+  
+--
+
+  - Aumentar la ponderación de las observaciones con $u_i$ de baja varianza (más "fiables").
+
+--
+
+  - Ahora hay que hacer uso de los mínimos cuadrados ponderados (WLS)
+
+---
+# Consecuencias: Inferencia
+
+--
+
+- Intervalos de confianza erróneos
+
+--
+
+- Problemas para las pruebas de hipótesis (tanto las pruebas $t$ como las $F$)
+
+--
+
+- Es de cuidado la inferencia. **Imagine que algo que le dicen y no puede ser testeado** 
+
+---
+# Preguntas que nos hacemos
+
+--
+
+**Pregunta:** ¿Cuál es la definición de heterocedasticidad?
+
+--
+
+- **R./:**
+<br>.blue[Matematicamente:] $\mathop{\text{Var}} \left( u_i | X \right) \neq \mathop{\text{Var}} \left( u_j | X \right)$ para algunos $i\neq j$.
+<br>.blue[Palabras:] Existe una relación sistemática entre la varianza de $u_i$ y nuestras variables explicativas.
+
+--
+
+**P:** ¿Por qué nos preocupa la heterocedasticidad?
+
+--
+
+- **R./:** Porque sesga nuestros errores estándar, arruinando nuestras pruebas estadísticas e intervalos de confianza. Además: **MCO** ya no produce el (mejor) estimador más eficiente.
+
+--
+
+**P:** ¿La gráfica de $(y)$ contra $(x)$, nos dice algo sobre la heterocedasticidad?
+
+--
+
+- **R./:** No es exactamente lo que queremos, pero como $(y)$ es una función de $(x)$ y $(u)$, todavía puede ser informativo. Si $(y)$ se vuelve más/menos disperso a medida que $(x)$ cambia, es probable que tengamos **heterocedasticidad**.
+---
+# Test y pruebas formales:
+
+--
+
+La .blue[eficiencia] de nuestros estimadores depende de la presencia o no de la heterocedasticidad. Los siguientes autores, tuvieron una idea para su detección y formularon un par de pruebas:
+
+--
+
+1. Prueba de **Park**.
+
+--
+
+1. Prueba de **Goldfeld-Quandt**.
+
+--
+
+1. Prueba de **Breusch-Pagan**.
+
+--
+
+1. Prueba de **White**.
+
+--
+
+`r fa("bullseye", fill="red")` Cada una de estas pruebas se centra en el hecho de que podemos .blue[utilizar el residuo OLS] $\color{#e64173}{e_i}$ .blue[para estimar la perturbación de la población] $\color{#e64173}{u_i}$.
+
+---
+class: title-slide-section-red, middle
+
+# Test para la heterocedasticidad
+
+<br>
+<img src="images/lognig.png" width="380" />
+
+
+---
+# Test y pruebas formales: Park
+
+--
+
+Asume o le da formas **funcionales**<sup>1</sup>  a la varianza de $\mu_{i}$ (residuos)
+$$\sigma_{i}^{2}=\sigma^{2}X_{i}^{\beta}e^{v_{i}}$$
+
+--
+
+Encontrando una estimación logarítmica:
+
+--
+
+$$Ln  \ \mu_{i}^{2}=ln \ \sigma^{2}+\beta \; ln\; X+ v_{i}$$
+
+--
+
+<ru-blockquote> Debe evaluar si es o no significativo el coeficiente del $(\beta)$. De esta forma estará detectando heterocedasticidad. _La significancía va con los P-valores_
+
+--
+
+.footnote[[1] Recuerde cuando se gráfica $y=f(x)$]
+
+---
+# Test y pruebas formales: Goldfeld-Quandt
+
+--
+
+Se centra en un tipo específico de heterocedasticidad: si la varianza de $u_i$ difiere .blue[entre dos grupos].<sup>†</sup>
+
+--
+
+¿Recuerda cómo utilizamos nuestros residuos para estimar el $\sigma^2$?
+
+--
+
+$$ s^2 = \dfrac{\text{SRC}}{n-1} = \dfrac{\sum_i e_i^2}{n-1} $$
+
+--
+
+Utilizaremos esta misma idea para determinar si hay evidencia de que nuestros dos grupos difieren en las varianzas de sus perturbaciones, comparando efectivamente $s^2_1$ y $s^2_2$ de nuestros dos grupos.
+
+--
+
+.footnote[
+[†]: La prueba G-Q fue una de las primeras pruebas de heterocedasticidad (1965).
+]
+---
+# Test y pruebas formales: Goldfeld-Quandt
+
+--
+
+El asunto es mas o menos este
+
+--
+
+1. Ordenar las observaciones por $x$
+
+--
+
+2. Dividir los datos en dos grupos de tamaño n.super[⭑]
+  - G<sub>1</sub>: El primer tercio
+  - G<sub>2</sub>: El último tercio
+  
+--
+
+3. Realizar regresiones separadas de $y$ en $x$ para G<sub>1</sub>  y G<sub>2</sub>
+
+--
+
+4. Guardar $SRC_1$ y $SRC_2$ respectivamente 
+
+--
+
+5. Calcular el .blue[estadístico G-Q]
+
+---
+# Test y pruebas formales: Goldfeld-Quandt 
+
+La prueba sigue una distribución $F$ (bajo hipótesis nula) con $n^{\star}-k$ y $n^{\star}-k$ grados de libertad.<sup>ª</sup>
+
+--
+
+$$F_{\left(n^{\star}-k,\, n^{\star}-k\right)} = \dfrac{\text{SRC}_2/(n^\star-k)}{\text{SRC}_1/(n^\star-k)} = \dfrac{\text{SRC}_2}{\text{SRC}_1}$$
+
+--
+
+**Notas**
+
+--
+
+- La prueba G-Q requiere que las perturbaciones sigan distribuciones normales.
+
+--
+
+- El G-Q asume un tipo/forma muy específico de heterocedasticidad.
+
+--
+
+- Funciona muy bien si conocemos la forma de heterocedasticidad potencial.
+
+--
+
+.footnote[
+[ª]: Goldfeld y Quandt sugirieron $n^{\star}$ de $(3/8)n$. La parte de $(k)$ hace referencia al número de parámetros estimados (_p.e_, $(\hat{\beta}_j)$'s).
+]
+---
+# Test y pruebas formales: Goldfeld-Quandt 
+
+--
+
+```{R, GQtest, echo = F, dev = "svg", fig.height = 4}
+set.seed(12345)
+# Datos
+gq_df <- tibble(
+  x = runif(1e3, -3, 3),
+  e = rnorm(1e3, 0, sd = 4 + 1.5 * x),
+  y = 1 + 3 * x + e
+)
+# Quantil
+gq_x <- quantile(gq_df$x, probs = c(3/8, 5/8))
+# Regresiones
+src1 <- lm(y ~ x, data = gq_df %>% filter(x < gq_x[1])) %>%
+  residuals() %>% raise_to_power(2) %>% sum()
+src2 <- lm(y ~ x, data = gq_df %>% filter(x > gq_x[2])) %>%
+  residuals() %>% raise_to_power(2) %>% sum()
+ggplot(data = gq_df, aes(x = x, y = e)) +
+geom_point(color = "darkslategrey", size = 2.75, alpha = 0.5) +
+labs(x = "x", y = "u") +
+theme_axes_math
+```
+---
+# Test y pruebas formales: Goldfeld-Quandt 
+
+--
+
+```{R, GQtest2, echo = F, dev = "svg", fig.height = 4}
+ggplot(data = gq_df, aes(
+  x = x, y = e,
+  color = cut(x, c(-Inf, gq_x, Inf)),
+  alpha = cut(x, c(-Inf, gq_x, Inf)),
+  shape = cut(x, c(-Inf, gq_x, Inf))
+)) +
+geom_vline(
+  xintercept = gq_x,
+  color = grey_mid,
+  size = 0.25
+) +
+geom_point(size = 2.75) +
+labs(x = "x", y = "u") +
+scale_color_manual(values = c("darkslategrey", grey_mid, red_pink)) +
+scale_shape_manual(values = c(19, 1, 19)) +
+scale_alpha_manual(values = c(0.5, 0.8, 0.6)) +
+theme_axes_math
+```
+
+--
+
+$F_{375,\,375} = \dfrac{\color{#e64173}{\text{SRC}_2 = `r format(round(src2, 1), nsmall = 0L, big.mark = ",")`}}{\color{#314f4f}{\text{SRC}_1 = `r format(round(src1, 1), nsmall = 0L, big.mark = ",")`}} \approx `r format(round(src2/src1, 1), nsmall = 0L, big.mark = ",")` \implies$ *p*-valor $< 0.001$
+
+$\therefore$ Rechazamos $H_0$: $\sigma^2_1 = \sigma^2_2$ y por ende, concluimos que el modelo tiene problemas de .black[Heterocedasticidad]
+---
+# Test y pruebas formales: Goldfeld-Quandt 
+
+--
+
+```{R, GQtest3, echo = F, dev = "svg", fig.height = 4}
+set.seed(12345)
+# Data
+gq2_df <- tibble(
+  x = runif(1e3, -3, 3),
+  e = rnorm(1e3, 0, sd = 2 + x^2),
+  y = 1 + 3 * x + e
+)
+# Quantiles
+gq_x <- quantile(gq2_df$x, probs = c(3/8, 5/8))
+# Regresiones
+src1b <- lm(y ~ x, data = gq2_df %>% filter(x < gq_x[1])) %>%
+  residuals() %>% raise_to_power(2) %>% sum()
+src2b <- lm(y ~ x, data = gq2_df %>% filter(x > gq_x[2])) %>%
+  residuals() %>% raise_to_power(2) %>% sum()
+ggplot(data = gq2_df, aes(
+  x = x, y = e,
+  color = cut(x, c(-Inf, gq_x, Inf)),
+  alpha = cut(x, c(-Inf, gq_x, Inf)),
+  shape = cut(x, c(-Inf, gq_x, Inf))
+)) +
+geom_vline(
+  xintercept = gq_x,
+  color = grey_mid,
+  size = 0.25
+) +
+geom_point(size = 2.75) +
+labs(x = "x", y = "u") +
+scale_color_manual(values = c("darkslategrey", grey_mid, red_pink)) +
+scale_shape_manual(values = c(19, 1, 19)) +
+scale_alpha_manual(values = c(0.5, 0.8, 0.6)) +
+theme_axes_math
+```
+
+--
+
+$F_{375,\,375} = \dfrac{\color{#e64173}{\text{SRC}_2 = `r format(round(src2b, 1), nsmall = 0L, big.mark = ",")`}}{\color{#314f4f}{\text{SRC}_1 = `r format(round(src1b, 1), nsmall = 0L, big.mark = ",")`}} \approx `r format(round(src2b/src1b, 1), nsmall = 0L, big.mark = ",")` \implies$ *p*-valor $\approx `r round(pf(src2b/src1b, 375, 375, lower.tail = F), 3)`$
+
+$\therefore$ No rechazamos $H_0$: $\sigma^2_1 = \sigma^2_2$ incluso cuando la .black[heterocedasticidad] esta presente.
+---
+background-size: 100%
+background-image: url(https://media.giphy.com/media/A6bYw4HCi9rbl0q8Xg/giphy.gif)
+
+???
+
+Image test. Taken from gyfty.
+
+---
+# Test y pruebas formales: Breusch- Pagan
+
+--
+
+Breusch y Pagan (1981) intentaron resolver este problema de ser demasiado específicos con la forma funcional de la heterocedasticidad.
+
+--
+
+- Permite que los datos muestren si/cómo la varianza de $u_i$ se correlaciona con $X$.
+
+--
+
+- Si $\sigma_i^2$ se correlaciona con $X$, entonces tenemos heterocedasticidad.
+
+--
+
+- Hacen una regresión de $e_i^2$ sobre $X = \left[ 1,\, x_1,\, x_2,\, \ldots,\, x_k \right]$ y prueba la significancia conjunta.
+
+---
+# Test y pruebas formales: Breusch- Pagan
+
+--
+
+El asunto es mas o menos este
+
+--
+
+1. Estimar una regresión $y$ con un intercepto y las variables $x_1,x_2,\dots,x_k$.
+
+--
+
+2. Guardar los residuos e.
+
+--
+
+3. Hacer una regresión ahora de $e^2$ con cada una de las variables $x_1,x_2,\dots,x_k$.
+
+--
+
+$$e_i^2 = \alpha_0 + \alpha_1 x_{1i} + \alpha_2 x_{2i} + \cdots + \alpha_k x_{ki} + v_i$$
+Luego, vamos a guardar el $R^2$ y Hacer la prueba de hipótesis $H_0$: $\alpha_1 = \alpha_2 = \cdots = \alpha_k = 0$
+
+---
+# Test y pruebas formales: Breusch- Pagan
+
+--
+
+El estadístico de B-P<sup>2</sup> es:
+
+--
+
+$$ \text{LM} = n \times R^2_{e} $$
+
+--
+
+donde $R^2_e$ es el $R^2$ de la regresión
+
+--
+
+$$e_i^2 = \alpha_0 + \alpha_1 x_{1i} + \alpha_2 x_{2i} + \cdots + \alpha_k x_{ki} + v_i$$
+
+--
+
+Bajo la hipótesis nula $H_0$, $\text{LM}$ se distribuye asintóticamente como $\chi^2_k$.
+
+--
+
+Este estadístico de prueba pone a prueba $H_0$: $\alpha_1 = \alpha_2 = \cdots = \alpha_k = 0$.
+
+--
+
+Rechazar la hipótesis nula implica una evidencia de .black[heterocedasticidad].
+
+--
+
+.footnote[
+[2]: Esta forma específica del estadístico de la prueba proviene en realidad de Koenker (1981).
+]
+---
+class: title-slide-section-red
+
+# La distribución $\chi^2$
+
+--
+
+Acabamos de mencionar que bajo la hipotesis nula, el estadístico de B-P se distribuye como una variable aleatoria $\chi^2$ con $k$ grados de libertad.
+
+--
+
+La distribución $\chi^2$ es sólo otro ejemplo de una distribución común (con nombre) (como la distribución Normal, la distribución $t$ y la misma $F$).
+
+---
+# La distribución $\chi^2$
+
+--
+
+Miremos tres ejemplos de ella, $\chi_k^2$: $\color{#314f4f}{k = 1}$, $\color{#e64173}{k = 2}$, and $\color{orange}{k = 9}$
+
+--
+
+```{R, chicuadrado, echo = F, dev = "svg", fig.height = 4}
+ggplot(data = tibble(x = c(0, 20)), aes(x)) +
+  geom_area(
+    stat = "function", fun = dchisq, args = list(df = 2),
+    fill = "darkslategrey", alpha = 0.3
+  ) +
+  stat_function(
+    fun = dchisq, args = list(df = 2), n = 1e3,
+    color = "darkslategrey"
+  ) +
+  geom_area(
+    stat = "function", fun = dchisq, args = list(df = 3),
+    fill = red_pink, alpha = 0.3
+  ) +
+  stat_function(
+    fun = dchisq, args = list(df = 3), n = 1e3,
+    color = red_pink
+  ) +
+  geom_area(
+    stat = "function", fun = dchisq, args = list(df = 9),
+    fill = "orange", alpha = 0.3
+  ) +
+  stat_function(
+    fun = dchisq, args = list(df = 9), n = 1e3,
+    color = "orange"
+  ) +
+  labs(x = "x", y = "f") +
+  theme_axes_math
+```
+---
+# La distribución $\chi^2$
+
+--
+
+El test de B-P no debe .blue[caer] en el extremo de la distribución $\widehat{\text{LM}}$ bajo el contraste de $H_0: \sigma^2_i=\sigma^2_j$
+
+```{R, chicuadrado2, echo = F, dev = "svg", fig.height = 4}
+ggplot(data = tibble(x = c(0, 8)), aes(x)) +
+  geom_area(
+    stat = "function", fun = dchisq, args = list(df = 2),
+    fill = "darkslategrey", alpha = 0.05
+  ) +
+  geom_area(
+    stat = "function", fun = dchisq, args = list(df = 2),
+    fill = red_pink, alpha = 0.85,
+    xlim = c(5, 8)
+  ) +
+  stat_function(
+    fun = dchisq, args = list(df = 2), n = 1e3,
+    color = "darkslategrey"
+  ) +
+  geom_vline(xintercept = 5, color = grey_dark, size = 0.5, linetype = "dotted") +
+  annotate("text", x = 5, y = 1.55 * dchisq(5, df = 2), label = TeX("$\\widehat{LM}$"), family = "MathJax_Main", size = 7) +
+  labs(x = "x", y = "f") +
+  theme_axes_math
+```
+---
+# Test y pruebas formales: Breusch- Pagan
+
+--
+
+El test o prueba de Breusch-Pagan .blue[es sensible a la forma funcional].
+
+```{R, bpfinist, echo = F, dev = "svg", fig.height = 3.5}
+set.seed(12345)
+# Data
+bp_df <- tibble(
+  x = runif(1e3, -3, 3),
+  e = rnorm(1e3, 0, sd = 2 + x^2),
+  y = 1 + 3 * x + e
+)
+# Regresiones
+lm_bp1 <- lm(residuals(lm(y ~ x, bp_df))^2 ~ 1 + bp_df$x) %>%
+  summary() %$% r.squared %>% multiply_by(1e3)
+lm_bp2 <- lm(residuals(lm(y ~ x, bp_df))^2 ~ 1 + bp_df$x + I(bp_df$x^2)) %>%
+  summary() %$% r.squared %>% multiply_by(1e3)
+# Gráfico
+ggplot(data = bp_df, aes(x = x, y = e)) +
+geom_point(size = 2.75, color = "darkslategrey", alpha = 0.5) +
+labs(x = "x", y = "u") +
+theme_axes_math
+```
+
+$$\begin{aligned}
+  e_i^2 &= \hat{\alpha}_0 + \hat{\alpha}_1 x_{1i} & \widehat{\text{LM}} &= `r round(lm_bp1, 2)` &\mathit{p}\text{-valor} \approx `r round(pchisq(lm_bp1, 1, lower.tail = F), 3)` \\
+  e_i^2 &= \hat{\alpha}_0 + \hat{\alpha}_1 x_{1i} \color{#e64173}{+ \hat{\alpha}_2 x^2_{1i}} & \widehat{\text{LM}} &= `r round(lm_bp2, 2)` &\mathit{p}\text{-valor} < 0.001
+\end{aligned}$$
+
+---
+# Test y pruebas formales: White
+
+--
+
+Se debe:
+
+--
+
+1. Hacer regresión y obtener residuales.
+
+--
+
+2. Estimar la siguiente regresión auxiliar:
+
+--
+$$\mu_{i}^{2}=\alpha_{0}+\underbrace{\alpha_{1}x_{1}+\alpha_{2}x_{2}}_{\text{Explicativas}}+\underbrace{\alpha_{3}x_{1}^{2}}_{\text{Var. al Cuadrado}}+\dots+\underbrace{\alpha_{5}x_{1}x_{2}}_{\text{Interacción}} + v_{i}$$
+
+--
+
+3. Probar que $H_{0}$ es homocedastico. Con estadístico   $nR^{2} \sim \chi^{2} \ g.l$.
+    
+--
+
+Para esto:
+
+--
+
+>Evaluar si $nR^{2}$ es $<$ al _estadístico critico_ $\chi^{2}$ y .red[NO] rechazar la hipótesis nula.
+
+---
+# Test y pruebas formales: White
+
+--
+
+*Ejemplo:* Considere el siguiente modelo $y = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \beta_3 x_3 + u$
+
+--
+
+**Paso 1:** Estimar el modelo; obtener residuos $(e)$.
+
+--
+
+**Paso 2:** Regresión de $e^2$ con variables explicativas, al cuadrado y sus interacciones.
+
+--
+
+$$\begin{aligned}
+  e^2 =
+  &\alpha_0 + \alpha_1 x_1 + \alpha_2 x_2 + \alpha_3 x_3 + \alpha_4 x_1^2 + \alpha_5 x_2^2 + \alpha_6 x_3^2 \\
+  &+ \alpha_7 x_1 x_2 + \alpha_8 x_1 x_3 + \alpha_9 x_2 x_3 + v
+\end{aligned}$$
+
+--
+
+Guardamos el $R^2$ de la ecuación anterior (lo llamamos $R_e^2$).
+
+--
+
+**Paso 3:** Testear $H_0$: $\alpha_1 = \alpha_2 = \cdots = \alpha_9 = 0$ usando $\text{LM} = n R^2_e \overset{\text{d}}{\sim} \chi_9^2$.
+
+---
+# Test y pruebas formales: White
+```{R, white, echo = F, dev = "svg", fig.height = 4}
+set.seed(12345)
+# Grafico
+ggplot(data = bp_df, aes(x = x, y = e)) +
+geom_point(size = 2.75, color = "darkslategrey", alpha = 0.5) +
+labs(x = "x", y = "u") +
+theme_axes_math
+```
+
+Y tenemos lista esta .grey[parte]
+
+$$\begin{aligned}
+ e_i^2 &= \hat{\alpha}_0 + \hat{\alpha}_1 x_{1i} \color{#e64173}{+ \hat{\alpha}_2 x^2_{1i}} & \widehat{\text{LM}} &= `r round(lm_bp2, 2)` &\mathit{p}\text{-value} < 0.001
+\end{aligned}$$
+---
+# Una prueba de ojitos 🧠
+
+--
+
+- Sea la siguiente tabla con estadisticos de .blue[White] determine que modelo tiene **Heterocedasticidad**
+
+--
+
+| Estadístico | P-Valor | Parámetros                     | Heterocedasticidad |
+|-------------|---------|--------------------------------|--------------------|
+| 9.47        | 0.0012  | 1                              |                    |
+| 6.45        | 0.0918  | 2                              |                    |
+| 2.17        | 0.1891  | 2                              |                    |
+| 4.23        | 0.1191  | 1                              |                    |
+
+
+
+---
+class: title-slide-section-grey
+# Bibliografía
+
+`r fa('book')` Gujarati, D. N., & Porter, D. C. (2011). *Econometria Básica*. Ed. Porto Alegre: AMGH..
+
+`r fa('book')` Stock, J. H., Watson, M. W., & Larrión, R. S. (2012). *Introducción a la Econometría*.
+
+`r fa('book')` Wooldridge, J. M. (2015). *Introductory econometrics: A modern approach*. Cengage learning.
+
+---
+class: title-slide-final, middle
+
+# Gracias por su atención!
+
+## Alguna pregunta adicional?
+
+### Carlos Andres Yanes Guerra
+`r fa("envelope", fill="red")` cayanes@uninorte.edu.co
+`r fa("twitter", fill="cyan")` keynes37
+
+
+
+
+
+
+
+
+

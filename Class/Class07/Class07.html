@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Econometria I</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Carlos Yanes" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <link href="libs/remark-css/rutgers.css" rel="stylesheet" />
+    <link href="libs/remark-css/rutgers-fonts.css" rel="stylesheet" />
+  </head>
+  <body>
+    <textarea id="source">
+
+name: xaringan-title
+class: left, middle
+
+
+# Econometría I
+&lt;br&gt;
+## Heterocedasticidad
+
+&lt;br&gt;
+&lt;br&gt;
+&lt;img src="images/lognig.png" width="280" /&gt;
+
+### Carlos Yanes | Departamento de Economía | 2024-05-07
+
+---
+class: middle, inverse
+
+.left-column[
+
+# 😅
+
+]
+
+.right-column[
+# Preguntas de la sesion anterior?
+]
+
+---
+class: middle, inverse
+
+.left-column[
+
+# 😅
+
+]
+
+.right-column[
+# Preguntas de la sesion anterior?
+]
+
+---
+
+
+
+
+background-size: 100%
+background-image: url(https://media.giphy.com/media/Gnh8nS5DgqyZy/giphy.gif)
+---
+# Heterocedasticidad
+
+--
+
+Debemos recordar los **supuestos** de M.C.O
+
+--
+
+1. Nuestra ***muestra*** es aleatoria las variables `\((x_k)\)` y `\((y_i)\)` son **representativas** de una población.
+
+--
+
+2. La variable `\((y)\)` es una **función lineal** de los `\((\beta_k)\)`'s del modelo y del residuo `\((u_i)\)`.
+
+--
+
+3. No hay **multicolinealidad perfecta** (relación) de las variables explicativas.
+
+--
+
+4. Las variables explicativas son **exogenas**: `\(\mathop{\boldsymbol{E}}\left[ u \middle| X \right] = 0 \left(\implies \mathop{\boldsymbol{E}}\left[ u \right] = 0\right)\)`.
+
+--
+
+5. Tenemos **varianza constante** de los residuos del modelo, es decir, `\(\sigma^2\)` se mantiene siempre o es estable, _p.e._,
+
+--
+
+  - `\(\mathop{\boldsymbol{E}}\left[ u_i^2 \middle| X \right] = \mathop{\text{Var}} \left( u_i \middle| X \right) = \sigma^2 \implies \mathop{\text{Var}} \left( u_i \right) = \sigma^2\)`
+
+--
+
+  - `\(\mathop{\text{Cov}} \left( u_i, \, u_j \middle| X \right) = \mathop{\boldsymbol{E}}\left[ u_i u_j \middle| X \right] = 0\)` para `\(i\neq j\)`
+
+--
+
+6. Los residuos tienen distribución normal, _p.e._, `\(u_i \overset{\text{iid}}{\sim} \mathop{\text{N}}\left( 0, \sigma^2 \right)\)`.
+
+---
+# Heterocedasticidad
+
+--
+
+<svg aria-hidden="true" role="img" viewBox="0 0 640 512" style="height:1em;width:1.25em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:red;overflow:visible;position:relative;"><path d="M88.2 309.1c9.8-18.3 6.8-40.8-7.5-55.8C59.4 230.9 48 204 48 176c0-63.5 63.8-128 160-128s160 64.5 160 128s-63.8 128-160 128c-13.1 0-25.8-1.3-37.8-3.6c-10.4-2-21.2-.6-30.7 4.2c-4.1 2.1-8.3 4.1-12.6 6c-16 7.2-32.9 13.5-49.9 18c2.8-4.6 5.4-9.1 7.9-13.6c1.1-1.9 2.2-3.9 3.2-5.9zM0 176c0 41.8 17.2 80.1 45.9 110.3c-.9 1.7-1.9 3.5-2.8 5.1c-10.3 18.4-22.3 36.5-36.6 52.1c-6.6 7-8.3 17.2-4.6 25.9C5.8 378.3 14.4 384 24 384c43 0 86.5-13.3 122.7-29.7c4.8-2.2 9.6-4.5 14.2-6.8c15.1 3 30.9 4.5 47.1 4.5c114.9 0 208-78.8 208-176S322.9 0 208 0S0 78.8 0 176zM432 480c16.2 0 31.9-1.6 47.1-4.5c4.6 2.3 9.4 4.6 14.2 6.8C529.5 498.7 573 512 616 512c9.6 0 18.2-5.7 22-14.5c3.8-8.8 2-19-4.6-25.9c-14.2-15.6-26.2-33.7-36.6-52.1c-.9-1.7-1.9-3.4-2.8-5.1C622.8 384.1 640 345.8 640 304c0-94.4-87.9-171.5-198.2-175.8c4.1 15.2 6.2 31.2 6.2 47.8l0 .6c87.2 6.7 144 67.5 144 127.4c0 28-11.4 54.9-32.7 77.2c-14.3 15-17.3 37.6-7.5 55.8c1.1 2 2.2 4 3.2 5.9c2.5 4.5 5.2 9 7.9 13.6c-17-4.5-33.9-10.7-49.9-18c-4.3-1.9-8.5-3.9-12.6-6c-9.5-4.8-20.3-6.2-30.7-4.2c-12.1 2.4-24.7 3.6-37.8 3.6c-61.7 0-110-26.5-136.8-62.3c-16 5.4-32.8 9.4-50 11.8C279 439.8 350 480 432 480z"/></svg> Nos enfocamos hoy en el supuesto \# .RUred[5]:
+
+--
+
+Tenemos **varianza constante** de los residuos del modelo, es decir, `\(\sigma^2\)` se mantiene siempre o es estable, _p.e._,
+
+--
+
+  - `\(\mathop{\boldsymbol{E}}\left[ u_i^2 \middle| X \right] = \mathop{\text{Var}} \left( u_i \middle| X \right) = \sigma^2 \implies \mathop{\text{Var}} \left( u_i \right) = \sigma^2\)`
+  
+--
+
+  - `\(\mathop{\text{Cov}} \left( u_i, \, u_j \middle| X \right) = \mathop{\boldsymbol{E}}\left[ u_i u_j \middle| X \right] = 0\)` para `\(i\neq j\)`
+
+--
+
+- Nos enfocamos en la violación de este **supuesto** porque nos va a generar .RUred[problemas] en el modelo, _p.e_:.
+
+--
+
+**Heterocedasticidad** `\(\mathop{\text{Var}} \left( u_i \right) = \sigma^2_i\)` y `\(\sigma^2_i \neq \sigma^2_j\)` para algunos `\(i\neq j\)`.
+
+--
+
+En otras palabras: nuestros residuos o (*perturbaciones*) tienen **varianzas** distintas o diferentes.
+
+---
+# Heterocedasticidad
+
+--
+
+Aunque se hace necesario que un modelo de regresión cumpla con este supuesto, es bueno saber que en otros momentos es bueno *relajarlo*. Piense que esta midiendo la relación existente entre `educación` y la `habilidad` de una persona (a veces no observable) esta se mantenga constante es muy estricto.
+
+--
+
+El problema de **heterocedasticidad** va mas que todo enfocada en el sesgo pero de los errores estandar de los estimadores de la regresión.
+
+---
+# Heterocedasticidad
+
+--
+
+<svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:red;overflow:visible;position:relative;"><path d="M156.6 384.9L125.7 354c-8.5-8.5-11.5-20.8-7.7-32.2c3-8.9 7-20.5 11.8-33.8L24 288c-8.6 0-16.6-4.6-20.9-12.1s-4.2-16.7 .2-24.1l52.5-88.5c13-21.9 36.5-35.3 61.9-35.3l82.3 0c2.4-4 4.8-7.7 7.2-11.3C289.1-4.1 411.1-8.1 483.9 5.3c11.6 2.1 20.6 11.2 22.8 22.8c13.4 72.9 9.3 194.8-111.4 276.7c-3.5 2.4-7.3 4.8-11.3 7.2v82.3c0 25.4-13.4 49-35.3 61.9l-88.5 52.5c-7.4 4.4-16.6 4.5-24.1 .2s-12.1-12.2-12.1-20.9V380.8c-14.1 4.9-26.4 8.9-35.7 11.9c-11.2 3.6-23.4 .5-31.8-7.8zM384 168a40 40 0 1 0 0-80 40 40 0 1 0 0 80z"/></svg> La varianza de `\(\mu_i\)` se incrementa en la medida que las `\(x\)` lo hacen.
+
+--
+
+&lt;img src="Class07_files/figure-html/heteroce 11-1.svg" style="display: block; margin: auto;" /&gt;
+
+---
+# Heterocedasticidad
+
+--
+
+<svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:red;overflow:visible;position:relative;"><path d="M156.6 384.9L125.7 354c-8.5-8.5-11.5-20.8-7.7-32.2c3-8.9 7-20.5 11.8-33.8L24 288c-8.6 0-16.6-4.6-20.9-12.1s-4.2-16.7 .2-24.1l52.5-88.5c13-21.9 36.5-35.3 61.9-35.3l82.3 0c2.4-4 4.8-7.7 7.2-11.3C289.1-4.1 411.1-8.1 483.9 5.3c11.6 2.1 20.6 11.2 22.8 22.8c13.4 72.9 9.3 194.8-111.4 276.7c-3.5 2.4-7.3 4.8-11.3 7.2v82.3c0 25.4-13.4 49-35.3 61.9l-88.5 52.5c-7.4 4.4-16.6 4.5-24.1 .2s-12.1-12.2-12.1-20.9V380.8c-14.1 4.9-26.4 8.9-35.7 11.9c-11.2 3.6-23.4 .5-31.8-7.8zM384 168a40 40 0 1 0 0-80 40 40 0 1 0 0 80z"/></svg> Varianza de `\(\mu_i\)` se incrementa con los extremos de `\(x\)`
+
+--
+
+&lt;img src="Class07_files/figure-html/hetero 12 -1.svg" style="display: block; margin: auto;" /&gt;
+
+---
+# Heterocedasticidad
+
+--
+
+<svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:red;overflow:visible;position:relative;"><path d="M156.6 384.9L125.7 354c-8.5-8.5-11.5-20.8-7.7-32.2c3-8.9 7-20.5 11.8-33.8L24 288c-8.6 0-16.6-4.6-20.9-12.1s-4.2-16.7 .2-24.1l52.5-88.5c13-21.9 36.5-35.3 61.9-35.3l82.3 0c2.4-4 4.8-7.7 7.2-11.3C289.1-4.1 411.1-8.1 483.9 5.3c11.6 2.1 20.6 11.2 22.8 22.8c13.4 72.9 9.3 194.8-111.4 276.7c-3.5 2.4-7.3 4.8-11.3 7.2v82.3c0 25.4-13.4 49-35.3 61.9l-88.5 52.5c-7.4 4.4-16.6 4.5-24.1 .2s-12.1-12.2-12.1-20.9V380.8c-14.1 4.9-26.4 8.9-35.7 11.9c-11.2 3.6-23.4 .5-31.8-7.8zM384 168a40 40 0 1 0 0-80 40 40 0 1 0 0 80z"/></svg> Otro ejemplo de heterocedasticidad pero cuando `\(\mu_i\)` varia por grupos
+
+--
+
+&lt;img src="Class07_files/figure-html/hetero 13-1.svg" style="display: block; margin: auto;" /&gt;
+
+---
+# Heterocedasticidad
+
+--
+
+### Consecuencias
+
+--
+
+- Entonces que consecuencias hay cuando es heterocedástico el modelo? es **Sesgado**? es **Ineficienciente**?
+
+--
+
+- Hay que mirar la insesgadez
+
+--
+
+**Recordeis&lt;sub&gt;1&lt;/sub&gt;:** MCO para ser insesgado requiere `\(\mathop{\boldsymbol{E}}\left[ \hat{\beta}_k \middle| X \right] = \beta_k\)` para todo `\(k\)`.
+
+--
+
+**Recordeis&lt;sub&gt;2&lt;/sub&gt;:** habiamos visto que `\(\hat{\beta}_1 = \dfrac{\sum_i\left(y_i-\overline{y}\right)\left(x_i-\overline{x}\right)}{\sum_i\left(x_i -\overline{x}\right)^2}\)`
+
+--
+
+Esto permite reescribir nuestro estimador como:
+
+--
+
+`$$\hat{\beta}_1 = \beta_1 + \dfrac{\sum_i \left( x_i - \overline{x} \right) u_i}{\sum_i \left( x_i - \overline{x} \right)^2}$$`
+---
+# Heterocedasticidad
+
+Demostración de lo anterior
+
+--
+
+Asuma que `\(y_i = \beta_0 + \beta_1 x_i + u_i\)`
+
+--
+
+$$
+`\begin{aligned}
+  \hat{\beta}_1
+  &amp;= \dfrac{\sum_i\left(y_i-\overline{y}\right)\left(x_i-\overline{x}\right)}{\sum_i\left(x_i -\overline{x}\right)^2} \\
+  &amp;= \dfrac{\sum_i\left(\left[ \beta_0 + \beta_1 x_i + u_i \right]- \left[ \beta_0 + \beta_1 \overline{x} + \overline{u} \right] \right)\left(x_i-\overline{x}\right)}{\sum_i\left(x_i -\overline{x}\right)^2} \\
+  &amp;= \dfrac{\sum_i\left(\beta_1 \left[ x_i - \overline{x} \right] + \left[u_i - \overline{u}\right]  \right)\left(x_i-\overline{x}\right)}{\sum_i\left(x_i -\overline{x}\right)^2} \\
+  &amp;= \dfrac{\sum_i\left(\beta_1 \left[ x_i - \overline{x} \right]^2 + \left[ x_i - \overline{x} \right] \left[u_i - \overline{u}\right]\right)}{\sum_i\left(x_i -\overline{x}\right)^2} \\
+  &amp;= \beta_1 + \dfrac{\sum_i\left(x_i - \overline{x}\right) \left(u_i - \overline{u}\right)}{\sum_i\left(x_i -\overline{x}\right)^2}
+\end{aligned}`
+$$
+---
+# Heterocedasticidad
+
+--
+
+$$
+`\begin{aligned}
+  \hat{\beta}_1
+  &amp;= \cdots = \beta_1 + \dfrac{\sum_i\left(x_i - \overline{x}\right) \left(u_i - \overline{u}\right)}{\sum_i\left(x_i -\overline{x}\right)^2} \\
+  &amp;= \beta_1 + \dfrac{\sum_i\left(x_i - \overline{x}\right) u_i - \overline{u} \sum_i\left(x_i - \overline{x}\right)}{\sum_i\left(x_i -\overline{x}\right)^2} \\
+  &amp;= \beta_1 + \dfrac{\sum_i\left(x_i - \overline{x}\right) u_i - \overline{u} \left(\sum_i x_i - \sum_i \overline{x}\right)}{\sum_i\left(x_i -\overline{x}\right)^2} \\
+  &amp;= \beta_1 + \dfrac{\sum_i\left(x_i - \overline{x}\right) u_i - \overline{u} \left(\sum_i x_i - n \overline{x}\right)}{\sum_i\left(x_i -\overline{x}\right)^2} \\
+  &amp;= \beta_1 + \dfrac{\sum_i\left(x_i - \overline{x}\right) u_i - \overline{u} \color{#e64173}{\left(\sum_i x_i - \sum_i x_i\right)}}{\sum_i\left(x_i -\overline{x}\right)^2} \\
+  &amp;= \beta_1 + \dfrac{\sum_i\left(x_i - \overline{x}\right) u_i}{\sum_i\left(x_i -\overline{x}\right)^2} \quad \text{😅}
+\end{aligned}`
+$$
+---
+# Heterocedasticidad
+
+--
+
+$$
+`\begin{aligned}
+  \mathop{\boldsymbol{E}}\left[ \hat{\beta}_1 \middle| X \right]
+  &amp;= \mathop{\boldsymbol{E}}\left[ \beta_1 + \dfrac{\sum_i\left(x_i - \overline{x}\right) u_i}{\sum_i\left(x_i -\overline{x}\right)^2} \middle| X \right] \\
+  &amp;= \beta_1 + \mathop{\boldsymbol{E}}\left[ \dfrac{\sum_i\left(x_i - \overline{x}\right) u_i}{\sum_i\left(x_i -\overline{x}\right)^2} \middle| X \right] \\
+  &amp;= \beta_1 + \dfrac{\sum_i\left(x_i - \overline{x}\right)}{\sum_i\left(x_i -\overline{x}\right)^2} \color{#e64173}{\underbrace{\mathop{\boldsymbol{E}}\left[ u_i \middle| X \right]}_{=0}} \\
+  &amp;= \beta_1 \quad \text{😹}
+\end{aligned}`
+$$
+
+--
+Ohhh. **MCO se mantiene insesgado** para los `\(\beta_k\)`.
+
+
+---
+# Heterocedasticidad
+
+--
+
+- Con insesgadez no hay problema
+
+--
+
+- Con **ineficiencia** si que lo hay
+
+--
+
+## Cómo así?
+
+--
+
+La eficiencia y la inferencia de MCO no sobreviven a la heterocedasticidad.
+
+--
+
+- En presencia de heterocedasticidad, MCO **ya no es el más eficiente** (mejor) estimador lineal insesgado.
+
+--
+
+
+- Sería más (eficiente) **ponderar las observaciones** inversamente a la varianza de su `\(u_i\)`.
+
+--
+
+  - Disminuir la ponderación de los `\(u_i\)` de alta varianza (demasiado difícil para aprender por ahora).
+  
+--
+
+  - Aumentar la ponderación de las observaciones con `\(u_i\)` de baja varianza (más "fiables").
+
+--
+
+  - Ahora hay que hacer uso de los mínimos cuadrados ponderados (WLS)
+
+---
+# Consecuencias: Inferencia
+
+--
+
+- Intervalos de confianza erróneos
+
+--
+
+- Problemas para las pruebas de hipótesis (tanto las pruebas `\(t\)` como las `\(F\)`)
+
+--
+
+- Es de cuidado la inferencia. **Imagine que algo que le dicen y no puede ser testeado** 
+
+---
+# Preguntas que nos hacemos
+
+--
+
+**Pregunta:** ¿Cuál es la definición de heterocedasticidad?
+
+--
+
+- **R./:**
+&lt;br&gt;.blue[Matematicamente:] `\(\mathop{\text{Var}} \left( u_i | X \right) \neq \mathop{\text{Var}} \left( u_j | X \right)\)` para algunos `\(i\neq j\)`.
+&lt;br&gt;.blue[Palabras:] Existe una relación sistemática entre la varianza de `\(u_i\)` y nuestras variables explicativas.
+
+--
+
+**P:** ¿Por qué nos preocupa la heterocedasticidad?
+
+--
+
+- **R./:** Porque sesga nuestros errores estándar, arruinando nuestras pruebas estadísticas e intervalos de confianza. Además: **MCO** ya no produce el (mejor) estimador más eficiente.
+
+--
+
+**P:** ¿La gráfica de `\((y)\)` contra `\((x)\)`, nos dice algo sobre la heterocedasticidad?
+
+--
+
+- **R./:** No es exactamente lo que queremos, pero como `\((y)\)` es una función de `\((x)\)` y `\((u)\)`, todavía puede ser informativo. Si `\((y)\)` se vuelve más/menos disperso a medida que `\((x)\)` cambia, es probable que tengamos **heterocedasticidad**.
+---
+# Test y pruebas formales:
+
+--
+
+La .blue[eficiencia] de nuestros estimadores depende de la presencia o no de la heterocedasticidad. Los siguientes autores, tuvieron una idea para su detección y formularon un par de pruebas:
+
+--
+
+1. Prueba de **Park**.
+
+--
+
+1. Prueba de **Goldfeld-Quandt**.
+
+--
+
+1. Prueba de **Breusch-Pagan**.
+
+--
+
+1. Prueba de **White**.
+
+--
+
+<svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:red;overflow:visible;position:relative;"><path d="M448 256A192 192 0 1 0 64 256a192 192 0 1 0 384 0zM0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256zm256 80a80 80 0 1 0 0-160 80 80 0 1 0 0 160zm0-224a144 144 0 1 1 0 288 144 144 0 1 1 0-288zM224 256a32 32 0 1 1 64 0 32 32 0 1 1 -64 0z"/></svg> Cada una de estas pruebas se centra en el hecho de que podemos .blue[utilizar el residuo OLS] `\(\color{#e64173}{e_i}\)` .blue[para estimar la perturbación de la población] `\(\color{#e64173}{u_i}\)`.
+
+---
+class: title-slide-section-red, middle
+
+# Test para la heterocedasticidad
+
+&lt;br&gt;
+&lt;img src="images/lognig.png" width="380" /&gt;
+
+
+---
+# Test y pruebas formales: Park
+
+--
+
+Asume o le da formas **funcionales**&lt;sup&gt;1&lt;/sup&gt;  a la varianza de `\(\mu_{i}\)` (residuos)
+`$$\sigma_{i}^{2}=\sigma^{2}X_{i}^{\beta}e^{v_{i}}$$`
+
+--
+
+Encontrando una estimación logarítmica:
+
+--
+
+`$$Ln  \ \mu_{i}^{2}=ln \ \sigma^{2}+\beta \; ln\; X+ v_{i}$$`
+
+--
+
+&lt;ru-blockquote&gt; Debe evaluar si es o no significativo el coeficiente del `\((\beta)\)`. De esta forma estará detectando heterocedasticidad. _La significancía va con los P-valores_
+
+--
+
+.footnote[[1] Recuerde cuando se gráfica `\(y=f(x)\)`]
+
+---
+# Test y pruebas formales: Goldfeld-Quandt
+
+--
+
+Se centra en un tipo específico de heterocedasticidad: si la varianza de `\(u_i\)` difiere .blue[entre dos grupos].&lt;sup&gt;†&lt;/sup&gt;
+
+--
+
+¿Recuerda cómo utilizamos nuestros residuos para estimar el `\(\sigma^2\)`?
+
+--
+
+$$ s^2 = \dfrac{\text{SRC}}{n-1} = \dfrac{\sum_i e_i^2}{n-1} $$
+
+--
+
+Utilizaremos esta misma idea para determinar si hay evidencia de que nuestros dos grupos difieren en las varianzas de sus perturbaciones, comparando efectivamente `\(s^2_1\)` y `\(s^2_2\)` de nuestros dos grupos.
+
+--
+
+.footnote[
+[†]: La prueba G-Q fue una de las primeras pruebas de heterocedasticidad (1965).
+]
+---
+# Test y pruebas formales: Goldfeld-Quandt
+
+--
+
+El asunto es mas o menos este
+
+--
+
+1. Ordenar las observaciones por `\(x\)`
+
+--
+
+2. Dividir los datos en dos grupos de tamaño n.super[⭑]
+  - G&lt;sub&gt;1&lt;/sub&gt;: El primer tercio
+  - G&lt;sub&gt;2&lt;/sub&gt;: El último tercio
+  
+--
+
+3. Realizar regresiones separadas de `\(y\)` en `\(x\)` para G&lt;sub&gt;1&lt;/sub&gt;  y G&lt;sub&gt;2&lt;/sub&gt;
+
+--
+
+4. Guardar `\(SRC_1\)` y `\(SRC_2\)` respectivamente 
+
+--
+
+5. Calcular el .blue[estadístico G-Q]
+
+---
+# Test y pruebas formales: Goldfeld-Quandt 
+
+La prueba sigue una distribución `\(F\)` (bajo hipótesis nula) con `\(n^{\star}-k\)` y `\(n^{\star}-k\)` grados de libertad.&lt;sup&gt;ª&lt;/sup&gt;
+
+--
+
+`$$F_{\left(n^{\star}-k,\, n^{\star}-k\right)} = \dfrac{\text{SRC}_2/(n^\star-k)}{\text{SRC}_1/(n^\star-k)} = \dfrac{\text{SRC}_2}{\text{SRC}_1}$$`
+
+--
+
+**Notas**
+
+--
+
+- La prueba G-Q requiere que las perturbaciones sigan distribuciones normales.
+
+--
+
+- El G-Q asume un tipo/forma muy específico de heterocedasticidad.
+
+--
+
+- Funciona muy bien si conocemos la forma de heterocedasticidad potencial.
+
+--
+
+.footnote[
+[ª]: Goldfeld y Quandt sugirieron `\(n^{\star}\)` de `\((3/8)n\)`. La parte de `\((k)\)` hace referencia al número de parámetros estimados (_p.e_, `\((\hat{\beta}_j)\)`'s).
+]
+---
+# Test y pruebas formales: Goldfeld-Quandt 
+
+--
+
+&lt;img src="Class07_files/figure-html/GQtest-1.svg" style="display: block; margin: auto;" /&gt;
+---
+# Test y pruebas formales: Goldfeld-Quandt 
+
+--
+
+&lt;img src="Class07_files/figure-html/GQtest2-1.svg" style="display: block; margin: auto;" /&gt;
+
+--
+
+`\(F_{375,\,375} = \dfrac{\color{#e64173}{\text{SRC}_2 = 18,203.4}}{\color{#314f4f}{\text{SRC}_1 = 1,039.5}} \approx 17.5 \implies\)` *p*-valor `\(&lt; 0.001\)`
+
+`\(\therefore\)` Rechazamos `\(H_0\)`: `\(\sigma^2_1 = \sigma^2_2\)` y por ende, concluimos que el modelo tiene problemas de .black[Heterocedasticidad]
+---
+# Test y pruebas formales: Goldfeld-Quandt 
+
+--
+
+&lt;img src="Class07_files/figure-html/GQtest3-1.svg" style="display: block; margin: auto;" /&gt;
+
+--
+
+`\(F_{375,\,375} = \dfrac{\color{#e64173}{\text{SRC}_2 = 14,516.8}}{\color{#314f4f}{\text{SRC}_1 = 14,937.1}} \approx 1 \implies\)` *p*-valor `\(\approx 0.609\)`
+
+`\(\therefore\)` No rechazamos `\(H_0\)`: `\(\sigma^2_1 = \sigma^2_2\)` incluso cuando la .black[heterocedasticidad] esta presente.
+---
+background-size: 100%
+background-image: url(https://media.giphy.com/media/A6bYw4HCi9rbl0q8Xg/giphy.gif)
+
+???
+
+Image test. Taken from gyfty.
+
+---
+# Test y pruebas formales: Breusch- Pagan
+
+--
+
+Breusch y Pagan (1981) intentaron resolver este problema de ser demasiado específicos con la forma funcional de la heterocedasticidad.
+
+--
+
+- Permite que los datos muestren si/cómo la varianza de `\(u_i\)` se correlaciona con `\(X\)`.
+
+--
+
+- Si `\(\sigma_i^2\)` se correlaciona con `\(X\)`, entonces tenemos heterocedasticidad.
+
+--
+
+- Hacen una regresión de `\(e_i^2\)` sobre `\(X = \left[ 1,\, x_1,\, x_2,\, \ldots,\, x_k \right]\)` y prueba la significancia conjunta.
+
+---
+# Test y pruebas formales: Breusch- Pagan
+
+--
+
+El asunto es mas o menos este
+
+--
+
+1. Estimar una regresión `\(y\)` con un intercepto y las variables `\(x_1,x_2,\dots,x_k\)`.
+
+--
+
+2. Guardar los residuos e.
+
+--
+
+3. Hacer una regresión ahora de `\(e^2\)` con cada una de las variables `\(x_1,x_2,\dots,x_k\)`.
+
+--
+
+`$$e_i^2 = \alpha_0 + \alpha_1 x_{1i} + \alpha_2 x_{2i} + \cdots + \alpha_k x_{ki} + v_i$$`
+Luego, vamos a guardar el `\(R^2\)` y Hacer la prueba de hipótesis `\(H_0\)`: `\(\alpha_1 = \alpha_2 = \cdots = \alpha_k = 0\)`
+
+---
+# Test y pruebas formales: Breusch- Pagan
+
+--
+
+El estadístico de B-P&lt;sup&gt;2&lt;/sup&gt; es:
+
+--
+
+$$ \text{LM} = n \times R^2_{e} $$
+
+--
+
+donde `\(R^2_e\)` es el `\(R^2\)` de la regresión
+
+--
+
+`$$e_i^2 = \alpha_0 + \alpha_1 x_{1i} + \alpha_2 x_{2i} + \cdots + \alpha_k x_{ki} + v_i$$`
+
+--
+
+Bajo la hipótesis nula `\(H_0\)`, `\(\text{LM}\)` se distribuye asintóticamente como `\(\chi^2_k\)`.
+
+--
+
+Este estadístico de prueba pone a prueba `\(H_0\)`: `\(\alpha_1 = \alpha_2 = \cdots = \alpha_k = 0\)`.
+
+--
+
+Rechazar la hipótesis nula implica una evidencia de .black[heterocedasticidad].
+
+--
+
+.footnote[
+[2]: Esta forma específica del estadístico de la prueba proviene en realidad de Koenker (1981).
+]
+---
+class: title-slide-section-red
+
+# La distribución `\(\chi^2\)`
+
+--
+
+Acabamos de mencionar que bajo la hipotesis nula, el estadístico de B-P se distribuye como una variable aleatoria `\(\chi^2\)` con `\(k\)` grados de libertad.
+
+--
+
+La distribución `\(\chi^2\)` es sólo otro ejemplo de una distribución común (con nombre) (como la distribución Normal, la distribución `\(t\)` y la misma `\(F\)`).
+
+---
+# La distribución `\(\chi^2\)`
+
+--
+
+Miremos tres ejemplos de ella, `\(\chi_k^2\)`: `\(\color{#314f4f}{k = 1}\)`, `\(\color{#e64173}{k = 2}\)`, and `\(\color{orange}{k = 9}\)`
+
+--
+
+&lt;img src="Class07_files/figure-html/chicuadrado-1.svg" style="display: block; margin: auto;" /&gt;
+---
+# La distribución `\(\chi^2\)`
+
+--
+
+El test de B-P no debe .blue[caer] en el extremo de la distribución `\(\widehat{\text{LM}}\)` bajo el contraste de `\(H_0: \sigma^2_i=\sigma^2_j\)`
+
+&lt;img src="Class07_files/figure-html/chicuadrado2-1.svg" style="display: block; margin: auto;" /&gt;
+---
+# Test y pruebas formales: Breusch- Pagan
+
+--
+
+El test o prueba de Breusch-Pagan .blue[es sensible a la forma funcional].
+
+&lt;img src="Class07_files/figure-html/bpfinist-1.svg" style="display: block; margin: auto;" /&gt;
+
+`$$\begin{aligned}
+  e_i^2 &amp;= \hat{\alpha}_0 + \hat{\alpha}_1 x_{1i} &amp; \widehat{\text{LM}} &amp;= 1.26 &amp;\mathit{p}\text{-valor} \approx 0.261 \\
+  e_i^2 &amp;= \hat{\alpha}_0 + \hat{\alpha}_1 x_{1i} \color{#e64173}{+ \hat{\alpha}_2 x^2_{1i}} &amp; \widehat{\text{LM}} &amp;= 185.8 &amp;\mathit{p}\text{-valor} &lt; 0.001
+\end{aligned}$$`
+
+---
+# Test y pruebas formales: White
+
+--
+
+Se debe:
+
+--
+
+1. Hacer regresión y obtener residuales.
+
+--
+
+2. Estimar la siguiente regresión auxiliar:
+
+--
+`$$\mu_{i}^{2}=\alpha_{0}+\underbrace{\alpha_{1}x_{1}+\alpha_{2}x_{2}}_{\text{Explicativas}}+\underbrace{\alpha_{3}x_{1}^{2}}_{\text{Var. al Cuadrado}}+\dots+\underbrace{\alpha_{5}x_{1}x_{2}}_{\text{Interacción}} + v_{i}$$`
+
+--
+
+3. Probar que `\(H_{0}\)` es homocedastico. Con estadístico   `\(nR^{2} \sim \chi^{2} \ g.l\)`.
+    
+--
+
+Para esto:
+
+--
+
+&gt;Evaluar si `\(nR^{2}\)` es `\(&lt;\)` al _estadístico critico_ `\(\chi^{2}\)` y .red[NO] rechazar la hipótesis nula.
+
+---
+# Test y pruebas formales: White
+
+--
+
+*Ejemplo:* Considere el siguiente modelo `\(y = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \beta_3 x_3 + u\)`
+
+--
+
+**Paso 1:** Estimar el modelo; obtener residuos `\((e)\)`.
+
+--
+
+**Paso 2:** Regresión de `\(e^2\)` con variables explicativas, al cuadrado y sus interacciones.
+
+--
+
+`$$\begin{aligned}
+  e^2 =
+  &amp;\alpha_0 + \alpha_1 x_1 + \alpha_2 x_2 + \alpha_3 x_3 + \alpha_4 x_1^2 + \alpha_5 x_2^2 + \alpha_6 x_3^2 \\
+  &amp;+ \alpha_7 x_1 x_2 + \alpha_8 x_1 x_3 + \alpha_9 x_2 x_3 + v
+\end{aligned}$$`
+
+--
+
+Guardamos el `\(R^2\)` de la ecuación anterior (lo llamamos `\(R_e^2\)`).
+
+--
+
+**Paso 3:** Testear `\(H_0\)`: `\(\alpha_1 = \alpha_2 = \cdots = \alpha_9 = 0\)` usando `\(\text{LM} = n R^2_e \overset{\text{d}}{\sim} \chi_9^2\)`.
+
+---
+# Test y pruebas formales: White
+&lt;img src="Class07_files/figure-html/white-1.svg" style="display: block; margin: auto;" /&gt;
+
+Y tenemos lista esta .grey[parte]
+
+`$$\begin{aligned}
+ e_i^2 &amp;= \hat{\alpha}_0 + \hat{\alpha}_1 x_{1i} \color{#e64173}{+ \hat{\alpha}_2 x^2_{1i}} &amp; \widehat{\text{LM}} &amp;= 185.8 &amp;\mathit{p}\text{-value} &lt; 0.001
+\end{aligned}$$`
+---
+# Una prueba de ojitos 🧠
+
+--
+
+- Sea la siguiente tabla con estadisticos de .blue[White] determine que modelo tiene **Heterocedasticidad**
+
+--
+
+| Estadístico | P-Valor | Parámetros                     | Heterocedasticidad |
+|-------------|---------|--------------------------------|--------------------|
+| 9.47        | 0.0012  | 1                              |                    |
+| 6.45        | 0.0918  | 2                              |                    |
+| 2.17        | 0.1891  | 2                              |                    |
+| 4.23        | 0.1191  | 1                              |                    |
+
+
+
+---
+class: title-slide-section-grey
+# Bibliografía
+
+<svg aria-hidden="true" role="img" viewBox="0 0 448 512" style="height:1em;width:0.88em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:currentColor;overflow:visible;position:relative;"><path d="M96 0C43 0 0 43 0 96V416c0 53 43 96 96 96H384h32c17.7 0 32-14.3 32-32s-14.3-32-32-32V384c17.7 0 32-14.3 32-32V32c0-17.7-14.3-32-32-32H384 96zm0 384H352v64H96c-17.7 0-32-14.3-32-32s14.3-32 32-32zm32-240c0-8.8 7.2-16 16-16H336c8.8 0 16 7.2 16 16s-7.2 16-16 16H144c-8.8 0-16-7.2-16-16zm16 48H336c8.8 0 16 7.2 16 16s-7.2 16-16 16H144c-8.8 0-16-7.2-16-16s7.2-16 16-16z"/></svg> Gujarati, D. N., &amp; Porter, D. C. (2011). *Econometria Básica*. Ed. Porto Alegre: AMGH..
+
+<svg aria-hidden="true" role="img" viewBox="0 0 448 512" style="height:1em;width:0.88em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:currentColor;overflow:visible;position:relative;"><path d="M96 0C43 0 0 43 0 96V416c0 53 43 96 96 96H384h32c17.7 0 32-14.3 32-32s-14.3-32-32-32V384c17.7 0 32-14.3 32-32V32c0-17.7-14.3-32-32-32H384 96zm0 384H352v64H96c-17.7 0-32-14.3-32-32s14.3-32 32-32zm32-240c0-8.8 7.2-16 16-16H336c8.8 0 16 7.2 16 16s-7.2 16-16 16H144c-8.8 0-16-7.2-16-16zm16 48H336c8.8 0 16 7.2 16 16s-7.2 16-16 16H144c-8.8 0-16-7.2-16-16s7.2-16 16-16z"/></svg> Stock, J. H., Watson, M. W., &amp; Larrión, R. S. (2012). *Introducción a la Econometría*.
+
+<svg aria-hidden="true" role="img" viewBox="0 0 448 512" style="height:1em;width:0.88em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:currentColor;overflow:visible;position:relative;"><path d="M96 0C43 0 0 43 0 96V416c0 53 43 96 96 96H384h32c17.7 0 32-14.3 32-32s-14.3-32-32-32V384c17.7 0 32-14.3 32-32V32c0-17.7-14.3-32-32-32H384 96zm0 384H352v64H96c-17.7 0-32-14.3-32-32s14.3-32 32-32zm32-240c0-8.8 7.2-16 16-16H336c8.8 0 16 7.2 16 16s-7.2 16-16 16H144c-8.8 0-16-7.2-16-16zm16 48H336c8.8 0 16 7.2 16 16s-7.2 16-16 16H144c-8.8 0-16-7.2-16-16s7.2-16 16-16z"/></svg> Wooldridge, J. M. (2015). *Introductory econometrics: A modern approach*. Cengage learning.
+
+---
+class: title-slide-final, middle
+
+# Gracias por su atención!
+
+## Alguna pregunta adicional?
+
+### Carlos Andres Yanes Guerra
+<svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:red;overflow:visible;position:relative;"><path d="M64 112c-8.8 0-16 7.2-16 16v22.1L220.5 291.7c20.7 17 50.4 17 71.1 0L464 150.1V128c0-8.8-7.2-16-16-16H64zM48 212.2V384c0 8.8 7.2 16 16 16H448c8.8 0 16-7.2 16-16V212.2L322 328.8c-38.4 31.5-93.7 31.5-132 0L48 212.2zM0 128C0 92.7 28.7 64 64 64H448c35.3 0 64 28.7 64 64V384c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V128z"/></svg> cayanes@uninorte.edu.co
+<svg aria-hidden="true" role="img" viewBox="0 0 512 512" style="height:1em;width:1em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:cyan;overflow:visible;position:relative;"><path d="M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253z"/></svg> keynes37
+
+
+
+
+
+
+
+
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script src="http://www.jvcasillas.com/ru_xaringan/js/ru_xaringan.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9"
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
