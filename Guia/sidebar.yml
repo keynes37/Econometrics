@@ -1,0 +1,8 @@
+website:
+  sidebar:
+    contents:
+      - index.qmd
+      - section: Parte 1
+        contents:
+          - Unidades/unidad01.qmd
+          - Unidades/unidad02.qmd
