@@ -1,7 +1,7 @@
 # Econometrics
 Econometrics course with note for undergraduate students
 
-## Class overhead v 0.3
+## Class overhead v 0.4
 
 Introducción [Clase 1](https://keynes37.github.io/Econometrics/Class/Class00/Class00.html#1)
 
