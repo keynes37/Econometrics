@@ -1,0 +1,100 @@
+---
+title: Econometría I
+subtitle: "Reto 01"
+author:
+  name: Carlos A. Yanes Guerra
+  affiliation: Universidad del Norte | Departamento de Economía
+# date: "`r format(Sys.time(), '%d %B %Y')`" ## Or "Lecture no."
+output: 
+  html_document:
+    keep_md: false
+    theme: journal
+    highlight: haddock
+    # code_folding: show
+    toc: yes
+    toc_depth: 4
+    toc_float: yes
+    css: css/preamble.css ## For multi-col environments
+  pdf_document:
+    latex_engine: xelatex
+    keep_tex: false ## Change to true if want keep intermediate .tex file
+    toc: true
+    toc_depth: 3
+    dev: cairo_pdf
+    # fig_width: 7 ## Optional: Set default PDF figure width
+    # fig_height: 6 ## Optional: Set default PDF figure height
+    extra_dependencies: ['booktabs', 'threeparttable', 'float'] # "longtable"
+    includes:
+      in_header: tex/preamble.tex ## For multi-col environments
+    pandoc_args:
+        --template=tex/mytemplate.tex ## For affiliation field. See: https://bit.ly/2T191uZ
+always_allow_html: true
+urlcolor: blue
+mainfont: cochineal
+sansfont: Fira Sans
+monofont: Fira Code ## Although, see: https://tex.stackexchange.com/q/294362
+## Automatically knit to both formats:
+knit: (function(inputFile, encoding) {
+ rmarkdown::render(inputFile, encoding = encoding, 
+ output_format = 'all') 
+ })
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE, dpi=300, fig.align = "center")
+```
+
+## Antes de empezar
+Recuerde que los retos son para desarrollarlos en clases en el tiempo sugerido por el profesor **1H:20 Min**. Trate con su grupo de trabajo (máximo 2 personas) este -*tenga un toque único*-. 
+
+## Objetivo
+
+Realizar a partir de la información disponible un análisis estadístico incluyendo los momentos de la distribución. Es indispensable consultar la ***guía de Econometría*** del curso para la elaboración de lo requerido.
+
+### Base simulada
+
+Corra el siguiente código:
+
+```r
+set.seed(228908) # Para replicación
+
+tiendas <- 110 # Número de tiendas
+
+# Generar los datos
+data_ventas <- data.frame(
+  tienda = 1:tiendas,
+  ventas_millones = round(runif(tiendas, min = 10, max = 100), 2), # Ventas en millones de pesos
+  empleados = sample(5:50, tiendas, replace = TRUE), # Número de empleados
+  zona = sample(c("Zona Norte", "Zona Sur"), tiendas, replace = TRUE)
+  )
+head(data_ventas) 
+```
+
+### Consideración
+Recuerde que algunas ocasiones dentro del código si solo se le pide la respuesta debe colocar lo siguiente en su chunk:
+
+`echo=FALSE`
+
+\newpage
+
+## Preguntas del Reto!
+
+1. Qué tienda es la que mas vende? cuanto? cuál es la que menos vende? cuanto? Cuanto es el requerimiento mínimo para decir que la tienda se encuentra por encima de la mediana de las ventas?. *Muestre el código y justifique su respuesta*.
+
+2. Qué tan diferente es el promedio de ventas de las tienda de la zona norte  vs la zona sur? Hay mucha desviación sobre ellas?
+
+3.  Digamos ahora que requerimos una variable como lo es **Productividad por ventas**. Note que en la base de datos no está. Debe hacer uso de la función `mutate` y usar la formula de:
+
+$$\text{Productividad}=\frac{Ventas \times 1\;millon}{\text{No de empleados}}$$
+
+4. Halle la media, el coeficiente de asimetría y la curtosis de la variable de productividad. Qué significa cada momento? *haga un análisis completo de eso*.
+
+5. Elabore el gráfico de histograma de la serie de **Productividad**. Qué le dice eso?
+
++ Tenga en consideración la linea de la distribución y no olvide explicarla tambien, tome como referencia lo siguiente:
+
+```r
+hist(x, main="Distribución de la variable x") # Histograma y título
+lines(density(x), col=4, lwd=2) # Línea de distribución
+```
+

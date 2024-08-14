@@ -1,0 +1,200 @@
+---
+title: Econometría I
+subtitle: "Reto 00"
+author:
+  name: Carlos A. Yanes Guerra
+  affiliation: Universidad del Norte | Departamento de Economía
+# date: "`r format(Sys.time(), '%d %B %Y')`" ## Or "Lecture no."
+output: 
+  html_document:
+    keep_md: false
+    theme: journal
+    highlight: haddock
+    # code_folding: show
+    toc: yes
+    toc_depth: 4
+    toc_float: yes
+    css: css/preamble.css ## For multi-col environments
+  pdf_document:
+    latex_engine: xelatex
+    keep_tex: false ## Change to true if want keep intermediate .tex file
+    toc: true
+    toc_depth: 3
+    dev: cairo_pdf
+    # fig_width: 7 ## Optional: Set default PDF figure width
+    # fig_height: 6 ## Optional: Set default PDF figure height
+    extra_dependencies: ['booktabs', 'threeparttable', 'float'] # "longtable"
+    includes:
+      in_header: tex/preamble.tex ## For multi-col environments
+    pandoc_args:
+        --template=tex/mytemplate.tex ## For affiliation field. See: https://bit.ly/2T191uZ
+always_allow_html: true
+urlcolor: blue
+mainfont: cochineal
+sansfont: Fira Sans
+monofont: Fira Code ## Although, see: https://tex.stackexchange.com/q/294362
+## Automatically knit to both formats:
+knit: (function(inputFile, encoding) {
+ rmarkdown::render(inputFile, encoding = encoding, 
+ output_format = 'all') 
+ })
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE, dpi=300, fig.align = "center")
+```
+
+## Antes de empezar
+Los retos son para desarrollarlos en clases en el tiempo sugerido por el profesor **1H:20 Min**. Trate con su grupo de trabajo (máximo 2 personas) este -*tenga un toque único*-. Para esta parte, queremos solo enfocarnos en leer código. Tratar de corregir algunos elementos de los que coloca el profesor y también hacer ciertas ejecuciones de estos chunks. La entrega debe hacerla en la carpeta del Brightspace para ello. La nota de *trabajos de clase* empieza desde acá.
+
+## Objetivo
+
+El objetivo de este reto es practicar los comandos básicos de R. A continuación, se presentan una serie de ejercicios que deben completar.
+
+### Ejemplo de salidas del trabajo
+
+Requerimos que el código sea limpio dentro de las respuestas
+
+:::::: {.columns}
+::: {.column width="48%" data-latex="{0.48\textwidth}"}
+Aqui un ejemplo de como debe ir su código.
+
+```{r math, message=FALSE, echo=FALSE}
+matrix(1:9,nrow = 3,ncol = 3)   
+```
+:::
+
+::: {.column width="4%" data-latex="{0.04\textwidth}"}
+\ <!-- an empty Div (with a white space), serving as a column separator -->
+:::
+
+::: {.column width="48%" data-latex="{0.48\textwidth}"}
+Matriz con nombres **R** con código.
+
+```{r dt, message=FALSE}
+V<-matrix(1:9,ncol=3)
+colnames(V)<-c("Edad", "Estado","Código")
+rownames(V)<-c("Alber","Marco","Maria")
+V
+```
+:::
+::::::
+\ <!-- an empty Div again to give some extra space before the next block -->
+
+Recuerde que algunas ocasiones dentro del código si solo se le pide la respuesta debe colocar lo siguiente:
+
+`echo=FALSE`
+
+\newpage
+
+## Preguntas
+
+### Ejercicio 1: Asignación de Variables
+
+Asigne el valor 10 a una variable llamada x y el valor 20 a una variable llamada y. Calcule la suma de (x) e (y) y almacénala en una variable llamada `suma`.
+
+```r
+# Asignación de variables
+x <- 10
+y <- 20
+
+# Calcula la suma
+suma <- ___ + ___
+
+# Imprime la suma
+print(___)
+
+```
+
+### Ejercicio 2: Operaciones aritmeticas
+
+De acuerdo a valores que usted proponga para las variables de `x`, `y`, `z` y `w`. cálcule lo siguiente:
+
+```r
+# Resta
+resta <- x - y
+
+# Multiplicación
+multiplicacion <- x * y
+
+# División
+division <- x / y
+
+# Imprime los resultados
+print(resta)
+print(multiplicacion)
+print(division)
+```
+
+*Recuerde que debe hacerlo con todas las variables*
+
+### Ejercicio 3: Vectores y secuencia
+
+Cree un vector que contenga los números del 1 al 10 y almacénalo en una variable llamada `mi_vector`. Luego, calcule la media y la suma de los elementos del vector.
+
+```r
+# Crea un vector
+mi_vector <- ___:___
+
+# Calcula la media
+media <- mean(mi_vector)
+
+# Calcula la suma
+suma_vector <- sum(mi_vector)
+
+# Imprima la media y la suma
+print(media)
+print(suma_vector)
+```
+
+### Ejercicio 4: función
+
+```r
+f <- function(num = 1) {
+         Pos <- "Tengo un gran reto!\n"
+         for(i in seq_len(num)) {
+                 cat(Pos)
+         }
+         chars <- nchar(Pos) * num
+         chars
+ }
+```
+
++ Qué resultado arroja si usted le dice por ejemplo `f(5)`?, qué significa el número que da como resultado?. 
++ Trate de explicar el código anterior y diganos que intenta hacer paso a paso.
+
+### Ejercicio 5: Demanda (como en microeconomía)
+
+Contexto
+Imagine que es un/a analista económico encargado de estudiar la relación entre el *precio* de un producto y su *demanda* en función del ingreso de los consumidores.
+
+1. ¿Cuál es la descripción básica de los datos sobre la demanda en función del precio y el ingreso? *Utilice la función de resumen o summary()* explique
+
+Responda eso utilizando lo siguiente
+
+```r
+# Cargar librerías necesarias
+library(ggplot2)
+
+# Supongamos que tenemos el siguiente conjunto de datos
+datos <- data.frame(
+  precio = c(10, 20, 30, 40, 50),
+  ingreso = c(2000, 2500, 3000, 3500, 4000),
+  demanda = c(100, 80, 60, 40, 20)
+)
+```
+
+De  acuerdo a lo siguiente:
+
+```r
+# Crear una gráfica de la demanda en función del precio
+ggplot(datos, aes(x = precio, y = demanda)) +
+  geom_point() +
+  geom_line() +
+  labs(title = "Gráfica de Demanda",
+       x = "Precio del Producto",
+       y = "Cantidad Demandada") +
+  theme_minimal()
+```
+
+2. Basándose en la gráfica que optiene del código anterior, ¿qué puede inferir sobre la relación entre el precio y la demanda del producto?
