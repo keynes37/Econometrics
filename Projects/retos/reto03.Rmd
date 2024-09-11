@@ -1,0 +1,86 @@
+---
+title: Econometría I
+subtitle: "Reto 03"
+author:
+  name: Carlos A. Yanes Guerra
+  affiliation: Universidad del Norte | Departamento de Economía
+# date: "`r format(Sys.time(), '%d %B %Y')`" ## Or "Lecture no."
+output: 
+  html_document:
+    keep_md: false
+    theme: journal
+    highlight: haddock
+    # code_folding: show
+    toc: yes
+    toc_depth: 4
+    toc_float: yes
+    css: css/preamble.css ## For multi-col environments
+  pdf_document:
+    latex_engine: xelatex
+    keep_tex: false ## Change to true if want keep intermediate .tex file
+    toc: true
+    toc_depth: 3
+    dev: cairo_pdf
+    # fig_width: 7 ## Optional: Set default PDF figure width
+    # fig_height: 6 ## Optional: Set default PDF figure height
+    extra_dependencies: ['booktabs', 'threeparttable', 'float'] # "longtable"
+    includes:
+      in_header: tex/preamble.tex ## For multi-col environments
+    pandoc_args:
+        --template=tex/mytemplate.tex ## For affiliation field. See: https://bit.ly/2T191uZ
+always_allow_html: true
+urlcolor: blue
+mainfont: cochineal
+sansfont: Fira Sans
+monofont: Fira Code ## Although, see: https://tex.stackexchange.com/q/294362
+## Automatically knit to both formats:
+knit: (function(inputFile, encoding) {
+ rmarkdown::render(inputFile, encoding = encoding, 
+ output_format = 'all') 
+ })
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE, dpi=300, fig.align = "center")
+```
+
+## Antes de empezar
+Recuerde que los retos son para desarrollarlos en clases en el tiempo sugerido por el profesor **1H:20 Min**. Trate con su grupo de trabajo (máximo 2 personas) este -*tenga un toque único*- donde haga uso en la gran mayoría de los códigos de clase y no los que les da la IA. 
+
+## Objetivo
+Hacer uso del modelo base de Machine learning (regresión)
+
+### Datos a usar
+Sea la siguiente tabla con información:
+
+| Obs | Nombre          | Edad | Ingresos | Gastos  | Estrato |
+|-----|-----------------|------|----------|---------|---------|
+| 1   | Emilio Sanchez  | 21   | 4664158  | 921000  | 5       |
+| 2   | Claudia Gurat   | 29   | 2753698  | 645000  | 3       |
+| 3   | Ernestina Vega  | 27   | 1448581  | 356900  | 2       |
+| 4   | Camila Sanchez  | 27   | 3220699  | 2100000 | 4       |
+| 5   | Lucia Stevens   | 21   | 3829716  | 2900000 | 4       |
+| 6   | Marco Bornet    | 25   | 915761   | 378000  | 1       |
+| 7   | Juan Silva      | 21   | 3659060  | 1690000 | 2       |
+| 8   | Maria Stevez    | 21   | 2352287  | 1587000 | 3       |
+| 9   | Juan Parniot    | 23   | 1446200  | 989670  | 2       |
+| 10  | José Pipol      | 25   | 2646853  | 1497200 | 3       |
+| 11  | Matias Guerra   | 25   | 1289810  | 978000  | 2       |
+| 12  | Adriana Perez   | 29   | 2728612  | 1450000 | 3       |
+| 13  | Luisa Rodriguez | 21   | 1078452  | 745200  | 2       |
+| 14  | Olga Cañon      | 28   | 2841315  | 156900  | 3       |
+| 15  | Sebastian Velas | 25   | 2347724  | 987300  | 3       |
+
+\newpage
+
+## Preguntas del Reto!
+
+**1.** Establezca primero con las variables ( _Ingreso_ y _costo_) un diagrama de dispersión, luego haga lo mismo pero ahora con las variables ( _Ingreso_ y _edad_) . **Realice un análisis comparativo de ambas gráficas**.
+
+**2.** Haga un análisis de los gastos por estrato socioeconómico.  *Pista:* Puede ayudarse del comando `table` de R.
+
+**3.** Cree una variable dicotoma o `dummy` para el genero de la persona y establezca una comparación entre el gasto por genero de las personas de la base. *Pista:* Debe responder finalmente cuál genero gasta mas.
+
+**4.** Realice una prueba estadística para determinar si el promedio de ingresos es diferente por genero. *Pista:* Haga uso de la prueba T- de student. _Explique y plantee la prueba de hipótesis_. Corra una regresion con las variables. Difiere de lo obtenido en la prueba T de Student?. _Explique_
+
+**5.** Ejecute una regresión adicional, pero ahora cuando la variable dependiente es el ingreso y la explicativa es el gasto. *Pista:* Muestre los resultados, incluyendo valores predichos y residuales e interprete el modelo.
