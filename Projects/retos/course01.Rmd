@@ -1,0 +1,107 @@
+---
+title: Econometría I
+subtitle: "Control teórico"
+author:
+  name: Carlos A. Yanes Guerra
+  affiliation: Universidad del Norte | Departamento de Economía
+# date: "`r format(Sys.time(), '%d %B %Y')`" ## Or "Lecture no."
+output: 
+  html_document:
+    keep_md: false
+    theme: journal
+    highlight: haddock
+    # code_folding: show
+    toc: yes
+    toc_depth: 4
+    toc_float: yes
+    css: css/preamble.css ## For multi-col environments
+  pdf_document:
+    latex_engine: xelatex
+    keep_tex: false ## Change to true if want keep intermediate .tex file
+    toc: true
+    toc_depth: 3
+    dev: cairo_pdf
+    # fig_width: 7 ## Optional: Set default PDF figure width
+    # fig_height: 6 ## Optional: Set default PDF figure height
+    extra_dependencies: ['booktabs', 'threeparttable', 'float'] # "longtable"
+    includes:
+      in_header: tex/preamble.tex ## For multi-col environments
+    pandoc_args:
+        --template=tex/mytemplate.tex ## For affiliation field. See: https://bit.ly/2T191uZ
+always_allow_html: true
+urlcolor: blue
+mainfont: cochineal
+sansfont: Fira Sans
+monofont: Fira Code ## Although, see: https://tex.stackexchange.com/q/294362
+## Automatically knit to both formats:
+knit: (function(inputFile, encoding) {
+ rmarkdown::render(inputFile, encoding = encoding, 
+ output_format = 'all') 
+ })
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE, dpi=300, fig.align = "center")
+```
+
+## Antes de empezar
+Este es un control para mirar que tanto presta atención el estudiante cuando el profesor explica algo teórico en clases. El Tema principal en esta ocasión es de Autocorrelación
+
+## Objetivo
+Medir el uso de la atención en clases
+
+## Empecemos
+
+1. Observe lo siguiente: (queremos mirar el enfoque de Curva de Phillips)
+
+$$\text{Inflacion}_t=\beta_0+\beta_1\text{Desempleo}+\epsilon_t$$
+
+a. Interprete 
+```{r, echo=FALSE}
+library(pacman)
+p_load(broom, latex2exp, ggplot2, ggthemes, ggforce, viridis, dplyr, magrittr, knitr, parallel, huxtable)
+library(tidyverse)
+library(babynames)
+library(fontawesome) # from github: https://github.com/rstudio/fontawesome
+library(DiagrammeR)
+library(fpp2)
+library(dynlm);library(lmtest); library(tidyverse)
+data(phillips, package='wooldridge')
+
+# Define Yearly time series beginning in 1948
+tsdata <- ts(phillips, start=1948)
+# Estimation of static Phillips curve:
+reg.s <- dynlm( inf ~ unem, data=tsdata, end=1996)
+tidy(reg.s)
+```
+
+\newpage
+
+b. Ahora analice esta gráfica:
+
+```{r, echo=FALSE}
+residual.s <- resid(reg.s)
+plot(residual.s, type="o")
+```
+
+¿Qué patrón sigue el residuo en el tiempo?
+
+\hspace{2cm}
+
+2. Ahora mire esta salida y escriba la ecuación pertinente
+
+```{r, echo=FALSE}
+pof<-dynlm(residual.s ~ -1+ L(residual.s))
+tidy(pof)
+```
+
+¿Qué logra mirar ahora? (interprete)
+\hspace{3cm}
+3. Hagamos el test de autocorrelación del modelo, requerimos que interprete la salida, trate de ser muy completo en la respuesta
+
+```{r, echo=FALSE}
+# DW tests
+dwtest(reg.s)
+```
+
+
