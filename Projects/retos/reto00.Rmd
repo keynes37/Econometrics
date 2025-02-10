@@ -45,11 +45,11 @@ knitr::opts_chunk$set(echo = TRUE, cache = TRUE, dpi=300, fig.align = "center")
 ```
 
 ## Antes de empezar
-Los retos son para desarrollarlos en clases en el tiempo sugerido por el profesor **1H:20 Min**. Trate con su grupo de trabajo (máximo 2 personas) este -*tenga un toque único*-. Para esta parte, queremos solo enfocarnos en leer código. Tratar de corregir algunos elementos de los que coloca el profesor y también hacer ciertas ejecuciones de estos chunks. La entrega debe hacerla en la carpeta del Brightspace para ello. La nota de *trabajos de clase* empieza desde acá.
+Los retos son para desarrollarlos en clases en el tiempo sugerido por el profesor **1H:40 Min**. Trate con su grupo de trabajo (máximo 2 personas) este -*tenga un toque único*-. Para esta parte, queremos solo enfocarnos en leer código. Tratar de corregir algunos elementos de los que coloca el profesor y también hacer ciertas ejecuciones de estos chunks. La entrega debe hacerla en la carpeta del Brightspace para ello. La nota de *trabajos de clase* empieza desde acá.
 
 ## Objetivo
 
-El objetivo de este reto es practicar los comandos básicos de R. A continuación, se presentan una serie de ejercicios que deben completar.
+El objetivo de este reto es practicar los comandos básicos de R. A continuación, se presentan una serie de ejercicios sencillos que deben completar. Empezar el formato word o pdf del Markdown.
 
 ### Ejemplo de salidas del trabajo
 
@@ -74,7 +74,7 @@ Matriz con nombres **R** con código.
 ```{r dt, message=FALSE}
 V<-matrix(1:9,ncol=3)
 colnames(V)<-c("Edad", "Estado","Código")
-rownames(V)<-c("Alber","Marco","Maria")
+rownames(V)<-c("Anyi","Lucas","Marcela")
 V
 ```
 :::
@@ -91,12 +91,12 @@ Recuerde que algunas ocasiones dentro del código si solo se le pide la respuest
 
 ### Ejercicio 1: Asignación de Variables
 
-Asigne el valor 10 a una variable llamada x y el valor 20 a una variable llamada y. Calcule la suma de (x) e (y) y almacénala en una variable llamada `suma`.
+Asigne el valor 10 a una variable llamada x y el valor y 40 a una variable llamada y. Calcule la suma de (x) e (y) y almacénala en una variable llamada `suma`.
 
 ```r
 # Asignación de variables
 x <- 10
-y <- 20
+y <- 40
 
 # Calcula la suma
 suma <- ___ + ___
@@ -130,7 +130,7 @@ print(division)
 
 ### Ejercicio 3: Vectores y secuencia
 
-Cree un vector que contenga los números del 1 al 10 y almacénalo en una variable llamada `mi_vector`. Luego, calcule la media y la suma de los elementos del vector.
+Cree un vector que contenga los números del 1 al 20 y almacénalo en una variable llamada `mi_vector`. Luego, calcule la media y la suma de los elementos del vector.
 
 ```r
 # Crea un vector
