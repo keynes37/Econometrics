@@ -13,6 +13,8 @@ Modelo Mínimos Cuadrados [MCO](https://keynes37.github.io/Econometrics/Class/Cl
 
 Intervalos en Mínimos Cuadrados [Test de parámetros](https://keynes37.github.io/Econometrics/Class/Class04/Class04.html#1)
 
+Regresión Múltiple [Demostración](https://raw.githack.com/keynes37/Econometrics/main/Class/Class05/Class05.html)
+
 
 ### Notas de clase
 
