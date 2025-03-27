@@ -1,0 +1,214 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\PassOptionsToPackage{dvipsnames,svgnames*,x11names*}{xcolor}
+%
+\documentclass[
+]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+  \setmainfont[]{Serif}
+  \setsansfont[]{Fira Sans}
+  \setmonofont[]{Fira Code}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  pdftitle={Econometría I},
+  colorlinks=true,
+  linkcolor=Maroon,
+  filecolor=Maroon,
+  citecolor=Blue,
+  urlcolor=blue,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\usepackage[margin=1in]{geometry}
+\usepackage{longtable,booktabs}
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+%% See: https://bookdown.org/yihui/rmarkdown-cookbook/multi-column.html
+%% I've made some additional adjustments based on my own preferences (e.g. cols
+%% should be top-aligned in case of uneven vertical length)
+\renewcommand{\contentsname}{Contenido}
+\newenvironment{columns}[1][]{}{}
+
+\newenvironment{column}[1]{\begin{minipage}[t]{#1}\ignorespaces}{%
+\end{minipage}
+\ifhmode\unskip\fi
+\aftergroup\useignorespacesandallpars
+}
+
+\def\useignorespacesandallpars#1\ignorespaces\fi{%
+#1\fi\ignorespacesandallpars}
+
+\makeatletter
+\def\ignorespacesandallpars{%
+  \@ifnextchar\par
+    {\expandafter\ignorespacesandallpars\@gobble}%
+    {}%
+}
+\makeatother
+\usepackage{booktabs}
+\usepackage{threeparttable}
+\usepackage{float}
+
+\title{Econometría I}
+\usepackage{etoolbox}
+\makeatletter
+\providecommand{\subtitle}[1]{% add subtitle to \maketitle
+  \apptocmd{\@title}{\par {\large #1 \par}}{}{}
+}
+\makeatother
+\subtitle{Reto 04}
+\usepackage{authblk}
+                                        \author[]{Carlos A. Yanes
+Guerra}
+                                                            \affil{Universidad
+del Norte \textbar{} Departamento de Economía}
+                                            \date{}
+
+\begin{document}
+\maketitle
+
+{
+\hypersetup{linkcolor=}
+\setcounter{tocdepth}{3}
+\tableofcontents
+}
+\subsection{Antes de empezar}\label{antes-de-empezar}
+
+Recuerde que los retos son para desarrollarlos en clases en el tiempo
+sugerido por el profesor 1H:20 Min. Trate con su grupo de trabajo
+(máximo 2 personas) este -tenga un toque único- donde haga uso en la
+gran mayoría de los códigos de clase y no los que les da la IA.
+
+\subsubsection{Objetivo}\label{objetivo}
+
+Hacer uso del modelo base de Machine learning (regresión)
+
+\subsubsection{Datos a usar}\label{datos-a-usar}
+
+Sea la siguiente tabla con información:
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.0694}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.2361}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.0833}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.1806}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.1528}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.2778}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Obs
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Nombre
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Edad
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Altura (cm)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Peso (kg)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Horas de Ejercicio
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+1 & Ana Martinez & 30 & 165 & 60 & 5 \\
+2 & Carlos Perez & 45 & 175 & 80 & 3 \\
+3 & Laura Gomez & 25 & 160 & 55 & 6 \\
+4 & Juan Rodriguez & 35 & 180 & 85 & 4 \\
+5 & Maria Lopez & 28 & 170 & 65 & 5 \\
+6 & Pedro Sanchez & 40 & 178 & 78 & 2 \\
+7 & Lucia Fernandez & 32 & 168 & 62 & 4 \\
+8 & Jose Ramirez & 50 & 182 & 90 & 1 \\
+9 & Sofia Torres & 27 & 162 & 58 & 5 \\
+10 & Andres Suarez & 38 & 176 & 82 & 3 \\
+11 & Paula Castro & 33 & 167 & 63 & 4 \\
+12 & Miguel Vargas & 29 & 174 & 75 & 3 \\
+13 & Elena Morales & 26 & 161 & 57 & 6 \\
+14 & Diego Rios & 42 & 179 & 83 & 2 \\
+15 & Natalia Ruiz & 31 & 166 & 61 & 5 \\
+\end{longtable}
+
+\subsection{Preguntas del Reto}\label{preguntas-del-reto}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  Establezca primero con las variables (Altura y Peso) un
+  \textbf{diagrama de dispersión}, luego haga lo mismo pero ahora con
+  las variables (Altura y Horas de Ejercicio). Realice un análisis
+  comparativo de ambas gráficas.
+\item
+  Haga un análisis del peso por edad. Pista: Puede ayudarse del comando
+  \texttt{Table} de R.
+\item
+  Cree una variable \emph{dicotómica} o dummy para el género de la
+  persona y establezca una comparación entre el peso por género de las
+  personas de la base. Pista: Debe responder finalmente cuál género
+  tiene mayor peso promedio.
+\item
+  Realice una prueba estadística para determinar si el promedio de horas
+  de ejercicio es diferente por género. Pista: Haga uso de la
+  \textbf{prueba T de Student}. Explique y plantee la prueba de
+  hipótesis. Corra ahora una \emph{regresión con las variables}.
+  ¿Difiere de lo obtenido en la prueba T de Student? Explique
+\item
+  Ejecute una regresión adicional, pero ahora cuando la variable
+  dependiente es el peso y la explicativa es la altura. Pista: Muestre
+  los resultados, incluyendo valores predichos y residuales e interprete
+  el modelo.
+\end{enumerate}
+
+\end{document}
