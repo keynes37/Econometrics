@@ -1,0 +1,1177 @@
+---
+title: "Econometria I"
+subtitle: "Reg Mul"
+author: "Carlos Yanes"
+date: "Universidad del Norte </br> `r Sys.Date()`"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    css: ["rutgers", "rutgers-fonts"]
+    nature:
+      beforeInit: "http://www.jvcasillas.com/ru_xaringan/js/ru_xaringan.js"
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+      ratio: "16:9"
+    seal: false
+---
+name: xaringan-title
+class: left, middle
+
+
+# Econometría I
+<br>
+## Regresión Multiple
+
+<br>
+<br>
+<img src="images/lognig.png" width="280" />
+
+### Carlos Yanes Guerra | Departamento de Economía | `r Sys.Date()`
+
+---
+exclude: true
+```{r Setup, include = F}
+options(htmltools.dir.version = FALSE)
+library(pacman)
+p_load(broom, latex2exp, ggplot2, ggthemes, ggforce, viridis, dplyr, magrittr, knitr, parallel, fontawesome, babynames, emo, huxtable)
+# Knitr ajustes
+opts_chunk$set(
+  comment = "#>",
+  fig.align = "center",
+  fig.height = 7,
+  fig.width = 10.5,
+  warning = F,
+  message = F
+)
+# Para GGplot2
+theme_empty <- theme_bw() + theme(
+  line = element_blank(),
+  rect = element_blank(),
+  strip.text = element_blank(),
+  axis.text = element_blank(),
+  plot.title = element_blank(),
+  axis.title = element_blank(),
+  plot.margin = structure(c(0, 0, -0.5, -1), unit = "lines", valid.unit = 3L, class = "unit"),
+  legend.position = "none"
+)
+theme_simple <- theme_bw() + theme(
+  line = element_blank(),
+  panel.grid = element_blank(),
+  rect = element_blank(),
+  strip.text = element_blank(),
+  axis.text.x = element_text(size = 14),
+  axis.text.y = element_blank(),
+  axis.ticks = element_blank(),
+  plot.title = element_blank(),
+  axis.title = element_blank(),
+  # plot.margin = structure(c(0, 0, -1, -1), unit = "lines", valid.unit = 3L, class = "unit"),
+  legend.position = "none"
+)
+theme_axes <- theme_empty + theme(
+  axis.title = element_text(size = 18),
+  plot.margin = structure(c(0, 0, 0.1, 0), unit = "lines", valid.unit = 3L, class = "unit"),
+)
+```
+
+```{R, colors, include = F}
+# Paleta de colores
+red_pink <- "#e64173"
+turquoise <- "#20B2AA"
+orange <- "#FFA500"
+red <- "#fb6107"
+blue <- "#2b59c3"
+green <- "#8bb174"
+grey_light <- "grey70"
+grey_mid <- "grey50"
+grey_dark <- "grey20"
+purple <- "#6A5ACD"
+```
+
+```{css, echo = F}
+@media print {
+  .has-continuation {
+    display: block !important;
+  }
+}
+```
+---
+background-size: 100%
+background-image: url(https://media.giphy.com/media/kMM3vtBEgSsLu/giphy.gif)
+
+???
+
+Image test. Taken from google.
+
+---
+class: middle, inverse
+
+.left-column[
+
+# `r emo::ji("confused")`
+
+]
+
+.right-column[
+# Preguntas de la sesion anterior?
+]
+
+---
+# Preliminar 
+
+La última vez:
+
+1. Estimamos regresión simple **M.C.O** 
+
+1. Tenemos los primeros **test** de Parámetros 
+
+1. Estuvimos con el tema de retornos `salarios f(Experiencia)`
+
+
+---
+class: title-slide-section-red, middle
+
+# Formas funcionales
+
+<br>
+<img src="images/lognig.png" width="380" />
+---
+# Formas Funcionales
+
+--
+
+| Modelo      | Ecuación                     | $\beta_{1}$                              | Lectura                                                                    |
+|-------------|------------------------------|------------------------------------------|----------------------------------------------------------------------------|
+| N-N | $y=\beta_{0}+\beta_{1}x$     | $\frac{\triangle y}{	\triangle x}$        | $y$ cambia en $\beta_{1}$ unidades ante un cambio de x                     |
+| N-L   | $y=\beta_{0}+\beta_{1}Ln(x)$   | $\frac{\triangle y}{\triangle x/x}$    | $y$ cambia en $\beta_{1}/100$ unidades ante un cambio del 1% de x         |
+| L-N   | $Ln(y)=\beta_{0}+\beta_{1}x$   | $\frac{\triangle y / y}{\triangle x}$   | $y$ cambia en $\beta_{1}*100\%$ unidades ante un cambio de una unidad de x |
+| L-L     | $Ln(y)=\beta_{0}+\beta_{1}Ln(x)$ | $\frac{\triangle y / y}{\triangle x/x}$ | Elasticidad: $y$ cambia en $\beta_{1} \%$ ante un cambio de un 1% de x    |
+
+---
+class: title-slide-section-grey, middle
+
+# `r emo::ji("badge")` para este tipo de ajustes
+
+---
+# Formas Funcionales
+
+--
+
+Un gráfico de dispersión
+
+```{R, trans1 figure start, dev = "svg", fig.height = 4.5, echo = F}
+# Set seed
+set.seed(12345)
+# Sample size
+n <- 1e3
+# Generate data
+trans_df <- tibble(
+  x = runif(n, 0, 3),
+  # y = 1 + x + x^2 + x^3 + x^4 + 0.5 * x^5 + rnorm(n, mean = 0, sd = 6)
+  y = 2 * exp(x) + rnorm(n, mean = 0, sd = 6)
+)
+# Plot
+ggplot(data = trans_df, aes(x = x, y = y)) +
+geom_point(size = 2.5, color = "darkslategrey", alpha = 0.5) +
+theme_empty
+```
+
+---
+# Formas Funcionales
+
+$y_i = \beta_0 + u_i$
+
+```{R, trans figure 0, dev = "svg", fig.height = 4.5, echo = F}
+# Plot
+ggplot(data = trans_df, aes(x = x, y = y)) +
+geom_line(stat = "smooth", method = lm, formula = y ~ 1, color = "orange", size = 1.5) +
+geom_point(size = 2.5, color = "darkslategrey", alpha = 0.5) +
+theme_empty
+```
+---
+# Formas Funcionales
+
+$y_i = \beta_0 + \beta_1 x + u_i$
+
+```{R, trans figure 1, dev = "svg", fig.height = 4.5, echo = F}
+# Plot
+ggplot(data = trans_df, aes(x = x, y = y)) +
+geom_line(stat = "smooth", method = lm, formula = y ~ 1, color = "orange", size = 1.5, alpha = 0.3) +
+geom_line(stat = "smooth", method = lm, formula = y ~ x, color = "orange", size = 1.5) +
+geom_point(size = 2.5, color = "darkslategrey", alpha = 0.5) +
+theme_empty
+```
+---
+# Formas Funcionales
+
+$y_i = \beta_0 + \beta_1 x + \beta_2 x^2 + u_i$
+
+```{R, trans figure 2, dev = "svg", fig.height = 4.5, echo = F}
+# Plot
+ggplot(data = trans_df, aes(x = x, y = y)) +
+geom_line(stat = "smooth", method = lm, formula = y ~ 1, color = "orange", size = 1.5, alpha = 0.3) +
+geom_line(stat = "smooth", method = lm, formula = y ~ x, color = "orange", size = 1.5, alpha = 0.3) +
+geom_line(stat = "smooth", method = lm, formula = y ~ poly(x, 2), color = "orange", size = 1.5) +
+geom_point(size = 2.5, color = "darkslategrey", alpha = 0.5) +
+theme_empty
+```
+
+---
+# Formas Funcionales
+
+$y_i = \beta_0 + \beta_1 x + \beta_2 x^2 + \beta_3 x^3 + u_i$
+
+```{R, trans figure 3, dev = "svg", fig.height = 4.5, echo = F}
+# Plot
+ggplot(data = trans_df, aes(x = x, y = y)) +
+geom_line(stat = "smooth", method = lm, formula = y ~ 1, color = "orange", size = 1.5, alpha = 0.3) +
+geom_line(stat = "smooth", method = lm, formula = y ~ x, color = "orange", size = 1.5, alpha = 0.3) +
+geom_line(stat = "smooth", method = lm, formula = y ~ poly(x, 2), color = "orange", size = 1.5, alpha = 0.3) +
+geom_line(stat = "smooth", method = lm, formula = y ~ poly(x, 3), color = "orange", size = 1.5) +
+geom_point(size = 2.5, color = "darkslategrey", alpha = 0.5) +
+theme_empty
+```
+---
+# Formas Funcionales
+
+$y_i = \beta_0 + \beta_1 x + \beta_2 x^2 + \beta_3 x^3 + \beta_4 x^4 + u_i$
+
+```{R, trans figure 4, dev = "svg", fig.height = 4.5, echo = F}
+# Plot
+ggplot(data = trans_df, aes(x = x, y = y)) +
+geom_line(stat = "smooth", method = lm, formula = y ~ 1, color = "orange", size = 1.5, alpha = 0.3) +
+geom_line(stat = "smooth", method = lm, formula = y ~ x, color = "orange", size = 1.5, alpha = 0.3) +
+geom_line(stat = "smooth", method = lm, formula = y ~ poly(x, 2), color = "orange", size = 1.5, alpha = 0.3) +
+geom_line(stat = "smooth", method = lm, formula = y ~ poly(x, 3), color = "orange", size = 1.5, alpha = 0.3) +
+geom_line(stat = "smooth", method = lm, formula = y ~ poly(x, 4), color = "orange", size = 1.5) +
+geom_point(size = 2.5, color = "darkslategrey", alpha = 0.5) +
+theme_empty
+```
+---
+# Formas Funcionales
+
+$y_i = \beta_0 + \beta_1 x + \beta_2 x^2 + \beta_3 x^3 + \beta_4 x^4 + \beta_5 x^5 + u_i$
+
+```{R, trans figure 5, dev = "svg", fig.height = 4.5, echo = F}
+# Plot
+ggplot(data = trans_df, aes(x = x, y = y)) +
+geom_line(stat = "smooth", method = lm, formula = y ~ 1, color = "orange", size = 1.5, alpha = 0.3) +
+geom_line(stat = "smooth", method = lm, formula = y ~ x, color = "orange", size = 1.5, alpha = 0.3) +
+geom_line(stat = "smooth", method = lm, formula = y ~ poly(x, 2), color = "orange", size = 1.5, alpha = 0.3) +
+geom_line(stat = "smooth", method = lm, formula = y ~ poly(x, 3), color = "orange", size = 1.5, alpha = 0.3) +
+geom_line(stat = "smooth", method = lm, formula = y ~ poly(x, 4), color = "orange", size = 1.5, alpha = 0.3) +
+geom_line(stat = "smooth", method = lm, formula = y ~ poly(x, 5), color = "orange", size = 1.5) +
+geom_point(size = 2.5, color = "darkslategrey", alpha = 0.5) +
+theme_empty
+```
+
+---
+# Formas Funcionales
+
+$y_i = 2 e^{x} + u_i$ **siendo este el más real**  
+
+```{R, trans figure 6, dev = "svg", fig.height = 4.5, echo = F}
+# Plot
+ggplot(data = trans_df, aes(x = x, y = y)) +
+geom_line(stat = "smooth", method = lm, formula = y ~ 1, color = "orange", size = 1.5, alpha = 0.3) +
+geom_line(stat = "smooth", method = lm, formula = y ~ x, color = "orange", size = 1.5, alpha = 0.3) +
+geom_line(stat = "smooth", method = lm, formula = y ~ poly(x, 2), color = "orange", size = 1.5, alpha = 0.3) +
+geom_line(stat = "smooth", method = lm, formula = y ~ poly(x, 3), color = "orange", size = 1.5, alpha = 0.3) +
+geom_line(stat = "smooth", method = lm, formula = y ~ poly(x, 4), color = "orange", size = 1.5, alpha = 0.3) +
+geom_line(stat = "smooth", method = lm, formula = y ~ poly(x, 5), color = "orange", size = 1.5, alpha = 0.3) +
+geom_line(stat = "smooth", method = lm, formula = y ~ exp(x), color = red_pink, size = 1.5) +
+geom_point(size = 2.5, color = "darkslategrey", alpha = 0.5) +
+theme_empty
+```
+
+---
+class: title-slide-section-red, middle
+
+# Regresión Múltiple
+
+<br>
+<img src="images/lognig.png" width="380" />
+
+---
+# Regresión Múltiple
+
+--
+
+`r fa ("puzzle-piece")` Cuando se controla (adiciona) mas variables a una regresión, los modelos de regresión lineal se vuelven herramientas mucho mas completas a la hora de estimar **efectos** sobre una variable _objetivo_. Desde luego tienden a ser .blue[mejores] modelos.
+
+--
+
+$$Y_{i}=\color{#e64173}{\beta}_{0}+\color{#e64173}{\beta}_{1}X_{1}+\color{#e64173}{\beta}_{2}X_{2}+\cdots+\color{#e64173}{\beta}_{\rho}X_{\rho}+\mu_{i}$$
+--
+
+- Los parámetros distintos al .blue[autónomo] serán considerados como .grey[parámetros] de pendiente.
+
+--
+
+- Son modelos que se manejan de forma similar a la .blue[regresión simple].
+
+--
+
+- El supuesto mas importante:
+
+--
+
+    $$E(u|x_{1},x_{2},x_{3}, \cdots, x_{k})=0$$
+--
+
+- Los efectos parciales se miden:
+
+--
+
+$$\bigtriangleup \hat{Y}=\bigtriangleup X_{1} \hat{\beta_{1}}+\bigtriangleup X_{2} \hat{\beta_{2}}$$
+---
+# Regresión Múltiple
+
+--
+.black[Importante:] la regresión lineal permite "ajustar" vía coeficientes $\color{#e64173}{\beta}_0,\, \ldots,\, \color{#e64173}{\beta}_p$ la mejor forma o manera de tratar un problema. Estos coeficientes o .grey[parámetros] se denominan _marginales_.
+
+--
+
+$$\begin{align}
+  \color{#6A5ACD}{\hat{y}_i} = \color{#e64173}{\hat{\beta}}_0 + \color{#e64173}{\hat{\beta}}_1 x_{1,i} + \color{#e64173}{\hat{\beta}}_2 x_{2,i} + \cdots + \color{#e64173}{\hat{\beta}}_p x_{p,i} + \varepsilon_i
+\end{align}$$
+
+--
+
+Esto suelen aplicarse en dos escenarios distintos con objetivos bastante diferenciados:
+
+--
+
+1. **Inferencia Causal** Estimar e interpretar .grey[los coeficientes].
+
+1. **Predicción** El enfoque solo es estimar .RUred[resultados].
+
+--
+
+Independientemente del objetivo, la forma de "ajustar" (estimar) el modelo es la misma.
+
+---
+# Regresión Múltiple
+
+--
+
+#### Ajuste de la recta de regresión
+
+--
+
+Como ocurre con muchos métodos de aprendizaje estadístico, la .black[regresión] se centra en **minimizar** alguna medida de pérdida/error.
+
+$$\begin{align}
+  e_i = \color{#F33F18}{y_i} - \color{#6A5ACD}{\hat{y}_i}
+\end{align}$$
+
+--
+
+Tenemos entonces que usar para **regresión** lo que es (RSS) _Residual Sum Squares_ (siglas en ingles) o la suma de los .black[residuos al cuadrado] de la regresión.
+
+--
+
+$$\begin{align}
+  \text{RSS} = e_1^2 + e_2^2 + \cdots + e_n^2 = \sum_{i=1}^n e_i^2
+\end{align}$$
+
+--
+
+El MCO escoge el(los) mejores $\color{#e64173}{\hat{\beta}_j}$ que minimizan la .black[RSS].
+
+---
+# Regresión Múltiple
+
+--
+
+#### Elección del modelo
+
+--
+
+Una primera forma para mirar que tanto ajuste tiene un modelo es el $R^2$, pero, también es bueno mirar _el residuo estándar de la regresión (RSE)_
+
+--
+
+.black[Residuo estándar de la regresión] (.black[RSE])
+
+--
+
+$$\begin{align}
+  \text{RSE}=\sqrt{\dfrac{1}{n-p-1}\text{RSS}}=\sqrt{\dfrac{1}{n-p-1}\sum_{i=1}^{n} \left( y_i - \hat{y}_i \right)^2}
+\end{align}$$
+
+--
+
+Recuerde que la formula del .black[R-cuadrado] (**R.super[2]**) es:
+
+--
+
+$$\begin{align}
+  R^2 = \dfrac{\text{TSS} - \text{RSS}}{\text{TSS}} = 1 - \dfrac{\text{RSS}}{\text{TSS}} \quad \text{donde} \quad \text{TSS} = \sum_{i=1}^{n} \left( y_i - \overline{y} \right)^2
+\end{align}$$
+
+---
+# Regresión Múltiple
+
+--
+
+En la **comparación** de modelos vamos a ver que el $R^2$ por si solo tiende a sobrestimar la capacidad de los modelos. 
+
+--
+
+$$\begin{align}
+  R^2 = 1 - \dfrac{\text{RSS}}{\text{TSS}}
+\end{align}$$
+
+--
+
+.black[Al adherir nuevas variables] la RSS $\downarrow$ pero en cambio TSS no lo hace. Así, $R^2$ se incrementa.
+
+--
+
+Cuando usamos la .black[RSE], esta penaliza .grey[ligeramente] la incorporación de nuevas variables:
+
+--
+
+$$\begin{align}
+  \text{RSE}=\sqrt{\dfrac{1}{n-p-1}\text{RSS}}
+\end{align}$$
+
+--
+
+Pero ocurre que .black[al adicionar una nueva variable:] RSS $\downarrow$ pero $p$ se incrementa. Así, los cambios en el RSE son inciertos.
+
+---
+# Regresión Múltiple
+
+--
+
+Volvemos al .RUred[problema], si .black[añadimos] mas variables al modelo, el $R^2$ *automáticamente* se incrementa.
+
+--
+
+**Solución:** Penalizar el número de variables, pero mediante _p.e._, $R^2$ Ajustado:
+
+$$ \overline{R}^2 = 1 - \dfrac{\sum_i \left( y_i - \hat{y}_i \right)^2/(n-k-1)}{\sum_i \left( y_i - \overline{y} \right)^2/(n-1)} $$
+
+*Nota:* El $R^2$ ajustado no necesariamente esta entre 0 y 1.
+
+---
+class: title-slide-section-grey, middle
+
+# Ok... y entonces?
+
+<br>
+<img src="images/lognig.png" width="380" />
+
+---
+# Regresión Múltiple
+
+--
+
+#### R2-Ajustado
+
+--
+
+Entonces el RSE no es la única forma para penalizar la .black[adición] de nuevas variables...
+
+--
+
+.black[R.super[2] ajustado] es otra forma clásica de .grey[solución].
+
+--
+
+$$\begin{align}
+  R^2\text{Ajustado} = 1 - \dfrac{\text{RSS}\color{#6A5ACD}{/(n - k - 1)}}{\text{TSS}\color{#6A5ACD}{/(n-1)}}
+\end{align}$$
+
+--
+
+R.super[2] Ajustado ayuda a penalizar esta adición
+
+--
+
+- $\text{RSS}$ siempre decrece cuando se adhiere una nueva variable.
+
+--
+
+- $\color{#6A5ACD}{\text{RSS}/(n-k-1)}$ podría incrementarse o decrecer con una nueva variable.
+
+---
+# Regresión Múltiple
+
+--
+
+```{R, gen datacat, cache = T, echo= F}
+n <- 1e2
+set.seed(789123)
+cat_df <- tibble(
+  x1 = runif(n = n, min = -3, max = 3),
+  x2 = runif(n = n, min = -2, max = 2),
+  x3 = runif(n = n, min = -1, max = 1),
+  x4 = runif(n = n, min = -4, max = 4),
+  u  = rnorm(n = n, mean = 0, sd = 1),
+  y  = -0.3 + x1 + x2 * 4 +x2 * 1 +x3 * 2 + u
+)
+m1<- lm(y~x1, data=cat_df)
+m2<- lm(y~x1+x2, data=cat_df)
+m3<- lm(y~x1+x2+x3, data=cat_df)
+m4<- lm(y~x1+x2+x3+x4, data=cat_df)
+huxreg(m1,m2,m3,m4, statistics=c("Observaciones" = "nobs", "R2" = "r.squared"))
+```
+---
+# Regresión Múltiple con R2 Ajustado
+
+```{R, gen moddatacat1, cache = T, echo= F}
+huxreg(m1,m2,m3,m4, statistics=c("Observaciones" = "nobs", "R2 Ajustado" = "adj.r.squared"))
+```
+---
+exclude: true
+
+```{R, overfit-data-gen, eval = F}
+# Set parameters
+set.seed(123)
+N = 2e3
+n = 500
+p = n - 1
+# Generar datos
+X = matrix(data = rnorm(n = N*p), ncol = p)
+β = matrix(data = rnorm(p, sd = 0.005), ncol = 1)
+y = X %*% β + matrix(rnorm(N, sd = 0.01), ncol = 1)
+# Crear una tabla
+pop_dt = X %>% data.matrix() %>% as.data.table()
+setnames(pop_dt, paste0("x", str_pad(1:p, 4, "left", 0)))
+pop_dt[, y := y %>% unlist()]
+# Subconjunto
+sub_dt = pop_dt[1:n,]
+out_dt = pop_dt[(n+1):N,]
+Nn = N - n
+# Para j en 1 to p: fit a model, record R2 and RSE
+fit_dt = mclapply(X = seq(1, p, by = 5), mc.cores = 12, FUN = function(j) {
+  # Ajuste
+  lm_j = lm(y ~ ., data = sub_dt[, c(1:j,p+1), with = F])
+  # Performance
+  y_hat = predict(lm_j, newdata = out_dt[, c(1:j,p+1), with = F])
+  out_rss = sum((out_dt[,y] - y_hat)^2)
+  out_tss = sum((out_dt[,y] - mean(out_dt[,y]))^2)
+  # Miramos
+  data.table(
+    p = j,
+    in_rse = summary(lm_j)$sigma,
+    in_r2 = summary(lm_j)$r.squared,
+    in_r2_adj = summary(lm_j)$adj.r.squared,
+    out_rse = sqrt(1 / (Nn - j - 1) * out_rss),
+    out_r2 = 1 - out_rss/out_tss,
+    out_r2_adj = 1 - ((out_rss) / (Nn - j - 1)) / ((out_tss) / (Nn-1))
+  )
+}) %>% rbindlist()
+# Salvamos resultados
+#saveRDS(fit_dt, file = "my_data.rds")
+library(readxl)
+write.csv(fit_dt, file = 'datafil/reloaded.csv')
+```
+---
+# Regresión Múltiple
+
+--
+
+```{R, r2 datos, include = F, cache = T}
+set.seed(1234)
+y <- rnorm(1e4)
+x <- matrix(data = rnorm(1e7), nrow = 1e4)
+x %<>% cbind(matrix(data = 1, nrow = 1e4, ncol = 1), x)
+r_df <- mclapply(X = 1:(1e3-1), mc.cores = detectCores() - 1, FUN = function(i) {
+  tmp_reg <- lm(y ~ x[,1:(i+1)]) %>% summary()
+  data.frame(
+    k = i + 1,
+    r2 = tmp_reg %$% r.squared,
+    r2_adj = tmp_reg %$% adj.r.squared
+  )
+}) %>% bind_rows()
+```
+
+```{R, r2 ploted, echo = F, dev = "svg", fig.height = 4.5}
+ggplot(data = r_df, aes(x = k, y = r2)) +
+geom_hline(yintercept = 0) +
+geom_vline(xintercept = 0) +
+geom_line(size = 2, alpha = 0.75, color = "darkslategrey") +
+geom_line(aes(y = r2_adj), size = 0.2, alpha = 0, color = red_pink) +
+ylab(TeX("R^2")) +
+xlab("Número de variables explicativas (k)") +
+theme_pander(base_size = 18)
+```
+
+---
+# Regresión Múltiple
+
+```{R, adjusted r2 plot, echo = F, dev = "svg", fig.height = 4.5}
+ggplot(data = r_df, aes(x = k, y = r2)) +
+geom_hline(yintercept = 0) +
+geom_vline(xintercept = 0) +
+geom_line(size = 2, alpha = 0.15, color = "darkslategrey") +
+geom_line(aes(y = r2_adj), size = 2, alpha = 0.85, color = red_pink) +
+ylab(TeX("R^2")) +
+xlab("Número de variables explicativas (k)") +
+theme_pander(base_size = 18)
+```
+
+**La solución:**  $\color{#e64173}{R^2}$ .pink[Ajustado]
+
+---
+class: title-slide-section-red, middle
+
+# Regresión con variables cualitativas y cuantitativas
+
+<br>
+<img src="images/lognig.png" width="380" />
+
+---
+
+# Regresion Múltiple con variable continua y discreta
+
+```{R, gen data, cache = T, include = F}
+n <- 1e2
+set.seed(123456)
+gen_df <- tibble(
+  x1 = runif(n = n, min = -3, max = 3),
+  x2 = sample(x = c(F, T), size = n, replace = T),
+  u  = rnorm(n = n, mean = 0, sd = 1),
+  y  = -0.5 + x1 + x2 * 4 + u
+)
+mean_a <- filter(gen_df, x2 == F)$y %>% mean()
+mean_b <- filter(gen_df, x2 == T)$y %>% mean()
+gen_df %<>% mutate(y_dm = y - mean_a * (x2 == F) - mean_b * (x2 == T))
+```
+
+$y_i = \beta_0 + \beta_1 x_{1i} + \beta_2 x_{2i} + u_i \;$ donde $x_1$ es continua y $\; x_2$ es categórica
+
+```{R, ploty 1, dev = "svg", echo = F, fig.height = 4.25}
+library(latex2exp)
+ggplot(data = gen_df, aes(y = y, x = x1, color = x2, shape = x2)) +
+geom_hline(yintercept = 0) +
+geom_vline(xintercept = 0) +
+annotate("text", x = -0.075, y = 7.75, label = TeX('$y$'), size = 8) +
+annotate("text", x = 2.95, y = 0.3, label = TeX("$x_1$"), size = 8) +
+geom_point(size = 3) +
+ylim(c(-4.5, 8)) +
+theme_empty +
+scale_color_manual(
+  expression(x[2]),
+  values = c("darkslategrey", red_pink),
+  labels = c("A", "B")
+) +
+scale_shape_manual(
+  expression(x[2]),
+  values = c(1, 19),
+  labels = c("A", "B")
+) +
+theme(
+  legend.position = "bottom",
+  text = element_text(size = 20)
+)
+```
+---
+# Regresion Múltiple con variable continua y discreta
+
+El intercepto y la variable categórica $x_2$ controla la media por grupos.
+
+```{R, ploty 2, dev = "svg", echo = F, fig.height = 4.25}
+ggplot(data = gen_df, aes(y = y, x = x1, color = x2, shape = x2)) +
+geom_hline(yintercept = mean_a, color = "darkslategrey", alpha = 0.5) +
+geom_hline(yintercept = mean_b, color = red_pink, alpha = 0.5) +
+geom_hline(yintercept = 0) +
+geom_vline(xintercept = 0) +
+annotate("text", x = -0.075, y = 7.75, label = TeX("$y$"), size = 8) +
+annotate("text", x = 2.95, y = 0.3, label = TeX("$x_1$"), size = 8) +
+geom_point(size = 3) +
+ylim(c(-4.5, 8)) +
+theme_empty +
+scale_color_manual(
+  expression(x[2]),
+  values = c("darkslategrey", red_pink),
+  labels = c("A", "B")
+) +
+scale_shape_manual(
+  expression(x[2]),
+  values = c(1, 19),
+  labels = c("A", "B")
+) +
+theme(
+  legend.position = "bottom",
+  text = element_text(size = 20)
+)
+```
+
+---
+# Regresion Múltiple con variable continua y discreta
+
+Cuando es removida $x_2$
+
+```{R, ploty 3, dev = "svg", echo = F, fig.height = 4.25}
+library(latex2exp)
+ggplot(data = gen_df %>% mutate(y = y - 4 * x2), aes(y = y_dm, x = x1)) +
+geom_hline(yintercept = 0) +
+geom_vline(xintercept = 0) +
+annotate("text", x = -0.075, y = 7.75, label = TeX("$y$"), size = 8) +
+annotate("text", x = 2.95, y = 0.3, label = TeX("$x_1$"), size = 8) +
+geom_point(size = 3, aes(color = x2, shape = x2)) +
+ylim(c(-4.5, 8)) +
+theme_empty +
+scale_color_manual(
+  expression(x[2]),
+  values = c("darkslategrey", red_pink),
+  labels = c("A", "B")
+) +
+scale_shape_manual(
+  expression(x[2]),
+  values = c(1, 19),
+  labels = c("A", "B")
+) +
+theme(
+  legend.position = "bottom",
+  text = element_text(size = 20)
+)
+```
+
+---
+# Regresion Múltiple con variable continua y discreta
+
+El parámetro $\hat{\beta}_1$ estima la relación entre $y_i$ y $x_1$  después de mantener constante a $x_2$.
+
+```{R, ploty 4, dev = "svg", echo = F, fig.height = 4.25}
+library(latex2exp)
+ggplot(data = gen_df %>% mutate(y = y - 4 * x2), aes(y = y_dm, x = x1)) +
+geom_smooth(method = lm, se = F, color = "orange") +
+geom_hline(yintercept = 0) +
+geom_vline(xintercept = 0) +
+annotate("text", x = -0.075, y = 7.75, label = TeX("$y$"), size = 8) +
+annotate("text", x = 2.95, y = 0.3, label = TeX("$x_1$"), size = 8) +
+geom_point(size = 3, aes(color = x2, shape = x2)) +
+ylim(c(-4.5, 8)) +
+theme_empty +
+scale_color_manual(
+  expression(x[2]),
+  values = c("darkslategrey", red_pink),
+  labels = c("A", "B")
+) +
+scale_shape_manual(
+  expression(x[2]),
+  values = c(1, 19),
+  labels = c("A", "B")
+) +
+theme(
+  legend.position = "bottom",
+  text = element_text(size = 20)
+)
+```
+
+
+---
+# Regresion Múltiple
+
+Otra forma de verlo
+
+```{R, ploty 5, dev = "svg", echo = F, fig.height = 4.25}
+ggplot(data = gen_df, aes(y = y, x = x1, color = x2, shape = x2)) +
+geom_smooth(method = lm, se = F) +
+geom_hline(yintercept = 0) +
+geom_vline(xintercept = 0) +
+annotate("text", x = -0.075, y = 7.75, label = TeX("$y$"), size = 8) +
+annotate("text", x = 2.95, y = 0.3, label = TeX("$x_1$"), size = 8) +
+geom_point(size = 3) +
+ylim(c(-4.5, 8)) +
+theme_empty +
+scale_color_manual(
+  expression(x[2]),
+  values = c("darkslategrey", red_pink),
+  labels = c("A", "B")
+) +
+scale_shape_manual(
+  expression(x[2]),
+  values = c(1, 19),
+  labels = c("A", "B")
+) +
+theme(
+  legend.position = "bottom",
+  text = element_text(size = 20)
+)
+```
+
+---
+# Regresion Múltiple
+
+Si buscamos un **estimador**
+
+--
+
+Esto en un modelo de regresión .blue[simple] $y_i = \beta_0 + \beta_1 x_i + u_i$
+
+--
+
+$$\begin{aligned}
+  \hat{\beta}_1 &= \\
+  &= \dfrac{\sum_i \left( x_i - \overline{x} \right) \left( y_i - \overline{y} \right)}{\sum_i \left( x_i -\overline{x} \right)} \\
+  &= \dfrac{\sum_i \left( x_i - \overline{x} \right) \left( y_i - \overline{y} \right)/(n-1)}{\sum_i \left( x_i -\overline{x} \right) / (n-1)} \\
+  &= \dfrac{\mathop{\hat{\text{Cov}}}(x,\,y)}{\mathop{\hat{\text{Var}}} \left( x \right)}
+\end{aligned}$$
+
+---
+# Regresion Múltiple
+
+Estimador lineal .blue[simple]
+
+$$\hat{\beta}_1 = \dfrac{\mathop{\hat{\text{Cov}}}(x,\,y)}{\mathop{\hat{\text{Var}}} \left( x \right)}$$
+
+--
+
+cuando vamos a la parte de regresión .blue[múltiple], el estimador **cambia** solo un poco:
+
+--
+
+$$\hat{\beta}_1 = \dfrac{\mathop{\hat{\text{Cov}}}(\color{#e64173}{\tilde{x}_1},\,y)}{\mathop{\hat{\text{Var}}} \left( \color{#e64173}{\tilde{x}_1} \right)}$$
+
+Donde $\color{#e64173}{\tilde{x}_1}$ es el *residuo* de la variable $x_1$ la variación que queda en $x$ después de controlar las otras variables explicativas.
+
+---
+# Regresion Múltiple
+
+Formalmente tenemos nuestro **Modelo** de .blue[Regresión Múltiple] de la siguiente forma:
+
+--
+
+$$y_i = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \beta_3 x_3 + u_i$$
+--
+
+Ya residualizado $x_{1}$ (el cual nombramos $\color{#e64173}{\tilde{x}_1}$) se obtiene de la regresión de $x_1$ sobre un intercepto y todas las demás variables explicativas y del final de los residuos, _p.e._,
+
+--
+
+$$\begin{aligned}
+  \hat{x}_{1i} &= \hat{\gamma}_0 + \hat{\gamma}_2 \, x_{2i} + \hat{\gamma}_3 \, x_{3i} \\
+  \color{#e64173}{\tilde{x}_{1i}} &= x_{1i} - \hat{x}_{1i}
+\end{aligned}$$
+
+--
+
+Lo que nos permite entender mejor el **estimador** de la regresión múltiple
+
+$$\hat{\beta}_1 = \dfrac{\mathop{\hat{\text{Cov}}}(\color{#e64173}{\tilde{x}_1},\,y)}{\mathop{\hat{\text{Var}}} \left( \color{#e64173}{\tilde{x}_1} \right)}$$
+---
+class: clear, middle
+
+```{R, venn_iv, echo = F, dev = "svg"}
+# Colors (order: x1, x2, x3, y)
+venn_colors <- c(purple, red, "grey60", orange)
+# Locations of circles
+venn_df <- tibble(
+  x  = c( 0.0,   -0.5,    1.5,   -1.0),
+  y  = c( 0.0,   -2.5,   -1.8,    2.0),
+  r  = c( 1.9,    1.5,    1.5,    1.3),
+  l  = c( "Y", "X[1]", "X[2]", "X[3]"),
+  xl = c( 0.0,   -0.5,    1.6,   -1.0),
+  yl = c( 0.0,   -2.5,   -1.9,    2.2)
+)
+# Venn
+ggplot(data = venn_df, aes(x0 = x, y0 = y, r = r, fill = l, color = l)) +
+geom_circle(alpha = 0.3, size = 0.75) +
+theme_void() +
+theme(legend.position = "none") +
+scale_fill_manual(values = venn_colors) +
+scale_color_manual(values = venn_colors) +
+geom_text(aes(x = xl, y = yl, label = l), size = 9, family = "Fira Sans Book", parse = T) +
+annotate(
+  x = -5.5, y = 3.3,
+  geom = "text", label = "Regresión Multiple", size = 9, family = "Fira Sans Book", hjust = 0
+) +
+xlim(-5.5, 4.5) +
+ylim(-4.2, 3.4) +
+coord_equal()
+```
+---
+class: title-slide-section-red
+
+# Otra forma de verlo `r fa ("reddit")`
+
+--
+
+## Estan las matrices
+
+--
+
+- Concepto de matrices
+
+- Matriz identidad, nula, vectores
+
+- Operaciones de matrices
+
+--
+
+### Esto tomelo como repaso
+
+---
+# Enfoque matricial 
+
+--
+
+<ru-blockquote>Una **matriz** es una colección de números ordenados rectangularmente.</ru-blockquote>
+
+--
+
+$$\left [ X \right ]=\begin{bmatrix}
+ x_{11}& x_{12}  & \cdots & x_{1k} \\ 
+ x_{21} & x_{22} & \cdots  & x_{2k}\\ 
+ \cdots & \cdots  &  \cdots & \cdots \\ 
+ x_{n1} & x_{n2} & \cdots & x_{nk} 
+\end{bmatrix}_{n*k}$$
+
+--
+
+<ru-blockquote> La **matriz identidad** es una matriz cuya _diagonal_ principal tiene números uno (1).</ru-blockquote>
+
+--
+
+$$\left [ X \right ]=\begin{bmatrix}
+ 1 & 0  & \cdots & 0 \\ 
+ 0 & 1  & \cdots & 0 \\
+ \cdots & \cdots  &  1 & \cdots \\ 
+ 0 & 0 & \cdots & 1 
+\end{bmatrix}_{n*k}$$
+
+---
+# Enfoque matricial
+
+> **Transpuesta** cambiar los elementos de una _fila_ por una _columna_ 
+
+--
+
+- Se obtiene creando una matriz cuya i-esima .blue[fila] es la misma j-esima .black[columna].
+
+--
+
+$$A=\begin{bmatrix}
+1 & 2 & 3 & 4\\
+5 & 6 & 7 & 8\\
+9 & 10 & 11 & 12
+\end{bmatrix} \quad  A'=\begin{bmatrix}
+1 & 5 & 9\\
+2 & 6 & 10\\
+3 & 7 & 11\\
+4 & 8 & 12
+\end{bmatrix}$$
+
+--
+
+> **Vectores** estos son lineas de las matrices
+
+--
+
+- Están los tipo **fila** y los tipo .blue[columna]
+
+$$X=\begin{bmatrix}
+\color{#e64173}{x_{11}} & \color{#e64173}{x_{12}} & \color{#e64173}{x_{13}} & \color{#e64173}{x_{1k}}\\
+\cdots  & \color{#6A5ACD}{x_{22}} & \cdots  & \cdots \\
+\cdots  & \color{#6A5ACD}{x_{32}} & \cdots  & \cdots \\
+\cdots  & \color{#6A5ACD}{x_{n2}} & \cdots  & \cdots 
+\end{bmatrix}$$
+
+---
+# Enfoque matricial 
+
+--
+
+#### Operaciones con matrices: Suma
+
+> **Suma de Matrices** deben tener mismo tamaño y funciona sumando cada uno de los elementos de una matriz con los de la siguiente matriz.
+
+--
+
+$$X=\begin{bmatrix}
+x_{11} &x_{12} & \cdots  & x_{1k}\\
+x_{21} & x_{22} & \cdots  & x_{2k}\\
+\cdots & \cdots & \cdots  & \cdots\\
+x_{n1} &x_{n2} &\cdots&x_{nk}
+\end{bmatrix} \; A=\begin{bmatrix}
+a_{11} &a_{12} & \cdots& a_{1k}\\
+a_{21} & a_{22} & \cdots  & a_{2k}\\
+\cdots & \cdots & \cdots & \cdots\\
+a_{n1} & {a_{n2}} & {\cdots } & {a_{nk}}
+\end{bmatrix}$$
+
+--
+
+$$X+A=\begin{bmatrix}
+x_{11} +a_{11} & x_{12} +a_{12} & \cdots& x_{1k} +a_{1k}\\
+x_{21}+a_{21} & x_{22} +a_{22} & \cdots & x_{2k} +a_{2k}\\
+\cdots & \cdots  & \cdots  & \cdots \\
+x_{n1} +a_{n1} & x_{n2} +a_{n2} & \cdots & x_{nk} +a_{nk}\end{bmatrix}$$
+
+---
+# Enfoque matricial 
+
+--
+
+#### Operaciones con matrices: Multiplicación
+
+Para esto hay que tener en consideración:
+
+- No es necesario que sean cuadradas.
+- Deben ser siempre **conformables**.
+   
+--
+
+>Para que una matriz sea _conformable_ debe considerarse lo siguiente:
+
+--
+
+$$A_{m*n}*X_{n*p} = C_{m*p}$$
+--
+
+_Debe coincidir o ser de igual tamaño las columnas de la primera matriz con las filas de la siguiente matriz en el orden de la operación_.
+
+---
+# Enfoque matricial 
+
+--
+
+#### Operaciones con matrices: Multiplicación
+
+Si tenemos dos vectores $A=(a_{1},a_{2},...,a_{n})$ y $B=(b_{1},b_{2},...,b_{n})$ entonces:
+
+--
+
+$$a*b=a_{1}*b_{1}+a_{2}*b_{2}+...+a_{n}*b_{n}$$
+--
+
+
+$$A= \begin{bmatrix}
+\color{#6A5ACD}{1} & \color{#6A5ACD}{2} & \color{#6A5ACD}{3} & \color{#6A5ACD}{4}\\
+5 & 6 & 7 & 8\\
+9 & 10 & 11 & 12
+\end{bmatrix}_{3*4} \quad B=\begin{bmatrix} 
+\color{#6A5ACD}{3} & 7 & 9\\
+\color{#6A5ACD}{4} & 9 & 2\\
+\color{#6A5ACD}{2} & 7 & 1\\
+\color{#6A5ACD}{4} & 7 & 2
+\end{bmatrix}_{4*3} \quad A \times B=\begin{bmatrix}
+\color{#6A5ACD}{33}  & \cdots  & \cdots \\
+\cdots  & \cdots  & \cdots \\
+\cdots  & \cdots  & \cdots 
+\end{bmatrix}_{3*3}$$
+
+--
+
+`r fa("paper-plane")` es importante que conozca las propiedades de la *multiplicación*:
+
+--
+
+`r fa("paperclip", fill="red")` A*I=A
+`r fa("paperclip", fill="red")` Ley asociativa $(AB)C=A(BC)$
+`r fa("paperclip", fill="red")` Ley distributiva $A(B+C)=AB+AC$
+`r fa("paperclip", fill="red")` Ley transpuesta: $(AB)'=B'A'$
+
+---
+class: title-slide-section-red, middle
+
+# De vuelta al estimador ahora matricial de M.C.O
+
+---
+# Forma matricial del modelo
+
+`r fa("star", fill="gray")` Hasta ahora lo que hemos deducido es el estimador de mínimos cuadrados ordinarios MCO para una variable dependiente y una independiente.
+
+--
+
+`r fa("star", fill="gray")` Debemos observar ahora como se "deriva" el **estimador** cuando se tiene .black[más] de una variable **independiente**.
+
+--
+
+> Debemos recordar que la información que se tiene cuando se estima un **modelo de regresión** tiene la siguiente forma: (Las variables se organizan por columnas).
+
+--
+
+$$\begin{bmatrix}
+Y_{1}\\
+Y_{2}\\
+\vdots \\
+Y_{n}
+\end{bmatrix}_{n*1}=
+\begin{bmatrix}
+1 & x_{12} & \cdots  & x_{1k}\\
+1 & x_{22} & \vdots  & x_{2k}\\
+\cdots  & \cdots  & \cdots  & \cdots \\
+1 & x_{n2} & \vdots  & x_{nk}
+\end{bmatrix}_{n*k} \times 
+\begin{bmatrix}
+\beta _{0}\\
+\beta _{1}\\
+\vdots \\
+\beta _{k}
+\end{bmatrix}_{k*1} +
+\begin{bmatrix}
+\mu _{1}\\
+\mu _{2}\\
+\vdots \\
+\mu _{n}
+\end{bmatrix}_{n*1}$$
+
+---
+# Forma matricial del modelo
+
+Tenemos por cada observación una **ecuación** que debe ser escrita:
+
+$$\begin{aligned}
+Y_{1} &=\beta _{0} +\beta _{1} X_{11} +\cdots +\beta _{k} X_{1k} +\mu _{1}\\
+Y_{2} &=\beta _{0} +\beta _{1} X_{21} +\cdots +\beta _{k} X_{2k} +\mu _{2}\\
+\cdots &=\cdots +\cdots +\cdots +\cdots +\cdots \\
+Y_{n} &=\beta _{0} +\beta _{1} X_{n1} +\cdots +\beta _{k} X_{nk} +\mu _{n}
+\end{aligned}$$
+
+---
+# Forma matricial del modelo
+
+- Lo cual nos permite tener un sistema así:
+
+--
+
+$$Y=XB+U$$
+--
+
+$$S=( y-X\beta ) '( y-X\beta ) = \mu '\mu$$
+--
+
+Donde
+$$y'y-y'X \beta - \beta 'X'y+\beta 'X'X \beta$$
+--
+
+$$\beta' X'y=( \beta 'X'y) =  y'X\beta$$
+--
+
+$$y'y-2\beta 'X'y+X'X\beta ^{2}$$
+--
+
+Debe derivar B:
+$$\frac{\partial S}{\partial \beta } =-2X'y+2X'X\beta =0$$
+--
+
+$$\beta =( X'X)^{-1} X'Y$$
+---
+class: title-slide-section-grey
+# Bibliografía
+
+`r fa('book')` Álvarez, R. A. R., Calvo, J. A. P., Torrado, C. A. M., & Mondragón, J. A. U. (2013). *Fundamentos de econometría intermedia: teoría y aplicaciones*. Universidad de los Andes.
+
+`r fa('book')` Stock, J. H., Watson, M. W., & Larrión, R. S. (2012). *Introducción a la Econometría*.
+
+`r fa('book')` Wooldridge, J. M. (2015). *Introductory econometrics: A modern approach*. Cengage learning.
+
+---
+class: title-slide-final, middle
+
+# Gracias!
+
+## Alguna pregunta adicional?
+
+### Carlos Andres Yanes Guerra
+`r fa("envelope", fill="red")` cayanes@uninorte.edu.co
+`r fa("twitter", fill="cyan")` keynes37
+
