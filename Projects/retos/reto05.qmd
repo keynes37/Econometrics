@@ -1,0 +1,118 @@
+---
+title: "Reto 05"
+subtitle: Econometría I | Universidad del Norte
+author: Carlos Yanes Guerra
+format:
+  pdf: default
+  html: default
+editor: visual
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, dpi=300, fig.align = "center")
+library(wooldridge)
+library(tidyverse)
+library(stargazer)
+data(hprice1)
+```
+
+## Objetivo
+
+Analizar el precio de viviendas usando variables cuantitativas y cualitativas, con énfasis en regresiones lineales, interacciones y transformación logarítmicas.
+
+## Base de datos
+
+Instale si es el caso el paquete del libro `Wooldridge` y cargue la base de datos.
+
+```r
+library(wooldridge)
+data(hprice1)
+```
+La base `hprice1` contiene información sobre viviendas. Variables clave:
+
+- `price`: precio de la vivienda (miles USD)
+- `sqrft`: área construida (pies cuadrados)
+- `bdrms`: número de habitaciones
+- `lotsize`: tamaño del lote (pies cuadrados)
+- `colonial`: 1 si es de estilo colonial, 0 si no
+
+---
+
+## Preguntas del Reto
+
+### 1. Visualización inicial
+
+- Grafique un histograma del precio (`price`). ¿Se distribuye de forma simétrica?
+- Genere un gráfico de barras con el precio promedio de casas coloniales vs. no coloniales.
+
+### 2. Regresión simple
+
+```r
+lm(price ~ sqrft + bdrms, data = hprice1)
+```
+
+- Interprete los coeficientes: ¿cómo afecta una habitación adicional el precio?
+- ¿Cuál es el efecto marginal del tamaño (`sqrft`)?
+
+### 3. Variable cualitativa: `colonial`
+
+```r
+lm(price ~ sqrft + bdrms + colonial, data = hprice1)
+```
+
+- ¿Qué indica el coeficiente de `colonial`?
+- ¿Cuál es el grupo base?
+- ¿Es significativa esta variable?
+
+### 4. Interacción: `sqrft * colonial`
+
+```r
+lm(price ~ sqrft * colonial + bdrms, data = hprice1)
+```
+
+- ¿Cómo varía el efecto del tamaño según el estilo arquitectónico?
+- Compare precios predichos para casas coloniales y no coloniales con igual tamaño.
+
+### 5. Transformación logarítmica
+
+```r
+lm(log(price) ~ log(sqrft) + bdrms + colonial, data = hprice1)
+```
+
+- ¿Qué interpretación tiene el coeficiente de `log(sqrft)`?
+- ¿Cambia la interpretación del coeficiente de `colonial`?
+
+### 6. Bonus: Tamaño del lote como variable categórica
+
+```r
+hprice1$size_cat <- cut(hprice1$lotsize,
+                        breaks = quantile(hprice1$lotsize, probs = c(0, 0.33, 0.66, 1)),
+                        labels = c("Pequeño", "Medio", "Grande"),
+                        include.lowest = TRUE)
+```
+
+- Genere variables dummy con `model.matrix()`. Para ello haga:
+
+```r
+X <- model.matrix(~ size_cat, data = hprice1)
+head(X)
+```
+
+y despues si haga:
+
+- Estime una regresión con estas nuevas categorías. P.e:
+```r
+modelo <- lm(hprice1$price ~ X[, "size_catMedio"] + X[, "size_catGrande"])
+summary(modelo)
+```
+
+*Usted hagalo usando huxtable*
+- ¿Qué categoría es la base? ¿Cuál tiene mayor efecto en el precio?
+
+## Recomendaciones
+
+- Usa funciones como `summary()`, `ggplot()`, `model.matrix()`, y `huxtable` para resultados y visualizaciones.
+- Interprete resultados con lógica económica y sentido del mercado inmobiliario.
+
+
