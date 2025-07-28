@@ -262,13 +262,15 @@ include_graphics("images/stock.png")
 
 ---
 # A tener en cuenta
-| Responsabilidad             | Tipo de trabajo      | Fecha de trabajo        | Ponderación |
-|--------------------|----------------------|-------------------------|-------------|
-| Primer Parcial     | Examen       | Semana 5 de clases            | 20%     |
-| Segundo Parcial    | Examen       | Semana 9 de clases      | 20%         |
-| Workclass          | Individual y Grupal    | a lo largo del semestre | 20%         |
-| Poster           | Grupal       | al final del semestre | 10%         |
-| Examen final       | Examen       | Por registro académico  | 30%         |
+| **Responsabilidad**                     | **Tipo de trabajo**         | **Fecha estimada**             | **Ponderación** |
+|----------------------------------------|-----------------------------|--------------------------------|-----------------|
+| **Presentación de Tema de Clase**      | Individual o en parejas     | Semanas 3 a 7                  | 10%             |
+| **Milestone del Proyecto de Datos**    | Grupal                      | Propuesta (sem 4), avance (sem 8) | 20%         |
+| **Póster Académico Final**             | Grupal                      | Semana 12                      | 15%             |
+| **Evaluaciones Parciales**             | Exámenes                    | Semana 5 y 9                   | 20% (10% c/u)   |
+| **Actividades Interactivas (Workclass)**| Individual y grupal         | A lo largo del semestre        | 10%             |
+| **Examen Final**                       | Examen                      | Según calendario académico     | **25%**         |
+| **Total**                              |                             |                                | **100%**        |
 
 ---
 # Advertencias legales
