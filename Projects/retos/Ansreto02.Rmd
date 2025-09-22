@@ -1,0 +1,39 @@
+---
+title: Econometría I
+subtitle: "Reto 02"
+author:
+  name: Carlos A. Yanes Guerra
+  affiliation: Universidad del Norte | Departamento de Economía
+date: "`r format(Sys.time(), '%d %B %Y')`"
+output: 
+  html_document:
+    keep_md: false
+    theme: journal
+    highlight: haddock
+    toc: yes
+    toc_depth: 4
+    toc_float: yes
+    css: css/preamble.css
+  pdf_document:
+    latex_engine: xelatex
+    toc: true
+    toc_depth: 3
+    dev: cairo_pdf
+    extra_dependencies: ['booktabs', 'threeparttable', 'float']
+    includes:
+      in_header: tex/preamble.tex
+    pandoc_args:
+      --template=tex/mytemplate.tex
+always_allow_html: true
+urlcolor: blue
+mainfont: cochineal
+sansfont: Fira Sans
+monofont: Fira Code
+knit: (function(inputFile, encoding) {
+ rmarkdown::render(inputFile, encoding = encoding, 
+ output_format = 'all') 
+ })
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE, dpi=300, fig.align = "center")

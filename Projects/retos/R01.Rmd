@@ -1,0 +1,197 @@
+---
+title: Econometría I
+subtitle: "Reto 01"
+author:
+  name: Carlos A. Yanes Guerra
+  affiliation: Universidad del Norte | Departamento de Economía
+# date: "`r format(Sys.time(), '%d %B %Y')`" ## Or "Lecture no."
+output: 
+  html_document:
+    keep_md: false
+    theme: journal
+    highlight: haddock
+    # code_folding: show
+    toc: yes
+    toc_depth: 4
+    toc_float: yes
+    css: css/preamble.css ## For multi-col environments
+  pdf_document:
+    latex_engine: xelatex
+    keep_tex: false ## Change to true if want keep intermediate .tex file
+    toc: true
+    toc_depth: 3
+    dev: cairo_pdf
+    # fig_width: 7 ## Optional: Set default PDF figure width
+    # fig_height: 6 ## Optional: Set default PDF figure height
+    extra_dependencies: ['booktabs', 'threeparttable', 'float'] # "longtable"
+    includes:
+      in_header: tex/preamble.tex ## For multi-col environments
+    pandoc_args:
+        --template=tex/mytemplate.tex ## For affiliation field. See: https://bit.ly/2T191uZ
+always_allow_html: true
+urlcolor: blue
+mainfont: cochineal
+sansfont: Fira Sans
+monofont: Fira Code ## Although, see: https://tex.stackexchange.com/q/294362
+## Automatically knit to both formats:
+knit: (function(inputFile, encoding) {
+ rmarkdown::render(inputFile, encoding = encoding, 
+ output_format = 'all') 
+ })
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE, dpi=300, fig.align = "center")
+suppressPackageStartupMessages({
+  library(tidyverse)
+  library(moments)   # para asimetría y curtosis
+})
+```
+
+## Antes de empezar
+Recuerde que los retos se desarrollan en clase en **1h:30 min**. Trabaje solo o en pareja (máx. 2).  
+Si el enunciado **solo pide resultado**, use `echo=FALSE` en ese *chunk*.
+
+## Brief de consultoría
+**Cliente:** *RetailCo* (110 tiendas).  
+**Pedido:** 1) foto de ventas y productividad; 2) comparación **Zona Norte vs. Zona Sur**; 3) un gráfico listo para comité.  
+
+### Entregables al final del trabajo:
+- **Mini-memo (≤150 palabras)**: 3 hallazgos + 1 recomendación.
+- **1 tabla** de métricas clave.
+- **1 gráfico** (histograma+density) con línea en media o mediana.
+
+## Objetivo
+Realizar un **análisis descriptivo y de momentos** para **ventas** y **productividad**, comparando **Norte vs. Sur** (debe apoyarse de la *Guía de Econometría* del curso.) **NO SE PERMITE CODIGO DE LA IA**. *Por esta vez se dan los códigos mas o menos completos. En la medida que aumente la dificultad, será menos ayuda de código*.
+
+\newpage
+
+## Base simulada
+
+Corra lo siguiente en su .rmd o R Markdown
+
+```r
+set.seed(228908)
+
+tiendas <- 110
+
+data_ventas <- tibble(
+  tienda = 1:tiendas,
+  zona = sample(c("Zona Norte","Zona Sur"), tiendas, replace = TRUE),
+  empleados = sample(5:50, tiendas, replace = TRUE)
+) |>
+  mutate(
+    ventas_millones = round(
+      rlnorm(n(), meanlog = 3.6, sdlog = 0.5) * if_else(zona=="Zona Norte", 1.07, 1), 2
+    )
+  )
+head(data_ventas)
+```
+
+
+# Preguntas del reto
+
+1.) **Tienda top/bottom y umbral de mediana de ellas**. ¿Qué tienda vende más y cuánto? ¿Cuál vende menos y cuánto?. ¿Cuál es el mínimo para estar por encima de la mediana de ventas?  
+> Muestre código y justifique en 1–2 líneas.
+
+```r
+resumen_top_bottom <- data_ventas |>
+  summarise(
+    mediana = median(ventas_millones),
+    max_venta = max(ventas_millones),
+    tienda_max = tienda[which.max(ventas_millones)],
+    min_venta = min(ventas_millones),
+    tienda_min = tienda[which.min(ventas_millones)]
+  )
+resumen_top_bottom
+```
+
+2.) **Norte vs. Sur: nivel y dispersión**. ¿Qué tan distinto es el promedio de ventas entre zonas? ¿La desviación estándar difiere mucho?** (compare numéricamente)  
+> Entregue una tabla por zona con: media, sd, p25, p50, p75.
+
+```r
+tabla_zonas <- data_ventas |>
+  group_by(zona) |>
+  summarise(
+    mean = mean(ventas_millones),
+    sd = sd(ventas_millones),
+    p25 = quantile(ventas_millones, .25),
+    p50 = median(ventas_millones),
+    p75 = quantile(ventas_millones, .75),
+    .groups = "drop"
+  )
+knitr::kable(tabla_zonas, caption = "Ventas por zona: nivel y dispersión")
+```
+
+3.) **Variable “Productividad” con `mutate`**
+Defina:
+\[
+\text{Productividad}=\frac{\text{Ventas} \times 1{,}000{,}000}{\text{No. empleados}}
+\]
+
+```r
+data_ventas <- data_ventas |>
+  mutate(productividad = ventas_millones*1e6 / empleados)
+
+data_ventas |>
+  select(tienda, zona, empleados, ventas_millones, productividad) |>
+  slice_head(n=5)
+```
+
+4.) **Momentos de “Productividad**
+Reporte **media**, **asimetría** y **curtosis (exceso)**.  
+Interprete: sesgo (derecha/izquierda) y colas (pesadas/ligeras). Conecte con el negocio (p.ej., “pocas tiendas ultra-productivas”).
+
+```r
+momentos_prod <- tibble(
+  media = mean(data_ventas$productividad),
+  asimetria = moments::skewness(data_ventas$productividad),
+  curtosis_exceso = moments::kurtosis(data_ventas$productividad) - 3
+)
+momentos_prod
+```
+
+5.) **Histograma + densidad (listo para comité)**
+Incluya **histograma** con **línea de densidad** y una **línea vertical** en **media o mediana** (justifique su elección).
+
+```r
+x <- data_ventas$productividad
+hist(x, breaks = 20,
+     main = "Distribución de la productividad",
+     xlab = "Pesos por empleado", ylab = "Frecuencia")
+lines(density(___), lwd = 2)
+abline(v = median(___), lwd = 2, lty = 2)
+```
+\newpage
+
+---
+
+# Tabla ejecutiva (para el memo)
+
+```r
+tabla_retail <- data_ventas |>
+  group_by(___) |>
+  summarise(
+    ventas_media   = mean(___),
+    ventas_mediana = median(___),
+    prod_media     = mean(___),
+    prod_mediana   = median(___),
+    .groups = "drop"
+  )
+knitr::kable(tabla_retail, caption = "Métricas clave por zona")
+```
+
+
+
+## Mini-memo ejemplo (≤150 palabras) *No tiene que ser igual*
+```{r echo=FALSE, results='asis'}
+cat("> **Hallazgos**: (1) La Zona ____ presenta ventas promedio de ____% superiores; (2) La dispersión en ____ es mayor/menor, sugiriendo ____; (3) La productividad nos muestra una asimetría ____ (colas ____), consistente con ____.
+",
+    "> **Recomendación**: Priorizar ____ en Zona ____ y ajustar dotación/procesos en tiendas con ____.")
+```
+
+# Criterios de evaluación (rúbrica breve)
+- **Correctitud numérica (10%)**  
+- **Evidencia (25%)**: tabla por zona + histograma/densidad claro  
+- **Interpretación econométrica (25%)**  
+- **Presentación consultiva (40%)**: mini-memo, títulos, unidades

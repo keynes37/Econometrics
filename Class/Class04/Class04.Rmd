@@ -302,7 +302,7 @@ jarque.test(u.hat)
 
 --
 
-Observe que la probabilidad de caer en la **zona de no rechazo** es tan solo de un 3.5%, -demasiado pequeña-. Necesitamos que $JB<\chi_{Critico}$. Para el caso, el estadístico nos da $JB=7.20>3.84$
+Observe que la probabilidad de caer en la **zona de no rechazo** es tan solo de un 2.7%, -demasiado pequeña-. Necesitamos que $JB<\chi_{Critico}$. Para el caso, el estadístico nos da $JB=7.2082>3.84$
 
 ---
 # Estadístico JB 🆒
@@ -328,7 +328,7 @@ qchisq(0.05,1, lower.tail = F)
 Ahora miremos al nivel de testeo mas alto, esto es 99%
 
 ```{r}
-qchisq(0.01,1, lower.tail = F)
+qchisq(0.001,1, lower.tail = F)
 ```
 
 
@@ -540,10 +540,11 @@ ci_df <- sim_df %>% filter(term == "x") %>%
 
 ```{R, simulation ci, echo = F, dev = "svg", fig.height = 5}
 # Plot
+#scale_y_continuous(breaks = lm0$coefficients[2], labels = TeX("$\\beta_1$"))
 ggplot(data = ci_df) +
 geom_segment(aes(y = lb, yend = ub, x = x, xend = x, color = ci_contains)) +
 geom_hline(yintercept = lm0$coefficients[2]) +
-scale_y_continuous(breaks = lm0$coefficients[2], labels = TeX("$\\beta_1$")) +
+scale_y_continuous(breaks = c(lm0$coefficients[2]),labels = c(TeX("$\\beta_1$"))) +
 scale_color_manual(values = c(red_pink, "grey85")) +
 theme_simple +
 theme(
