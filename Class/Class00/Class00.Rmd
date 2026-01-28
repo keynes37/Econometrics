@@ -25,7 +25,7 @@ class: left, middle
 
 <br>
 <br>
-<img src="images/lognig.png" width="280" />
+<img src="images/log60.png" width="280" />
 
 ### Carlos A. Yanes | Departamento de Economía | `r Sys.Date()`
 
@@ -184,7 +184,7 @@ Siempre tengan en cuenta:
 
 --
 
-- Poseer un usuario y cuenta en [Discord](https://discord.com) e inscribirse en el siguiente [https://discord.gg/gkGe8DbH](https://discord.gg/gkGe8DbH)
+- Poseer un usuario y cuenta en [Discord](https://discord.com) e inscribirse en el siguiente [https://discord.gg/rQrrVJcS](https://discord.gg/rQrrVJcS)
 
 --
 
@@ -260,16 +260,15 @@ include_graphics("images/stock.png")
 
 3. (Opcional) Descargar [Git](https://git-scm.com/downloads).
 
+4. Usar Google Colab. [Google Colaboratory](https://colab.research.google.com/)
+
 ---
 # A tener en cuenta
 | **Responsabilidad**                     | **Tipo de trabajo**         | **Fecha estimada**             | **Ponderación** |
 |----------------------------------------|-----------------------------|--------------------------------|-----------------|
-| **Presentación de Tema de Clase**      | Individual o en parejas     | Semanas 3 a 7                  | 10%             |
-| **Milestone del Proyecto de Datos**    | Grupal                      | Propuesta (sem 4), avance (sem 8) | 20%         |
-| **Póster Académico Final**             | Grupal                      | Semana 12                      | 15%             |
-| **Evaluaciones Parciales**             | Exámenes                    | Semana 5 y 9                   | 20% (10% c/u)   |
-| **Actividades Interactivas (Workclass)**| Individual y grupal         | A lo largo del semestre        | 10%             |
-| **Examen Final**                       | Examen                      | Según calendario académico     | **25%**         |
+| **Evaluaciones Parciales**             | Exámenes                    | Semana 5 y 9                   | 40% (20% c/u)   |
+| **Actividades**                        | Individual y grupal         | A lo largo del semestre        | 30%             |
+| **Examen Final**                       | Examen                      | Según calendario académico     | **30%**         |
 | **Total**                              |                             |                                | **100%**        |
 
 ---
