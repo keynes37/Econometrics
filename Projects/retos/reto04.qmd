@@ -6,8 +6,6 @@ format:
     pdf: default
 ---
 
-
-
 ```{r, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, cache = TRUE, dpi=300, fig.align = "center")
 library(extrafont)

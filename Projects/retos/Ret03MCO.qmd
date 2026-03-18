@@ -1,0 +1,190 @@
+---
+title: "Reto 03"
+subtitle: Econometría I | Universidad del Norte
+author: Carlos Yanes Guerra
+format: 
+    pdf: default
+---
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE, dpi=300, fig.align = "center")
+library(tidyverse)
+library(modelsummary)
+```
+
+## Antes de empezar
+
+Recuerde que los retos son para desarrollarlos **durante la clase en el tiempo sugerido por el profesor (1H:20 Min)**. Trabaje con su grupo (máximo **2 personas**). El objetivo es que utilicen **los comandos vistos en clase** y no simplemente copiar código de inteligencia artificial.
+
+### Objetivo del reto
+
+Aplicar herramientas básicas de **análisis econométrico con regresión lineal**, explorando la relación entre **capital humano, inversión tecnológica y desempeño de las empresas**.
+
+
+### Datos a usar
+
+La siguiente tabla contiene información simulada de **empresas del sector tecnológico en Colombia**.
+
+```{r, echo=FALSE, warning=FALSE}
+datos <- data.frame(
+Empresa = c("AndesTech","CaribeSoft","DataNova","CodeLabs","InnovaSys",
+            "DigitalCore","TechWave","CloudNet","Algoritmo","NextLogic",
+            "SmartData","VisionTech","ByteSolutions","NeoSystems","SigmaTech"),
+
+Empleados = c(45,60,30,80,55,40,70,90,35,50,65,75,28,85,48),
+
+Salario = c(1200,1100,1300,1250,1150,1000,1350,1400,1200,1250,
+            1320,1380,1100,1420,1180),
+
+Inversion = c(180,200,150,300,210,160,280,350,170,220,
+              260,310,140,330,190),
+
+Capacitacion = c(30,35,40,50,32,28,45,55,33,38,
+                 42,48,25,52,34),
+
+Ingresos = c(4.2,5.0,3.8,7.5,4.9,3.5,6.8,8.2,3.9,5.1,
+             6.0,7.2,3.1,8.0,4.4)
+)
+
+head(datos, 10)
+```
+
+
+Puede importarlo como:
+
+```r
+datos <- data.frame(
+Empresa = c("AndesTech","CaribeSoft","DataNova","CodeLabs","InnovaSys",
+            "DigitalCore","TechWave","CloudNet","Algoritmo","NextLogic",
+            "SmartData","VisionTech","ByteSolutions","NeoSystems","SigmaTech"),
+
+Empleados = c(45,60,30,80,55,40,70,90,35,50,65,75,28,85,48),
+
+Salario = c(1200,1100,1300,1250,1150,1000,1350,1400,1200,1250,
+            1320,1380,1100,1420,1180),
+
+Inversion = c(180,200,150,300,210,160,280,350,170,220,
+              260,310,140,330,190),
+
+Capacitacion = c(30,35,40,50,32,28,45,55,33,38,
+                 42,48,25,52,34),
+
+Ingresos = c(4.2,5.0,3.8,7.5,4.9,3.5,6.8,8.2,3.9,5.1,
+             6.0,7.2,3.1,8.0,4.4)
+)
+```
+
+
+## Preguntas del reto
+
+**1.** Exploración gráfica. Realice un **diagrama de dispersión** entre:
+
+a) **Inversión en tecnología** y **Ingresos anuales**
+
+b) **Horas de capacitación** y **Ingresos anuales**
+
+Compare ambas gráficas y responda:
+
+- ¿Cuál variable parece tener mayor relación con los ingresos?
+- ¿La relación parece lineal?
+- ¿Observa valores atípicos?
+
+Explique brevemente su interpretación económica.
+
+**2.** Análisis descriptivo. Analice la relación entre el **tamaño de la empresa y sus ingresos**.
+
+Para esto cree una variable dummy:
+
+
+$$EmpresaGrande =
+\begin{cases}
+1 & \text{si empleados } \geq 60 \\
+0 & \text{si empleados } < 60
+\end{cases}$$
+
+Un ejemplo de como hacerlo en R puede ser:
+
+```r
+datos$nueva_variable <- ifelse(datos$Empleados >= 60, 1, 0)
+```
+
+Luego:
+
+- Compare los **ingresos promedio** entre empresas grandes y pequeñas.
+- Interprete el resultado.
+
+#### 3. Comparación entre inversión tecnológica
+
+Cree una variable dummy llamada **AltaInversion**:
+
+$$
+AltaInversion =
+\begin{cases}
+1 & \text{si inversión } \geq 250 \\
+0 & \text{si inversión } < 250
+\end{cases}
+$$
+
+Luego responda:
+
+- ¿Las empresas con mayor inversión tecnológica tienen mayores ingresos promedio?
+- ¿Qué interpretación económica podría tener este resultado?
+
+#### 4. Prueba estadística
+
+Realice una **prueba T de diferencia de medias** para evaluar si los ingresos promedio difieren entre:
+
+- Empresas con **alta inversión tecnológica**
+- Empresas con **baja inversión tecnológica**
+
+Plantee claramente:
+
+Hipótesis nula  
+
+$$
+H_0: \mu_1 = \mu_0
+$$
+
+Hipótesis alternativa  
+
+$$
+H_1: \mu_1 \neq \mu_0
+$$
+
+Interprete el **p-valor** obtenido.
+
+#### 5. Estimación de un modelo de regresión
+
+Estime el siguiente modelo:
+
+$$
+Ingresos_i = \beta_0 + \beta_1 Inversion_i + u_i
+$$
+
+Despues responda:
+
+- Interprete el coeficiente de **Inversión**.
+- Analice el **R² del modelo**.
+
+Finalmente:
+
+- Obtenga los **valores predichos**
+- Obtenga los **residuales**
+
+Utilizando los residuos del modelo estimado de la parte anterior:
+
+a) Grafique
+
+- **Histograma de los residuos**
+
+Analice:
+
+- ¿Los residuos parecen tener media cercana a cero?
+- ¿Observa algún patrón en el gráfico de residuos?
+
+---
+
+## Nota para los estudiantes
+
+Recuerde que en econometría **no basta con estimar un modelo**, también es necesario **evaluar si los supuestos del modelo se cumplen**.
+
