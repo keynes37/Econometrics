@@ -1475,30 +1475,33 @@ Universidad del Norte | Departamento de Economía<br>
 <p>Va el <strong>workclass</strong> #4, al igual que todos los
 anteriores puede ser entregado en grupo de máximo dos (2) estudiantes.
 En esta ocasión se va hacer estimación de modelo e
-<strong>inferencia</strong> y lo haremos con el modelo de mínimos
-cuadrados ordinarios o MCO. Recuerde que el tiempo para entrega ahora
-será de <em>1 hora y 50 minutos</em>. El formato de recepción solo es en
+<strong>inferencia</strong> con variables dicotómicas (dummies) e
+<strong>interacciones</strong>, usando el modelo de mínimos cuadrados
+ordinarios (MCO). Recuerde que el tiempo para entrega ahora será de
+<em>1 hora y 50 minutos</em>. El formato de recepción solo es en
 <strong>word</strong> o <strong>pdf</strong> en la carpeta del curso de
 <strong>Brightspace</strong> para eso. No se admite por correo ni en
 formato (Rmd) que es distinto al solicitado.</p>
 </div>
 <div id="objetivo" class="section level2">
 <h2>Objetivo</h2>
-<p>Recordar la parte de microeconomía y realizar un par de modelos para
-comprobación de algunas teorías y aplicarlas a un caso de estudio.</p>
+<p>Aplicar los conceptos de variables dicotómicas e interacciones dentro
+del marco del modelo de regresión lineal, conectando la teoría
+microeconómica de la demanda con herramientas de econometría
+aplicada.</p>
 </div>
 <div id="base-de-datos" class="section level2">
 <h2>Base de datos</h2>
-<p>El archivo esta situado en la página web del profesor. Tome en
-consideración la base de datos (datoscons.txt). La base contiene tres
-variables que tienen que ver con el consumo (en unidades) de cajas de
-tomates, el ingreso del agente que compra (en pesos colombianos) y el
-precio por libra (en pesos colombianos) del producto que paga el
-comprador.</p>
+<p>El archivo está situado en la página web del profesor. Tome en
+consideración la base de datos (<code>datoscons.txt</code>). La base
+contiene tres variables que tienen que ver con el consumo (en unidades)
+de cajas de tomates, el ingreso del agente que compra (en pesos
+colombianos) y el precio por libra (en pesos colombianos) del producto
+que paga el comprador.</p>
 <p>La pregunta central en esta ocasión es:</p>
 <center>
-<strong>Qué tan sensible es la demanda de la empresa vendedora de
-tómates con respecto a los precios que revela el producto?</strong>
+<strong>¿Cambia la sensibilidad de la demanda de tomates ante el precio
+según el nivel de ingreso del comprador?</strong>
 </center>
 <div style="page-break-after: always;"></div>
 </div>
@@ -1510,40 +1513,83 @@ texto. Use el directorio de descarga e importe con la opción de
 <ol style="list-style-type: decimal">
 <li><p>Establezca las estadísticas descriptivas de todas las variables
 de la base de datos (media, varianza, desviación estándar, máximos y
-mínimos). Use el formato que desee, pero <em>interprete los
-resultados</em>.</p></li>
-<li><p>Ejecute una primera regresión (1) cuando la variable dependiente
-es el <code>consumo</code> y tiene como explicativa a la variable
-<code>precio</code>. <em>Muestre el encabezado de los resultados,
-incluyendo valores predichos y residuales. Luego establezca la prueba de
-Jarque-Bera para residuos e interprete</em>.</p></li>
-<li><p>Ahora haga una segunda regresión (2), pero cuando las variables
-son logarítmicas. Por ejemplo log(consumo) y log(precios). Por último,
-haga una tercera (3) y cuarta (4) regresión pero cuando la variable
-explicativa es el ingreso (tiene que replicar la regresión (1) y (2)
-pero teniendo ahora el ingreso como variable explicativa o control).
-¿Qué tipo de modelo de regresión está estimando? Específicamente, ¿Qué
-tipo de relación supone que existe entre qué variables? ¿qué diferencias
-hay entre los modelos?. Use el formato de <code>huxreg</code>. Deben
-salirle en total (4) regresiones por columna en una misma tabla.
-<em>Describa los resultados. El uso de ecuaciones formales le dará mas
-puntos</em>.</p></li>
-<li><p>Haga una prueba de hipótesis e interprétela con los resultados de
-los parámetros del modelo 1 y 2.</p></li>
-<li><p>Escoja el modelo de regresión para responder a la
-<strong>pregunta central</strong> de la consultoría. Diganos que
-sensibilidad tiene de forma lineal el modelo y muestre la forma de
-elasticidad. <em>Plantee una tabla con solo 5 datos que muestre lo
-anterior</em>. Establezca que modelo es el mejor para la empresa y
-justifique.</p></li>
+mínimos). A partir de la mediana del <strong>ingreso</strong>, construya
+una variable dummy llamada <code>d_ingreso</code> que tome el valor de
+<strong>1</strong> si el ingreso del comprador está por encima de la
+mediana, y <strong>0</strong> en caso contrario. Igualmente, con base en
+la mediana del <strong>precio</strong>, construya una segunda dummy
+llamada <code>d_precio</code> que tome el valor de <strong>1</strong> si
+el precio está por encima de la mediana, y <strong>0</strong> en caso
+contrario. <em>Reporte la distribución de frecuencias de cada dummy e
+interprete qué representa cada grupo</em>.</p></li>
+<li><p>Estime dos regresiones donde la variable dependiente es el
+<code>consumo</code>:</p>
+<ul>
+<li><strong>Modelo (1):</strong> incluya como regresor únicamente la
+variable continua <code>precio</code>.</li>
+<li><strong>Modelo (2):</strong> incluya <code>precio</code> y la dummy
+<code>d_ingreso</code>.</li>
+</ul>
+<p>Muestre los resultados con <code>huxreg</code>. <em>Interprete el
+coeficiente de la dummy en el Modelo (2): ¿qué significa económicamente
+que el intercepto cambie según el nivel de ingreso? ¿Cambia la pendiente
+del precio entre grupos? Use ecuaciones formales para sustentar su
+respuesta</em>.</p></li>
+<li><p>Ahora estime dos regresiones adicionales:</p>
+<ul>
+<li><strong>Modelo (3):</strong> incluya <code>precio</code>,
+<code>d_ingreso</code> y el <strong>término de interacción</strong>
+<code>precio × d_ingreso</code>.</li>
+<li><strong>Modelo (4):</strong> trabaje con las versiones logarítmicas:
+<code>log(consumo)</code>, <code>log(precio)</code>,
+<code>d_ingreso</code> y la interacción
+<code>log(precio) × d_ingreso</code>.</li>
+</ul>
+<p>Presente los cuatro modelos en una sola tabla con
+<code>huxreg</code>. <em>¿Qué diferencia existe entre el Modelo (2) y el
+Modelo (3)? ¿Qué implica que la interacción sea estadísticamente
+significativa? Exprese los efectos marginales del precio para cada grupo
+(d_ingreso = 0 y d_ingreso = 1) usando notación matemática
+formal</em>.</p></li>
+<li><p>Realice una prueba de hipótesis <strong>conjunta</strong> (prueba
+F) para el Modelo (3), evaluando si los coeficientes de
+<code>d_ingreso</code> y de la interacción
+<code>precio × d_ingreso</code> son conjuntamente significativos. Use la
+función <code>linearHypothesis()</code> del paquete <code>car</code>.
+<em>Plantee formalmente <span class="math inline">\(H_0\)</span> y <span class="math inline">\(H_1\)</span>, reporte el estadístico y el p-valor,
+e interprete el resultado económicamente: ¿existe evidencia de que el
+efecto del precio sobre el consumo difiere entre compradores de alto y
+bajo ingreso?</em></p></li>
+<li><p>Con base en los resultados del <strong>Modelo (4)</strong>
+(log-log con interacción), construya una tabla con al menos <strong>5
+observaciones representativas</strong> de la muestra —incluyendo al
+menos dos del grupo <code>d_ingreso = 0</code> y dos del grupo
+<code>d_ingreso = 1</code>— que muestre el valor de
+<code>log(precio)</code>, el grupo de ingreso y la
+<strong>elasticidad-precio</strong> implícita para cada observación.
+Recuerde que en el Modelo (4) la elasticidad del precio depende del
+grupo. <em>Explique cuál modelo (lineal o log-log, con o sin
+interacción) es el más adecuado para responder la pregunta central del
+taller y justifique su elección usando criterios estadísticos y
+económicos</em>.</p></li>
 </ol>
 <div id="ayudas" class="section level4">
 <h4>Ayudas</h4>
-<p>En la parte final debe estimar desde luego de forma manual las
-elasticidades solo del modelo de regresión (1) y tener presente la
-regresión (2). En la guía #5 aparece como hacerlo. Puede establecerlo de
-forma individual (elasticidad) o en efecto de la elasticidad promedio o
-la conocida como elasticidad arco (melasticidad).</p>
+<p>Para construir el término de interacción en R puede hacerlo
+directamente con el operador <code>:</code> dentro de <code>lm()</code>,
+por ejemplo
+<code>lm(consumo ~ precio + d_ingreso + precio:d_ingreso, data = datos)</code>,
+o equivalentemente usando <code>*</code> que incluye ambos términos
+principales y la interacción de forma automática. Para la prueba
+conjunta del punto 4, consulte <code>?linearHypothesis</code> del
+paquete <code>car</code>. Recuerde que en un modelo log-log con
+interacción de la forma:</p>
+<p><span class="math display">\[\ln(C_i) = \beta_0 + \beta_1 \ln(P_i) +
+\beta_2 D_i + \beta_3 \left[\ln(P_i) \times D_i\right] +
+\varepsilon_i\]</span></p>
+<p>la elasticidad-precio para el grupo <span class="math inline">\(D_i =
+0\)</span> es <span class="math inline">\(\beta_1\)</span>, y para el
+grupo <span class="math inline">\(D_i = 1\)</span> es <span class="math inline">\(\beta_1 + \beta_3\)</span>.</p>
 </div>
 </div>
 

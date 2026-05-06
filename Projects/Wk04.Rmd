@@ -46,19 +46,19 @@ knitr::opts_chunk$set(echo = TRUE, cache = TRUE, dpi=300, fig.align = "center")
 
 ## Antes de empezar
 
-Va el **workclass** \#4, al igual que todos los anteriores puede ser entregado en grupo de máximo dos (2) estudiantes. En esta ocasión se va hacer estimación de modelo e **inferencia** y lo haremos con el modelo de mínimos cuadrados ordinarios o MCO. Recuerde que el tiempo para entrega ahora será de _1 hora y 50 minutos_. El formato de recepción solo es en **word** o **pdf** en la carpeta del curso de **Brightspace** para eso. No se admite por correo ni en formato (Rmd) que es distinto al solicitado.
+Va el **workclass** \#4, al igual que todos los anteriores puede ser entregado en grupo de máximo dos (2) estudiantes. En esta ocasión se va hacer estimación de modelo e **inferencia** con variables dicotómicas (dummies) e **interacciones**, usando el modelo de mínimos cuadrados ordinarios (MCO). Recuerde que el tiempo para entrega ahora será de _1 hora y 50 minutos_. El formato de recepción solo es en **word** o **pdf** en la carpeta del curso de **Brightspace** para eso. No se admite por correo ni en formato (Rmd) que es distinto al solicitado.
 
 ## Objetivo
 
-Recordar la parte de microeconomía y realizar un par de modelos para comprobación de algunas teorías y aplicarlas a un caso de estudio.
+Aplicar los conceptos de variables dicotómicas e interacciones dentro del marco del modelo de regresión lineal, conectando la teoría microeconómica de la demanda con herramientas de econometría aplicada.
 
 ## Base de datos
 
-El archivo esta situado en la página web del profesor. Tome en consideración la base de datos (datoscons.txt). La base contiene tres variables que tienen que ver con el consumo (en unidades) de cajas de tomates, el ingreso del agente que compra (en pesos colombianos) y el precio por libra (en pesos colombianos) del producto que paga el comprador.
+El archivo está situado en la página web del profesor. Tome en consideración la base de datos (`datoscons.txt`). La base contiene tres variables que tienen que ver con el consumo (en unidades) de cajas de tomates, el ingreso del agente que compra (en pesos colombianos) y el precio por libra (en pesos colombianos) del producto que paga el comprador.
 
 La pregunta central en esta ocasión es:
 
-<center>**Qué tan sensible es la demanda de la empresa vendedora de tómates con respecto a los precios que revela el producto?**</center>
+<center>**¿Cambia la sensibilidad de la demanda de tomates ante el precio según el nivel de ingreso del comprador?**</center>
 
 \newpage
 
@@ -66,15 +66,30 @@ La pregunta central en esta ocasión es:
 
 Esta vez le toca importar los datos a R. Esta se encuentra en formato texto. Use el directorio de descarga e importe con la opción de `library(readr)`.
 
-1. Establezca las estadísticas descriptivas de todas las variables de la base de datos (media, varianza, desviación estándar, máximos y mínimos). Use el formato que desee, pero *interprete los resultados*. 
+1. Establezca las estadísticas descriptivas de todas las variables de la base de datos (media, varianza, desviación estándar, máximos y mínimos). A partir de la mediana del **ingreso**, construya una variable dummy llamada `d_ingreso` que tome el valor de **1** si el ingreso del comprador está por encima de la mediana, y **0** en caso contrario. Igualmente, con base en la mediana del **precio**, construya una segunda dummy llamada `d_precio` que tome el valor de **1** si el precio está por encima de la mediana, y **0** en caso contrario. *Reporte la distribución de frecuencias de cada dummy e interprete qué representa cada grupo*.
 
-2. Ejecute una primera regresión (1) cuando la variable dependiente es el `consumo` y tiene como explicativa a la variable `precio`. *Muestre el encabezado de los resultados, incluyendo valores predichos y residuales. Luego establezca la prueba de Jarque-Bera para residuos e interprete*. 
+2. Estime dos regresiones donde la variable dependiente es el `consumo`:
 
-3. Ahora haga una segunda regresión (2), pero cuando las variables son logarítmicas. Por ejemplo log(consumo) y log(precios). Por último, haga una tercera (3) y cuarta (4) regresión pero cuando la variable explicativa es el ingreso (tiene que replicar la regresión (1) y (2) pero teniendo ahora el ingreso como variable explicativa o control). ¿Qué tipo de modelo de regresión está estimando? Específicamente, ¿Qué tipo de relación supone que existe entre qué variables? ¿qué diferencias hay entre los modelos?. Use el formato de `huxreg`. Deben salirle en total (4) regresiones por columna en una misma tabla. *Describa los resultados. El uso de ecuaciones formales le dará mas puntos*.
+    - **Modelo (1):** incluya como regresor únicamente la variable continua `precio`.
+    - **Modelo (2):** incluya `precio` y la dummy `d_ingreso`.
 
-4. Haga una prueba de hipótesis e interprétela con los resultados de los parámetros del modelo 1 y 2.
+    Muestre los resultados con `huxreg`. *Interprete el coeficiente de la dummy en el Modelo (2): ¿qué significa económicamente que el intercepto cambie según el nivel de ingreso? ¿Cambia la pendiente del precio entre grupos? Use ecuaciones formales para sustentar su respuesta*.
 
-5. Escoja el modelo de regresión para responder a la **pregunta central** de la consultoría. Diganos que sensibilidad tiene de forma lineal el modelo y muestre la forma de elasticidad. *Plantee una tabla con solo 5 datos que muestre lo anterior*. Establezca que modelo es el mejor para la empresa y justifique.
+3. Ahora estime dos regresiones adicionales:
+
+    - **Modelo (3):** incluya `precio`, `d_ingreso` y el **término de interacción** `precio × d_ingreso`.
+    - **Modelo (4):** trabaje con las versiones logarítmicas: `log(consumo)`, `log(precio)`, `d_ingreso` y la interacción `log(precio) × d_ingreso`.
+
+    Presente los cuatro modelos en una sola tabla con `huxreg`. *¿Qué diferencia existe entre el Modelo (2) y el Modelo (3)? ¿Qué implica que la interacción sea estadísticamente significativa? Exprese los efectos marginales del precio para cada grupo (d_ingreso = 0 y d_ingreso = 1) usando notación matemática formal*.
+
+4. Realice una prueba de hipótesis **conjunta** (prueba F) para el Modelo (3), evaluando si los coeficientes de `d_ingreso` y de la interacción `precio × d_ingreso` son conjuntamente significativos. Use la función `linearHypothesis()` del paquete `car`. *Plantee formalmente $H_0$ y $H_1$, reporte el estadístico y el p-valor, e interprete el resultado económicamente: ¿existe evidencia de que el efecto del precio sobre el consumo difiere entre compradores de alto y bajo ingreso?*
+
+5. Con base en los resultados del **Modelo (4)** (log-log con interacción), construya una tabla con al menos **5 observaciones representativas** de la muestra —incluyendo al menos dos del grupo `d_ingreso = 0` y dos del grupo `d_ingreso = 1`— que muestre el valor de `log(precio)`, el grupo de ingreso y la **elasticidad-precio** implícita para cada observación. Recuerde que en el Modelo (4) la elasticidad del precio depende del grupo. *Explique cuál modelo (lineal o log-log, con o sin interacción) es el más adecuado para responder la pregunta central del taller y justifique su elección usando criterios estadísticos y económicos*.
 
 #### Ayudas
-En la parte final debe estimar desde luego de forma manual las elasticidades solo del modelo de regresión (1) y tener presente la regresión (2). En la guía \#5 aparece como hacerlo. Puede establecerlo de forma individual (elasticidad) o en efecto de la elasticidad promedio o la conocida como elasticidad arco (melasticidad). 
+
+Para construir el término de interacción en R puede hacerlo directamente con el operador `:` dentro de `lm()`, por ejemplo `lm(consumo ~ precio + d_ingreso + precio:d_ingreso, data = datos)`, o equivalentemente usando `*` que incluye ambos términos principales y la interacción de forma automática. Para la prueba conjunta del punto 4, consulte `?linearHypothesis` del paquete `car`. Recuerde que en un modelo log-log con interacción de la forma:
+
+$$\ln(C_i) = \beta_0 + \beta_1 \ln(P_i) + \beta_2 D_i + \beta_3 \left[\ln(P_i) \times D_i\right] + \varepsilon_i$$
+
+la elasticidad-precio para el grupo $D_i = 0$ es $\beta_1$, y para el grupo $D_i = 1$ es $\beta_1 + \beta_3$.
